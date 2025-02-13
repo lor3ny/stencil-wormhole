@@ -53,7 +53,7 @@ cmake -S . -B build -DCMAKE_CXX_COMPILER=clang++-17 -DCMAKE_C_COMPILER=clang-17
 
 3. Run make
 ```sh
-make -C build
+make -C build -j(procs)
 ```
 
 4. Run the program
