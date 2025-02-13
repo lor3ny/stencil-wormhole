@@ -1,4 +1,4 @@
-# Template for Compilation for Tenstorrent Cards
+# Compilation Temaplate for Tenstorrent Cards
 
 *The project is compiled with the following tt-metal commit [91e61c006a9c1900ec90aee8e0898f69574bae04](https://github.com/tenstorrent/tt-metal/commit/53d4192a5bb07df8ae8da5f2ff8ca60967d9118b)*
 
