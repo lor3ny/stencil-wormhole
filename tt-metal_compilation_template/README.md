@@ -59,5 +59,5 @@ make -C build
 4. Run the program
 ```sh
 # note: You MUST do it in the parent directory or else TT-Metal wont recognise the kernels
-./build/TT-GoL
+./build/name_of_your_application
 ```
