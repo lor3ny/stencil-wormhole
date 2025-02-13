@@ -43,7 +43,7 @@ git clone https://github.com/lor3ny/stecil_wormhole
 cd stecil_wormhole
 ```
 
-The template is inside the folder ```sh tt-metal_compilation_template``` 
+The template is inside the folder ```tt-metal_compilation_template``` 
 
 2. Run cmake
 ```sh
