@@ -112,7 +112,7 @@ CPMAddPackage(
 # pybind11 : https://github.com/pybind/pybind11
 ############################################################################################################################
 
-CPMAddPackage(NAME pybind11 GITHUB_REPOSITORY pybind/pybind11 GIT_TAG v2.13.6 OPTIONS "CMAKE_MESSAGE_LOG_LEVEL NOTICE")
+#CPMAddPackage(NAME pybind11 GITHUB_REPOSITORY pybind/pybind11 GIT_TAG v2.13.6 OPTIONS "CMAKE_MESSAGE_LOG_LEVEL NOTICE")
 
 ############################################################################################################################
 # nlohmann/json : https://github.com/nlohmann/json
@@ -124,53 +124,53 @@ CPMAddPackage(NAME json GITHUB_REPOSITORY nlohmann/json GIT_TAG v3.11.3 OPTIONS 
 # xtensor : https://github.com/xtensor-stack/xtensor
 ############################################################################################################################
 
-CPMAddPackage(
-    NAME xtl
-    GITHUB_REPOSITORY xtensor-stack/xtl
-    GIT_TAG 0.7.7
-    OPTIONS
-        "CMAKE_MESSAGE_LOG_LEVEL NOTICE"
-        "XTL_ENABLE_TESTS OFF"
-)
-CPMAddPackage(
-    NAME xtensor
-    GITHUB_REPOSITORY xtensor-stack/xtensor
-    GIT_TAG 0.25.0
-    OPTIONS
-        "CMAKE_MESSAGE_LOG_LEVEL NOTICE"
-        "XTENSOR_ENABLE_TESTS OFF"
-)
-CPMAddPackage(
-    NAME xtensor-blas
-    GITHUB_REPOSITORY xtensor-stack/xtensor-blas
-    GIT_TAG 0.21.0
-    OPTIONS
-        "CMAKE_MESSAGE_LOG_LEVEL NOTICE"
-        "XTENSOR_ENABLE_TESTS OFF"
-)
+#CPMAddPackage(
+#    NAME xtl
+#    GITHUB_REPOSITORY xtensor-stack/xtl
+#    GIT_TAG 0.7.7
+#    OPTIONS
+#        "CMAKE_MESSAGE_LOG_LEVEL NOTICE"
+#        "XTL_ENABLE_TESTS OFF"
+#)
+#CPMAddPackage(
+#    NAME xtensor
+#    GITHUB_REPOSITORY xtensor-stack/xtensor
+#    GIT_TAG 0.25.0
+#    OPTIONS
+#        "CMAKE_MESSAGE_LOG_LEVEL NOTICE"
+#        "XTENSOR_ENABLE_TESTS OFF"
+#)
+#CPMAddPackage(
+#    NAME xtensor-blas
+#    GITHUB_REPOSITORY xtensor-stack/xtensor-blas
+#    GIT_TAG 0.21.0
+#    OPTIONS
+#        "CMAKE_MESSAGE_LOG_LEVEL NOTICE"
+#        "XTENSOR_ENABLE_TESTS OFF"
+#)
 
 ############################################################################################################################
 # benchmark : https://github.com/google/benchmark
 ############################################################################################################################
 
-CPMAddPackage(
-    NAME benchmark
-    GITHUB_REPOSITORY google/benchmark
-    GIT_TAG v1.9.1
-    OPTIONS
-        "CMAKE_MESSAGE_LOG_LEVEL NOTICE"
-        "BENCHMARK_USE_LIBCXX ${ENABLE_LIBCXX}"
-        "BENCHMARK_ENABLE_TESTING OFF"
-)
+#CPMAddPackage(
+#    NAME benchmark
+#    GITHUB_REPOSITORY google/benchmark
+#    GIT_TAG v1.9.1
+#    OPTIONS
+#        "CMAKE_MESSAGE_LOG_LEVEL NOTICE"
+#        "BENCHMARK_USE_LIBCXX ${ENABLE_LIBCXX}"
+#        "BENCHMARK_ENABLE_TESTING OFF"
+#)
 
-if(benchmark_ADDED)
-    set_target_properties(
-        benchmark
-        PROPERTIES
-            LIBRARY_OUTPUT_DIRECTORY
-                "${CMAKE_BINARY_DIR}/lib"
-    )
-endif()
+#if(benchmark_ADDED)
+#    set_target_properties(
+#        benchmark
+#        PROPERTIES
+#            LIBRARY_OUTPUT_DIRECTORY
+#                "${CMAKE_BINARY_DIR}/lib"
+#    )
+#endif()
 
 ############################################################################################################################
 # taskflow : https://github.com/taskflow/taskflow
