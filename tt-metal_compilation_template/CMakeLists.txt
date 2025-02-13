@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(TT-GoL CXX)
+project(stencil CXX)
 
 option(USE_LIBCPP OFF)
 set(CMAKE_C_COMPILER $ENV{CMAKE_C_COMPILER})
@@ -35,19 +35,19 @@ endif()
 
 add_compile_options($<$<COMPILE_LANG_AND_ID:CXX,Clang>:-fsized-deallocation>)
 
-add_executable(TT-GoL main.cpp)
+add_executable(stencil src/hello_world_compute_kernel.cpp)
 
-set_target_properties(TT-GoL PROPERTIES
+set_target_properties(stencil PROPERTIES
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
 )
 
-target_compile_definitions(TT-GoL PRIVATE
+target_compile_definitions(stencil PRIVATE
     FMT_HEADER_ONLY
 )
 
-target_compile_options(TT-GoL PRIVATE
+target_compile_options(stencil PRIVATE
     -Werror
     -Wdelete-non-virtual-dtor
     -Wreturn-type
@@ -83,7 +83,7 @@ target_compile_options(TT-GoL PRIVATE
     $<$<CXX_COMPILER_ID:GNU>:-Wno-error=non-template-friend>
 )
 
-target_include_directories(TT-GoL PRIVATE
+target_include_directories(stencil PRIVATE
     $ENV{TT_METAL_HOME}
     $ENV{TT_METAL_HOME}/tt_metal
     $ENV{TT_METAL_HOME}/tt_metal/api/
@@ -103,15 +103,15 @@ target_include_directories(TT-GoL PRIVATE
     $ENV{TT_METAL_HOME}/tt_metal/api/tt-metalium/
 )
 
-#link_directories(TT-GoL PRIVATE
+#link_directories(stencil PRIVATE
 #    $ENV{TT_METAL_HOME}/build_Release/lib
 #)
 
-target_link_directories(TT-GoL PRIVATE
+target_link_directories(stencil PRIVATE
     $ENV{TT_METAL_HOME}/build_Release/lib
 )
 
-target_link_libraries(TT-GoL PRIVATE
+target_link_libraries(stencil PRIVATE
     fmt  
     magic_enum
     Reflect::Reflect
@@ -125,5 +125,5 @@ target_link_libraries(TT-GoL PRIVATE
     #$ENV{TT_METAL_HOME}/build/lib/libtt_metal.a
 )
 
-target_compile_options(TT-GoL PRIVATE -stdlib=libc++)
-target_link_options(TT-GoL PRIVATE -lc++ -lc++abi)
+target_compile_options(stencil PRIVATE -stdlib=libc++)
+target_link_options(stencil PRIVATE -lc++ -lc++abi)
