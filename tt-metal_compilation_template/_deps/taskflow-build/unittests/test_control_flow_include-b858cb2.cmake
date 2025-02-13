@@ -1,0 +1,5 @@
+if(EXISTS "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/_deps/taskflow-build/unittests/test_control_flow_tests-b858cb2.cmake")
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/_deps/taskflow-build/unittests/test_control_flow_tests-b858cb2.cmake")
+else()
+  add_test(test_control_flow_NOT_BUILT-b858cb2 test_control_flow_NOT_BUILT-b858cb2)
+endif()
