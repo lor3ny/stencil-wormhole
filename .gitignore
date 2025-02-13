@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+
+/tt-metal_compilation_template/CMakeCache.txt
+/tt-metal_compilation_template/CMakeFiles
+/tt-metal_compilation_template/build
+/tt-metal_compilation_template/_deps
+/tt-metal_compilation_template/.cpmcache
+/tt-metal_compilation_template/CPM_modules
