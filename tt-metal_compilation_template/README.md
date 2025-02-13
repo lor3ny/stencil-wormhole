@@ -13,7 +13,7 @@ This project is built to give a general template to build TT-Metalium applicatio
 
 ### TT-Metal Building
 
-Follow the link before to have the most updated version, but in general you need to follow these steps
+Follow the link before to have the most updated version, but in general you need to follow these steps:
 
 0. Clone tt-metal
 ```sh
