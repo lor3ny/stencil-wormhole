@@ -4,7 +4,7 @@
 using namespace std;
 
 
-void UpdateTemperature(float* temp, int dim, float dt, float alpha){
+void UpdateTemperature(double* temp, int dim, double dt, double alpha){
     // Update temperature
     for(int i = 1; i < dim - 1; i++){
         for(int j = 1; j < dim - 1; j++){
@@ -14,12 +14,22 @@ void UpdateTemperature(float* temp, int dim, float dt, float alpha){
 
 }
 
-inline void InitializeGrid(int *grid, int dim){
+inline void InitializeGrid(double *grid, int dim){
     int i, j;
-    for(i = 0; i < dim*dim; ++i){
+    for(i = 0; i < dim; ++i){
         for(j = 0; j < dim; ++j){
             grid[i*dim +j] = 0.0;
         }
+    }
+}
+
+inline void PrintGrid(double *grid, int dim){
+    int i, j;
+    for(i = 0; i < dim; ++i){
+        for(j = 0; j < dim; ++j){
+            cout << " " << grid[i*dim + j] << " ";
+        }
+        cout << endl;
     }
 }
 
@@ -27,21 +37,24 @@ int main(){
 
     // SIMULATION PARAMETERS
     int dim = 100; //GRID SIZE
-    int lx = 1, ly = 1;   //DOMAIN SIZE
+    double lx = 1, ly = 1;   //DOMAIN SIZE
     float max_time = 0.2;
 
-    float dx = lx / (dim - 1);
-    float dy = ly / (dim - 1);
-    float dt = 0.0001;  // Time step
-    float alpha = 0.1;  // Coefficient of diffusion
+    double dx = lx / (double) (dim - 1);
+    double dy = ly / (dim - 1);
+    double dt = 0.0001;  // Time step
+    double alpha = 0.1;  // Coefficient of diffusion
 
     //TEMPERATURE MATRIX
-    float* temp = (float*) malloc(dim * dim * sizeof(float));
+    double* temp = (double*) malloc(dim * dim * sizeof(double));
+    InitializeGrid(temp, dim);
+
+    temp[(dim/2)*dim + (dim/2)] = 100.0;
 
     // CFL Stability Condition (Courant-Friedrichs-Lewy)
-    float CFL = alpha * dt / powf(dx, 2);
+    double CFL = alpha * dt / (double) powf(dx, 2);
     if(CFL > 0.25){
-        cerr << "Instabilità numerica: ridurre dt o aumentare dx." << endl;
+        cerr << "CFL: " << CFL << " Instabilità numerica: ridurre dt o aumentare dx." << endl;
         return 1;
     }
 
@@ -53,6 +66,8 @@ int main(){
     }
 
     cout << "Simulation completed." << endl;
+
+    PrintGrid(temp, dim);
 
     free(temp);
     return 0;
