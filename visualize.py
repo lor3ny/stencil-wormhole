@@ -19,18 +19,11 @@ if __name__ == '__main__':
     lx, ly = frames[0].shape
     Tmax = 0.2
 
-    # Visualizzazione
-    ncols = 4
-    nrows = (len(frames) + ncols - 1) // ncols  # Determina il numero di righe necessarie
-    fig, axes = plt.subplots(nrows, ncols, figsize=(15, 3 * nrows))
-    axes = axes.flatten()
-    for i, frame in enumerate(frames):
-        axes[i].imshow(frame, cmap='hot', origin='lower', extent=[0, lx, 0, ly])
-        axes[i].set_title(f"t = {i * Tmax / len(frames):.3f}s")
-        axes[i].axis('off')
-
-    # Nasconde gli assi extra
-    for i in range(len(frames), len(axes)):
-        axes[i].axis('off')
+    for idx, frame in enumerate(frames):
+        plt.imshow(frame, cmap='viridis', origin='lower')
+        plt.colorbar()
+        plt.title(f'Time: {idx * Tmax:.2f}')
+        plt.savefig(f'frame_{idx}.png')
+        plt.clf()
 
     plt.show()
