@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import time
 
 # Parametri della simulazione
-nx, ny = 100, 100  # Dimensioni della griglia
+nx, ny = 21, 21  # Dimensioni della griglia
 lx, ly = 1.0, 1.0  # Lunghezza dominio
-Tmax = 0.2         # Tempo massimo di simulazione
+Tmax = 0.0005        # Tempo massimo di simulazione
 
 dissipation = 0.1  # Coefficiente di dissipazione del calore
 
@@ -17,6 +17,7 @@ alpha = 0.1  # Coefficiente di diffusione termica
 
 # Condizione di stabilità CFL (Courant-Friedrichs-Lewy)
 CFL = alpha * dt / dx**2
+print(dx**2)
 if CFL > 0.25:
     raise ValueError("Instabilità numerica: ridurre dt o aumentare dx.")
 
@@ -29,9 +30,9 @@ temp[nx//2, ny//2] = 100.0
 def update_temperature(temp):
     """ Calcola il prossimo stato della temperatura con uno stencil 5-points."""
     temp_new = np.copy(temp)
-    temp_new[1:-1, 1:-1] = temp[1:-1, 1:-1] + CFL * (
-        temp[2:, 1:-1] + temp[:-2, 1:-1] + temp[1:-1, 2:] + temp[1:-1, :-2] - 4 * temp[1:-1, 1:-1]
-    )
+    for i in range(1, nx - 1):
+        for j in range(1, ny - 1):
+            temp_new[i, j] += dissipation * (temp[i + 1, j] + temp[i - 1, j] + temp[i, j + 1] + temp[i, j - 1] - 4 * temp[i, j])
     return temp_new
 
 # Simulazione
@@ -51,13 +52,10 @@ while time_elapsed < Tmax:
     '''
 
 print(f"Simulazione completata in {time.time() - start_time:.2f} secondi")
+print(temp)
 
-for i in range(len(frames)):
-    plt.imshow(frames[i], cmap='hot', origin='lower', extent=[0, lx, 0, ly])
-    plt.axis('off')
-    plt.savefig(f'frames/frame_{i}.png')
 
-'''
+
 # Visualizzazione
 ncols = 4
 nrows = (len(frames) + ncols - 1) // ncols  # Determina il numero di righe necessarie
@@ -72,5 +70,4 @@ for i, frame in enumerate(frames):
 for i in range(len(frames), len(axes)):
     axes[i].axis('off')
 
-plt.show()'
-'''
+plt.show()

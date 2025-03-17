@@ -1,0 +1,8 @@
+{
+    "cmake.sourceDirectory": "/home/lorenzo/stencil_wormhole/tt-metal_compilation_template",
+    "files.associations": {
+        "iosfwd": "cpp",
+        "iostream": "cpp",
+        "ostream": "cpp"
+    }
+}
