@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/hello_world_compute_kernel.cpp" "CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o" "gcc" "CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o.d"
+  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/stencil_tenstorrent_host.cpp" "CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o" "gcc" "CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

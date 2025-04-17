@@ -17,6 +17,7 @@ using namespace tt;
 using namespace tt::tt_metal;
 using namespace std;
 
+
 //export TT_METAL_DPRINT_CORES="(0,0)-(7,7)"
 
 inline void saveGridCSV(const std::string& filename, double* grid, int dim_x, int dim_y) {
@@ -91,7 +92,6 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-
     // ---------------------------------------------------------
     // ---------------------------------------------------------
     // HOST INITIALIZATION
@@ -109,8 +109,8 @@ int main(int argc, char** argv) {
     constexpr uint32_t single_tile_size = 1 * 1024; // 1KiB for every tile
     constexpr uint32_t num_tiles = 64; // Number of tiles
     constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; // Total size of the DRAM buffer: 64 KiB 
-    tt_metal::DataFormat data_format = tt_metal::DataFormat::Float64_b;
-    tt_metal::MathFidelity math_fidelity = tt_metal::MathFidelity::HiFi4;
+    DataFormat data_format = DataFormat::Float32;
+    MathFidelity math_fidelity = MathFidelity::HiFi4;
 
     // ---------------------------------------------------------
     // DRAM BUFFER CREATION: OFFCHIP GDDR6 MEMORY 12GB
@@ -118,9 +118,10 @@ int main(int argc, char** argv) {
 
     // Both input and output have the same configuration, in this case I have chosen Interleaved instead of Shreaded
 
-    tt_metal::InterleavedBufferConfig dram_config(.device = device, 
-                                                  .size = dram_buffer_size, .page_size = dram_buffer_size,  
-                                                  .buffer_type = tt_metal::BufferType::DRAM);
+    // deivce, size, page_size, buffer_type
+    tt_metal::InterleavedBufferConfig dram_config(device, 
+                                                  dram_buffer_size, dram_buffer_size,  
+                                                  tt_metal::BufferType::DRAM);
     std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer = CreateBuffer(dram_config);
     std::shared_ptr<tt::tt_metal::Buffer> output_dram_buffer = CreateBuffer(dram_config);
     
@@ -132,14 +133,18 @@ int main(int argc, char** argv) {
     uint32_t num_sram_tiles = 1;
 
     uint32_t cb_input_index = CBIndex::c_0;  // 0
-    CircularBufferConfig cb_input_config( .size = single_tile_size * num_sram_tiles, 
-                                          .page_size = {{cb_input_index, data_format}}
-    ).set_page_size(cb_input_index, single_tile_size);
+    // size, page_size
+    CircularBufferConfig cb_input_config( single_tile_size * num_sram_tiles, 
+                                          {{cb_input_index, data_format}}
+    );
+    cb_input_config.set_page_size(cb_input_index, single_tile_size);
 
-    uint32_t cb_output_index = CBIndex::c_1;  // 0
-    CircularBufferConfig cb_output_config( .size = single_tile_size * num_sram_tiles, 
-                                           .page_size = {{cb_input_index, data_format}}
-    ).set_page_size(cb_output_index, single_tile_size);
+    uint32_t cb_output_index = CBIndex::c_1;  // 1
+    // size, page_size
+    CircularBufferConfig cb_output_config( single_tile_size * num_sram_tiles, 
+                                           {{cb_output_index, data_format}}
+    );
+    cb_output_config.set_page_size(cb_output_index, single_tile_size);
 
     CBHandle cb_input = tt_metal::CreateCircularBuffer(program, core, cb_input_config);
     CBHandle cb_output = tt_metal::CreateCircularBuffer(program, core, cb_output_config);
@@ -168,11 +173,13 @@ int main(int argc, char** argv) {
 
     std::vector<uint32_t> compute_args = { /* I DON'T KNOW THEM NOW*/ };
     auto stencil_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/kernels/void_compute_kernel.cpp",
-        core, tt_metal::ComputeConfig{ .math_fidelity = math_fidelity, 
+        core, tt_metal::ComputeConfig{ .math_fidelity = math_fidelity,
+                                       .fp32_dest_acc_en = false, 
+                                       .math_approx_mode = false,
                                        .compile_args = compute_args});
 
     // Compute config has a lot of arguments, but I don't know them now:
-    // - .math_approx_mode
+    // - .math_approx_modes
     // - .fp32_dest_acc_en
     // - .defines
     // If think many others

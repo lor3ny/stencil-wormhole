@@ -35,7 +35,7 @@ endif()
 
 add_compile_options($<$<COMPILE_LANG_AND_ID:CXX,Clang>:-fsized-deallocation>)
 
-add_executable(stencil src/hello_world_compute_kernel.cpp)
+add_executable(stencil src/stencil_tenstorrent_host.cpp)
 
 set_target_properties(stencil PROPERTIES
     CXX_STANDARD 20

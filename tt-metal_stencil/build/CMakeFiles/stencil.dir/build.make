@@ -72,28 +72,28 @@ include CMakeFiles/stencil.dir/flags.make
 CMakeFiles/stencil.dir/codegen:
 .PHONY : CMakeFiles/stencil.dir/codegen
 
-CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o: CMakeFiles/stencil.dir/flags.make
-CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o: /home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/hello_world_compute_kernel.cpp
-CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o: CMakeFiles/stencil.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o"
-	/usr/bin/clang++-17 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o -MF CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o.d -o CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o -c /home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/hello_world_compute_kernel.cpp
+CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: CMakeFiles/stencil.dir/flags.make
+CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: /home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/stencil_tenstorrent_host.cpp
+CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: CMakeFiles/stencil.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o"
+	/usr/bin/clang++-17 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o -MF CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o.d -o CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o -c /home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/stencil_tenstorrent_host.cpp
 
-CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.i"
-	/usr/bin/clang++-17 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/hello_world_compute_kernel.cpp > CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.i
+CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.i"
+	/usr/bin/clang++-17 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/stencil_tenstorrent_host.cpp > CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.i
 
-CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.s"
-	/usr/bin/clang++-17 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/hello_world_compute_kernel.cpp -o CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.s
+CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.s"
+	/usr/bin/clang++-17 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/stencil_tenstorrent_host.cpp -o CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.s
 
 # Object files for target stencil
 stencil_OBJECTS = \
-"CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o"
+"CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o"
 
 # External object files for target stencil
 stencil_EXTERNAL_OBJECTS =
 
-stencil: CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o
+stencil: CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o
 stencil: CMakeFiles/stencil.dir/build.make
 stencil: _deps/fmt-build/libfmt.a
 stencil: _deps/yaml-cpp-build/libyaml-cpp.a

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o"
-  "CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o.d"
+  "CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o"
+  "CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o.d"
   "stencil"
   "stencil.pdb"
 )

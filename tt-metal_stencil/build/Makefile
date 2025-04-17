@@ -1514,29 +1514,29 @@ flatc/fast:
 	$(MAKE) $(MAKESILENT) -f _deps/flatbuffers-build/CMakeFiles/flatc.dir/build.make _deps/flatbuffers-build/CMakeFiles/flatc.dir/build
 .PHONY : flatc/fast
 
-src/hello_world_compute_kernel.o: src/hello_world_compute_kernel.cpp.o
-.PHONY : src/hello_world_compute_kernel.o
+src/stencil_tenstorrent_host.o: src/stencil_tenstorrent_host.cpp.o
+.PHONY : src/stencil_tenstorrent_host.o
 
 # target to build an object file
-src/hello_world_compute_kernel.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/stencil.dir/build.make CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o
-.PHONY : src/hello_world_compute_kernel.cpp.o
+src/stencil_tenstorrent_host.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/stencil.dir/build.make CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o
+.PHONY : src/stencil_tenstorrent_host.cpp.o
 
-src/hello_world_compute_kernel.i: src/hello_world_compute_kernel.cpp.i
-.PHONY : src/hello_world_compute_kernel.i
+src/stencil_tenstorrent_host.i: src/stencil_tenstorrent_host.cpp.i
+.PHONY : src/stencil_tenstorrent_host.i
 
 # target to preprocess a source file
-src/hello_world_compute_kernel.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/stencil.dir/build.make CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.i
-.PHONY : src/hello_world_compute_kernel.cpp.i
+src/stencil_tenstorrent_host.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/stencil.dir/build.make CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.i
+.PHONY : src/stencil_tenstorrent_host.cpp.i
 
-src/hello_world_compute_kernel.s: src/hello_world_compute_kernel.cpp.s
-.PHONY : src/hello_world_compute_kernel.s
+src/stencil_tenstorrent_host.s: src/stencil_tenstorrent_host.cpp.s
+.PHONY : src/stencil_tenstorrent_host.s
 
 # target to generate assembly for a file
-src/hello_world_compute_kernel.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/stencil.dir/build.make CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.s
-.PHONY : src/hello_world_compute_kernel.cpp.s
+src/stencil_tenstorrent_host.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/stencil.dir/build.make CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.s
+.PHONY : src/stencil_tenstorrent_host.cpp.s
 
 # Help Target
 help:
@@ -1654,9 +1654,9 @@ help:
 	@echo "... visualization"
 	@echo "... while_loop"
 	@echo "... yaml-cpp"
-	@echo "... src/hello_world_compute_kernel.o"
-	@echo "... src/hello_world_compute_kernel.i"
-	@echo "... src/hello_world_compute_kernel.s"
+	@echo "... src/stencil_tenstorrent_host.o"
+	@echo "... src/stencil_tenstorrent_host.i"
+	@echo "... src/stencil_tenstorrent_host.s"
 .PHONY : help
 
 
