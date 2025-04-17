@@ -1,0 +1,1 @@
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/composition.dir/composition.cpp.o -o composition  -lpthread

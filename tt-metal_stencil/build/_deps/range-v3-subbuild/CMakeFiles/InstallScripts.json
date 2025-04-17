@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/build/_deps/range-v3-subbuild/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -1,0 +1,1 @@
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/test_for_each.dir/test_for_each.cpp.o -o test_for_each  -lpthread

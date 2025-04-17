@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     std::vector<uint32_t> compute_kernel_args = {};
     KernelHandle void_compute_kernel_id = CreateKernel(
         program,
-        "../src/kernels/compute/void_compute_kernel.cpp",
+        "src/kernels/compute/void_compute_kernel.cpp",
         core,
         ComputeConfig{
             .math_fidelity = MathFidelity::HiFi4,

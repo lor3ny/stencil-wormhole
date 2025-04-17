@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/build/_deps/flatbuffers-subbuild/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
