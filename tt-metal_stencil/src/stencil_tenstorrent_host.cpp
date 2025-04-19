@@ -119,9 +119,10 @@ int main(int argc, char** argv) {
     // Both input and output have the same configuration, in this case I have chosen Interleaved instead of Shreaded
 
     // deivce, size, page_size, buffer_type
-    tt_metal::InterleavedBufferConfig dram_config(device, 
-                                                  dram_buffer_size, dram_buffer_size,  
-                                                  tt_metal::BufferType::DRAM);
+    tt_metal::InterleavedBufferConfig dram_config{.device = device, 
+                                                  .size = dram_buffer_size, 
+                                                  .page_size = single_tile_size,  
+                                                  .buffer_type = tt_metal::BufferType::DRAM};
     std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer = CreateBuffer(dram_config);
     std::shared_ptr<tt::tt_metal::Buffer> output_dram_buffer = CreateBuffer(dram_config);
     
@@ -131,7 +132,6 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
 
     uint32_t num_sram_tiles = 1;
-
     uint32_t cb_input_index = CBIndex::c_0;  // 0
     // size, page_size
     CircularBufferConfig cb_input_config( single_tile_size * num_sram_tiles, 
@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
     );
     cb_input_config.set_page_size(cb_input_index, single_tile_size);
 
-    uint32_t cb_output_index = CBIndex::c_1;  // 1
+    uint32_t cb_output_index = CBIndex::c_16;  // 16
     // size, page_size
     CircularBufferConfig cb_output_config( single_tile_size * num_sram_tiles, 
                                            {{cb_output_index, data_format}}
