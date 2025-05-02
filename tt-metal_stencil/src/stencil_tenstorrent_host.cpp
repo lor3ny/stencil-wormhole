@@ -54,6 +54,7 @@ inline void PrintGrid(double *grid, int dim){
     }
 }
 
+int main(int argc, char** argv) {
 
     // ---------------------------------------------------------
     // ---------------------------------------------------------
@@ -93,8 +94,6 @@ inline void PrintGrid(double *grid, int dim){
         return 1;
     }
 
-int main(int argc, char** argv) {
-
     // ---------------------------------------------------------
     // ---------------------------------------------------------
     // HOST INITIALIZATION
@@ -111,8 +110,8 @@ int main(int argc, char** argv) {
 
 
     constexpr CoreCoord core = {0, 0};  
-    constexpr uint32_t single_tile_size = 4; // 1KiB for every tile
-    constexpr uint32_t num_tiles = 4; // Number of tiles
+    constexpr uint32_t single_tile_size = 32*32; // 1KiB for every tile
+    constexpr uint32_t num_tiles = 1; // Number of tiles
     constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; // Total size of the DRAM buffer: 64 KiB 
     DataFormat data_format = DataFormat::Float32;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
@@ -128,7 +127,7 @@ int main(int argc, char** argv) {
     // deivce, size, page_size, buffer_type
     tt_metal::InterleavedBufferConfig dram_config{.device = device, 
                                                   .size = dram_buffer_size, 
-                                                  .page_size = dram_buffer_size,  
+                                                  .page_size = single_tile_size,  
                                                   .buffer_type = tt_metal::BufferType::DRAM};
     std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer = CreateBuffer(dram_config);
     std::shared_ptr<tt::tt_metal::Buffer> output_dram_buffer = CreateBuffer(dram_config);
@@ -140,7 +139,7 @@ int main(int argc, char** argv) {
 
     cout << "Creating SRAM buffers..." << endl;
 
-    uint32_t num_sram_tiles = 4;
+    uint32_t num_sram_tiles = 1;
     uint32_t cb_input_index = CBIndex::c_0;  // 0
     // size, page_size
     CircularBufferConfig cb_input_config( single_tile_size * num_sram_tiles, 
@@ -184,7 +183,6 @@ int main(int argc, char** argv) {
                                             .compile_args = writer_compile_time_args}
     );
     
-    
 
     std::vector<uint32_t> compute_args = {};
     KernelHandle stencil_kernel_id = tt_metal::CreateKernel( 
@@ -195,7 +193,7 @@ int main(int argc, char** argv) {
             .math_fidelity = math_fidelity,
             .fp32_dest_acc_en = false, 
             .math_approx_mode = false,
-            .compile_args = compute_args
+            .compile_args = compute_args,
         }
     );
 
