@@ -3,24 +3,41 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "dataflow_api.h"
+#include "debug/dprint.h"
 
 void kernel_main() {
+
+    DPRINT << "WRITER GO" << ENDL();
+    
     uint32_t dst_addr = get_arg_val<uint32_t>(0);
-    uint32_t dst_bank_id = get_arg_val<uint32_t>(1);
+    uint32_t tiles_count = get_arg_val<uint32_t>(1);
+    uint32_t dst_bank_id = get_arg_val<uint32_t>(2);
+    uint32_t dst_size = get_arg_val<uint32_t>(3);
 
+    constexpr uint32_t cb_id_out16 = tt::CBIndex::c_16;
+    /*
+    const uint32_t dst_tile_bytes = get_tile_size(cb_id_out0);
+    DPRINT << "STOP 1" << ENDL();
+        
+    const InterleavedAddrGenFast<true> dst_noc_addr = {
+        .bank_base_address = dst_addr, .page_size = dst_tile_bytes, .data_format = DataFormat::Float32};
 
-    // QUESTA COSA DEL BANK NON MI CONVINCE...
-    // Come faccio a sapere quale bank id assegnare nel main?
-    // Quante bank ho a disposizione?
-    // Perchè se so quante bank e quanto sono grandi posso accelerare a stecca decidendo io
-    uint64_t dst_noc_addr = get_noc_addr_from_bank_id<true>(dst_bank_id, dst_addr);
-
-    constexpr uint32_t cb_id_out0 = tt::CBIndex::c_16;
-    uint32_t ublock_size_bytes = get_tile_size(cb_id_out0);
     uint32_t l1_read_addr = get_read_ptr(cb_id_out0);
 
     cb_wait_front(cb_id_out0, 1);
-    noc_async_write(l1_read_addr, dst_noc_addr, ublock_size_bytes);
+    noc_async_write_tile(dst_tile_bytes, dst_noc_addr, l1_read_addr);
     noc_async_write_barrier();
     cb_pop_front(cb_id_out0, 1);
+    */
+
+    uint32_t l1_read_addr_out16 = get_write_ptr(cb_id_out16);
+
+    cb_wait_front(cb_id_out16, 1);
+    std::uint64_t dram_buffer_dst_noc_addr = get_noc_addr_from_bank_id<true>(dst_bank_id, dst_addr);
+    noc_async_write(l1_read_addr_out16, dram_buffer_dst_noc_addr, dst_size);
+    noc_async_write_barrier();
+    cb_pop_front(cb_id_out16, 1);
+    
+    
+    DPRINT << "WRITER STOP" << ENDL();
 }
