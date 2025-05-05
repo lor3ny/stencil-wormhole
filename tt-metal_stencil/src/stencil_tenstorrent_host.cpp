@@ -44,7 +44,7 @@ inline void InitializeGrid(double *grid, int dim){
     }
 }
 
-inline void PrintGrid(double *grid, int dim){
+inline void PrintGrid(uint32_t *grid, int dim){
     int i, j;
     for(i = 0; i < dim; ++i){
         for(j = 0; j < dim; ++j){
@@ -64,35 +64,51 @@ int main(int argc, char** argv) {
 
     cout << "Setting up heat propagation stencil..." << endl;
 
-    int dim = 1000; // Grid Size
-    double lx = 10.0, ly = 10.0;   // Domain Size
-    float max_time = 1;
+    //int dim = 1000; // Grid Size
+    //double lx = 10.0, ly = 10.0;   // Domain Size
+    //float max_time = 1;
 
-    double dx = lx / (double) (dim - 1);
-    double dy = ly / (double) (dim - 1);
-    double dt = 0.0001;  // Time step
-    double alpha = 0.1;  // Coefficient of diffusion
+    //double dx = lx / (double) (dim - 1);
+    //double dy = ly / (double) (dim - 1);
+    //double dt = 0.0001;  // Time step
+    //double alpha = 0.1;  // Coefficient of diffusion
 
-    double* temp = (double*) malloc(dim * dim * sizeof(double));
-    double* res_temp = (double*) malloc(dim * dim * sizeof(double));
-    if (!temp || !res_temp) {
-        cerr << "Errore: allocazione di memoria fallita!" << endl;
-        free(temp);
-        free(res_temp);
-        return 1;
+    constexpr uint32_t single_tile_size = 32*32; 
+    constexpr uint32_t num_tiles = 1; 
+    constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; 
+    constexpr uint32_t dim = 8;  
+
+    uint32_t* input_vec = (uint32_t*) malloc(dram_buffer_size); // It is a BFP16
+    uint32_t* output_vec= (uint32_t*) malloc(dram_buffer_size);
+
+    memset(input_vec, 0, dram_buffer_size);
+    memset(output_vec, 0, dram_buffer_size);
+
+
+    for(int i = 0; i<dim; i++){
+        for(int j = 0; j<dim; j++){
+            int val = 0;
+            if(i==0)
+                val = 1;
+            else if(j==0)
+                val = 1;
+            else if (j==dim-1)
+                val = 1;
+            else if (i==dim-1)
+                val = 1;
+
+            input_vec[i*dim + j] = val;
+        }
     }
-    memset(temp, 0, dim * dim * sizeof(double));
-    memset(res_temp, 0, dim * dim * sizeof(double));
 
-    temp[(dim/2)*dim + (dim/2)] = 100.0;
-    res_temp[(dim/2)*dim + (dim/2)] = 100.0;
+    input_vec[(dim/2)*dim + (dim/2)] = 100.0;
 
     // CFL Stability Condition (Courant-Friedrichs-Lewy)
-    double CFL = (double) alpha * (double) dt / (double) powf(dx, 2);
-    if(CFL > 0.25){
-        cerr << "CFL: " << CFL << " Instabilità numerica: ridurre dt o aumentare dx." << endl;
-        return 1;
-    }
+    // double CFL = (double) alpha * (double) dt / (double) powf(dx, 2);
+    // if(CFL > 0.25){
+    //     cerr << "CFL: " << CFL << " Instabilità numerica: ridurre dt o aumentare dx." << endl;
+    //     return 1;
+    // }
 
     // ---------------------------------------------------------
     // ---------------------------------------------------------
@@ -108,12 +124,13 @@ int main(int argc, char** argv) {
     CommandQueue& cq = device->command_queue(); // Take the command_queue from the device created
     Program program = CreateProgram();
 
+    // ---------------------------------------------------------
+    // I want to compute a single tile stencil: 32x32 bytes is 16x16 BFP32, but with a stencil 3x3 I need to consider
+    // 1 BFP32 padding, so the real matrix is 15x15 BFP32.
+    // ---------------------------------------------------------
 
     constexpr CoreCoord core = {0, 0};  
-    constexpr uint32_t single_tile_size = 32*32; // 1KiB for every tile
-    constexpr uint32_t num_tiles = 1; // Number of tiles
-    constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; // Total size of the DRAM buffer: 64 KiB 
-    DataFormat data_format = DataFormat::Float32;
+    DataFormat data_format = DataFormat::Float16;  // Convert it to 32
     MathFidelity math_fidelity = MathFidelity::HiFi4;
 
     // ---------------------------------------------------------
@@ -139,22 +156,58 @@ int main(int argc, char** argv) {
 
     cout << "Creating SRAM buffers..." << endl;
 
-    uint32_t num_sram_tiles = 1;
-    uint32_t cb_input_index = CBIndex::c_0;  // 0
-    // size, page_size
-    CircularBufferConfig cb_input_config( single_tile_size * num_sram_tiles, 
-                                          {{cb_input_index, data_format}}
-    );
-    cb_input_config.set_page_size(cb_input_index, dram_buffer_size);
+    uint32_t num_sram_tiles = num_tiles;
 
-    uint32_t cb_output_index = CBIndex::c_16;  // 16
+    uint32_t cb_0_index = CBIndex::c_0;  // 0
+    // size, page_size
+    CircularBufferConfig cb_0_config( single_tile_size * num_sram_tiles, 
+                                          {{cb_0_index, data_format}}
+    );
+    cb_0_config.set_page_size(cb_0_index, dram_buffer_size);
+
+    uint32_t cb_1_index = CBIndex::c_1;  // 1
+    // size, page_size
+    CircularBufferConfig cb_1_config( single_tile_size * num_sram_tiles, 
+                                          {{cb_1_index, data_format}}
+    );
+    cb_1_config.set_page_size(cb_1_index, dram_buffer_size);
+
+    uint32_t cb_2_index = CBIndex::c_2;  // 2
+    // size, page_size
+    CircularBufferConfig cb_2_config( single_tile_size * num_sram_tiles, 
+                                          {{cb_2_index, data_format}}
+    );
+    cb_2_config.set_page_size(cb_2_index, dram_buffer_size);
+
+    uint32_t cb_3_index = CBIndex::c_3;  // 3
+    // size, page_size
+    CircularBufferConfig cb_3_config( single_tile_size * num_sram_tiles, 
+                                          {{cb_3_index, data_format}}
+    );
+    cb_3_config.set_page_size(cb_3_index, dram_buffer_size);
+
+    uint32_t cb_4_index = CBIndex::c_4;  // 4
+    // size, page_size
+    CircularBufferConfig cb_4_config(single_tile_size * num_sram_tiles, 
+                                          {{cb_4_index, data_format}}
+    );
+    cb_4_config.set_page_size(cb_4_index, dram_buffer_size);
+
+
+    uint32_t cb_output_index = CBIndex::c_5;  // 5
     // size, page_size
     CircularBufferConfig cb_output_config( single_tile_size * num_sram_tiles, 
                                            {{cb_output_index, data_format}}
     );
     cb_output_config.set_page_size(cb_output_index, dram_buffer_size);
 
-    CBHandle cb_input = tt_metal::CreateCircularBuffer(program, core, cb_input_config);
+    // MAYBE I CAN USE ONLY ONE CONFIG!
+
+    CBHandle cb_0 = tt_metal::CreateCircularBuffer(program, core, cb_0_config);
+    CBHandle cb_1 = tt_metal::CreateCircularBuffer(program, core, cb_1_config); 
+    CBHandle cb_2 = tt_metal::CreateCircularBuffer(program, core, cb_2_config);
+    CBHandle cb_3 = tt_metal::CreateCircularBuffer(program, core, cb_3_config);
+    CBHandle cb_4 = tt_metal::CreateCircularBuffer(program, core, cb_4_config);
     CBHandle cb_output = tt_metal::CreateCircularBuffer(program, core, cb_output_config);
 
     // ---------------------------------------------------------
@@ -209,28 +262,12 @@ int main(int argc, char** argv) {
     
     cout << "Enqueueing write buffers..." << endl;
 
-    cout << dram_buffer_size << endl;
-    cout << dram_buffer_size/4 << endl;
-
-    vector<uint32_t> input_vec(dram_buffer_size/4);
-    vector<uint32_t> output_vec(dram_buffer_size/4);
-    memset(input_vec.data(), 1, dram_buffer_size);
-    memset(output_vec.data(), 0, dram_buffer_size);
-
-    cout << "Input buffer before: ";
-    for(uint32_t i = 0; i < dram_buffer_size/4; ++i){
-        cout << input_vec[i] << " ";
-    }
-    cout << endl;
-    
-    cout << "Output buffer before: ";
-    for(uint32_t i = 0; i < dram_buffer_size/4; ++i){
-        cout << output_vec[i] << " ";
-    }
+    PrintGrid(input_vec, dim);
+    PrintGrid(output_vec, dim);
     cout << endl;
 
-    EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
-    EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ          
+    EnqueueWriteBuffer(cq, input_dram_buffer, input_vec, false);  // E' UNA MEMCPY, NULLA DI PIÙ
+    EnqueueWriteBuffer(cq, output_dram_buffer, output_vec, false);  // E' UNA MEMCPY, NULLA DI PIÙ          
     
     // ---------------------------------------------------------
     // SETUP RUNTIME ARGS: Set the runtime arguments for the kernels
@@ -240,6 +277,7 @@ int main(int argc, char** argv) {
 
     const uint32_t input_bank_id = 0;
     const uint32_t output_bank_id = 0;
+    const float stencil_scalar = 0.25f; // SETTING IT TO uint32_t means to have an integer than? maybe
 
     // QUI SETTO RUNTIME ARGS PER READER
     tt_metal::SetRuntimeArgs( program, reader_kernel_id, core,
@@ -248,8 +286,8 @@ int main(int argc, char** argv) {
     tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, 
             {output_dram_buffer->address(), num_tiles, output_bank_id, output_dram_buffer->size()});
 
-    
-    tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {});
+    tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, 
+            {num_tiles, stencil_scalar});
     
 
 
@@ -261,11 +299,10 @@ int main(int argc, char** argv) {
         
     EnqueueProgram(cq, program, false);
     // Wait Until Program Finishes
-    EnqueueReadBuffer(cq, output_dram_buffer, output_vec.data(), true); // Read the result from the device
+    EnqueueReadBuffer(cq, output_dram_buffer, output_vec, true); // Read the result from the device
     Finish(cq);
     printf("Core {0, 0} on Device 0 completed the task.\n");
     CloseDevice(device);
-
 
     // ---------------------------------------------------------
     // ---------------------------------------------------------
@@ -277,20 +314,11 @@ int main(int argc, char** argv) {
 
     //saveGridCSV("result.csv", res_temp, dim, dim);
 
-    cout << "Input buffer before: ";
-    for(uint32_t i = 0; i < dram_buffer_size/4; ++i){
-        cout << input_vec[i] << " ";
-    }
-    cout << endl;
-    
-    cout << "Output buffer before: ";
-    for(uint32_t i = 0; i < dram_buffer_size/4; ++i){
-        cout << output_vec[i] << " ";
-    }
-    cout << endl;
+    PrintGrid(input_vec, dim);
+    PrintGrid(output_vec, dim-2);
 
-    free(res_temp);
-    free(temp);
+    free(input_vec);
+    free(output_vec);
 
     return 0;
 }
