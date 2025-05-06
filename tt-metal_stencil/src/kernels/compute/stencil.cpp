@@ -14,7 +14,7 @@ void MAIN {
     constexpr auto cb_out16 = tt::CBIndex::c_16;
 
 
-    uint32_t cb_tile_count = 2;
+    uint32_t cb_tile_count = 8;
 
     unary_op_init_common(cb_in0, cb_out16);
     copy_tile_init(cb_in0);

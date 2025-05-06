@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
 
     constexpr CoreCoord core = {0, 0};  
     constexpr uint32_t single_tile_size = 32*32; // 1KiB for every tile
-    constexpr uint32_t num_tiles = 2; // Number of tiles
+    constexpr uint32_t num_tiles = 8; // Number of tiles
     constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; // Total size of the DRAM buffer: 64 KiB 
     DataFormat data_format = DataFormat::Float16;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
@@ -190,8 +190,8 @@ int main(int argc, char** argv) {
 
     vector<uint32_t> input_vec(dram_buffer_size/4);
     vector<uint32_t> output_vec(dram_buffer_size/4);
-    input_vec = create_constant_vector_of_bfloat16(single_tile_size, 11.5f);
-    output_vec = create_constant_vector_of_bfloat16(single_tile_size, 0.0f);
+    input_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 11.5f);
+    output_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 0.0f);
 
     size_t n = dram_buffer_size / sizeof(bfloat16);
 
