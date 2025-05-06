@@ -14,14 +14,14 @@ void MAIN {
     constexpr auto cb_out16 = tt::CBIndex::c_16;
 
 
-    uint32_t cb_tile_count = 1;
+    uint32_t cb_tile_count = 2;
 
+    unary_op_init_common(cb_in0, cb_out16);
     copy_tile_init(cb_in0);
 
     // OPERATIONS ARE ASYNCH SO EVERYTHING IS PIPELINED
 
     tile_regs_acquire();
-    
 
     for(uint32_t i = 0; i < cb_tile_count; i++) {
         cb_reserve_back(cb_out16, 1);

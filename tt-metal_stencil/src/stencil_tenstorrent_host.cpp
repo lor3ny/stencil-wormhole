@@ -54,6 +54,23 @@ inline void PrintGrid(double *grid, int dim){
     }
 }
 
+// IMPORTANT
+// Tenstorrent works with BFP16, TT-Metaliu requires uint32_t buffers, and packs on it two BFP16.
+// So it packs on every uint32_t cel two bfloat16 values. Checks printf("Result = %x\n", result_vec[0]);
+// You will see the two copies of the same HEX. 
+
+void TT_printMatrix(uint32_t* matrix, size_t rows, size_t cols) {
+    bfloat16* a_bf16 = reinterpret_cast<bfloat16*>(matrix);
+
+    for(int i =0; i<rows; i++){
+        for(int j =0; j<cols; j++){
+            std::cout << a_bf16[i*cols + j].to_float() << " ";
+        }
+        std::cout << "\n";
+    }
+    std::cout << std::flush;
+}
+
 int main(int argc, char** argv) {
 
     // ---------------------------------------------------------
@@ -73,7 +90,7 @@ int main(int argc, char** argv) {
 
     constexpr CoreCoord core = {0, 0};  
     constexpr uint32_t single_tile_size = 32*32; // 1KiB for every tile
-    constexpr uint32_t num_tiles = 1; // Number of tiles
+    constexpr uint32_t num_tiles = 2; // Number of tiles
     constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; // Total size of the DRAM buffer: 64 KiB 
     DataFormat data_format = DataFormat::Float16;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
@@ -173,30 +190,16 @@ int main(int argc, char** argv) {
 
     vector<uint32_t> input_vec(dram_buffer_size/4);
     vector<uint32_t> output_vec(dram_buffer_size/4);
-    input_vec = create_constant_vector_of_bfloat16(single_tile_size, 1.0f);
+    input_vec = create_constant_vector_of_bfloat16(single_tile_size, 11.5f);
     output_vec = create_constant_vector_of_bfloat16(single_tile_size, 0.0f);
 
-    printf(
-        "Expected = %x\n",
-        pack_two_bfloat16_into_uint32(std::pair<bfloat16, bfloat16>(bfloat16(22.0f), bfloat16(22.0f))));
-
-
-    cout << "Input buffer before: ";
-    std::cout << "Partial results: (note we are running under BFP16. It's going to be less accurate)\n";
     size_t n = dram_buffer_size / sizeof(bfloat16);
-    bfloat16* a_bf16 = reinterpret_cast<bfloat16*>(input_vec.data());
-    bfloat16* b_bf16 = reinterpret_cast<bfloat16*>(output_vec.data());
-    for (int i = 0; i < n; i++) {
-        std::cout << "  " << a_bf16[i].to_float() << " + " << b_bf16[i].to_float() << "\n";
-    }
-    std::cout << std::flush;
-    
-    cout << "Output buffer before: ";
-    printf("Result = ");
-    for(uint32_t i = 0; i < dram_buffer_size/4; i++){
-        printf("%x ", output_vec[i]);  // 22 = 1102070192
-    }
-    cout << endl;
+
+    std::cout << "Input: " << std::endl;
+    TT_printMatrix(input_vec.data(), 1, n);
+
+    std::cout << "Output: " << std::endl;
+    TT_printMatrix(output_vec.data(), 1, n);
 
     EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
     EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ          
@@ -242,21 +245,11 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
     // ---------------------------------------------------------
 
-    cout << "Saving results..." << endl;
+    std::cout << "Input: " << std::endl;
+    TT_printMatrix(input_vec.data(), 1, n);
 
-    cout << "Input buffer before: ";
-    printf("Result = ");
-    for(uint32_t i = 0; i < dram_buffer_size/4; i++){
-        printf("%x ", input_vec[i]);  // 22 = 1102070192
-    }
-    cout << endl;
-    
-    cout << "Output buffer before: ";
-    printf("Result = ");
-    for(uint32_t i = 0; i < dram_buffer_size/4; i++){
-        printf("%x ", output_vec[i]);  // 22 = 1102070192
-    }
-    cout << endl;
+    std::cout << "Output: " << std::endl;
+    TT_printMatrix(output_vec.data(), 1, n);
 
     //saveGridCSV("result.csv", res_temp, dim, dim);
 
