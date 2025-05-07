@@ -81,14 +81,13 @@ void MAIN {
     cb_push_back(cb_MID, 1);
     tile_regs_release();
     
-
-    //SCALING
+    // SCALING
     
     tile_regs_acquire();
-    add_tiles_init(cb_SCALAR, cb_MID);
-    cb_wait_front(cb_MID, 1);
+    mul_tiles_init(cb_SCALAR, cb_MID);
     cb_wait_front(cb_SCALAR, 1);
-    add_tiles(cb_SCALAR, cb_MID, 0, 0, dst0);
+    cb_wait_front(cb_MID, 1);
+    mul_tiles(cb_SCALAR, cb_MID, 0, 0, dst0);
     cb_pop_front(cb_MID, 1);
     cb_pop_front(cb_SCALAR, 1);
 
@@ -98,7 +97,6 @@ void MAIN {
     cb_reserve_back(cb_OUTPUT, 1);
     pack_tile(dst0, cb_OUTPUT);
     cb_push_back(cb_OUTPUT, 1);
-
     tile_regs_release();
     
     

@@ -20,18 +20,13 @@ void kernel_main() {
     uint32_t src_addr_DOWN = get_arg_val<uint32_t>(4);
     uint32_t src_addr_SCALAR = get_arg_val<uint32_t>(5);
 
-    uint32_t num_tiles = get_arg_val<uint32_t>(1);
-    uint32_t src_bank_id = get_arg_val<uint32_t>(2);
-    //uint32_t src_size = get_arg_val<uint32_t>(3);
-
-
     constexpr uint32_t cb_id_0 = tt::CBIndex::c_0; // CENTER
     constexpr uint32_t cb_id_1 = tt::CBIndex::c_1; // UP
     constexpr uint32_t cb_id_2 = tt::CBIndex::c_2; // LEFT
     constexpr uint32_t cb_id_3 = tt::CBIndex::c_3; // RIGHT
     constexpr uint32_t cb_id_4 = tt::CBIndex::c_4; // DOWN
 
-    constexpr uint32_t cb_id_7 = tt::CBIndex::c_7; // DOWN
+    constexpr uint32_t cb_id_7 = tt::CBIndex::c_7; // SCALAR
     
     const DataFormat src_data_format = get_dataformat(cb_id_0);
     const uint32_t src_tile_bytes = get_tile_size(cb_id_0);
@@ -66,14 +61,12 @@ void kernel_main() {
         .data_format = src_data_format
     };
 
-    
     const InterleavedAddrGenFast<true> src_SCALAR = {
         .bank_base_address = src_addr_SCALAR,
         .page_size = src_tile_bytes,
         .data_format = src_data_format
     };
     
-
 
     cb_reserve_back(cb_id_1, 1);
     cb_reserve_back(cb_id_4, 1);

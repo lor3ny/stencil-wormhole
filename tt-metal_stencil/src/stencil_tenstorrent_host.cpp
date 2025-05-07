@@ -90,17 +90,18 @@ int main(int argc, char** argv) {
         for(int j = 0; j<mat_cols; j++){
             bfloat16 val = 0.0f;
             if(i==0)
-                val = 2.0f;
+                val = 1.0f;
             else if(j==0)
-                val = 2.0f;
+                val = 1.0f;
             else if (j==mat_cols-1)
-                val = 2.0f;
+                val = 1.0f;
             else if (i==mat_rows-1)
-                val = 2.0f;
+                val = 1.0f;
 
             input_bf16[i*mat_cols + j] = val;
         }
     }
+    input_bf16[(mat_rows/2)*mat_cols + (mat_cols/2)] = 100.0f; //CENTRAL
 
     for(int i = 0; i<submat_rows; i++){
         for(int j = 0; j<submat_cols; j++){
@@ -110,7 +111,7 @@ int main(int argc, char** argv) {
             right_bf16[i*submat_cols + j] = input_bf16[(i+1)*mat_cols + (j+2)]; //RIGHT
             down_bf16[i*submat_cols + j] = input_bf16[(i+2)*mat_cols + (j+1)]; //DOWN
 
-            scalar_bf16[i*submat_cols + j] = 1.0f; //SCALAR
+            scalar_bf16[i*submat_cols + j] = 0.25f; //SCALAR
         }
     }
 
@@ -202,28 +203,28 @@ int main(int argc, char** argv) {
     );
     cb_5_config.set_page_size(cb_5_index, dram_buffer_size);
 
-    uint32_t cb_scalar_index = CBIndex::c_7;  // 6
-    CircularBufferConfig cb_scalar_config( single_tile_size * num_sram_tiles, 
-                                           {{cb_scalar_index, data_format}}
-    );
-    cb_scalar_config.set_page_size(cb_scalar_index, dram_buffer_size);
-
     uint32_t cb_output_index = CBIndex::c_6;  // 6
     CircularBufferConfig cb_output_config( single_tile_size * num_sram_tiles, 
                                            {{cb_output_index, data_format}}
     );
     cb_output_config.set_page_size(cb_output_index, dram_buffer_size);
 
-    // MAYBE I CAN USE ONLY ONE CONFIG!
+    uint32_t cb_scalar_index = CBIndex::c_7;  // 6
+    CircularBufferConfig cb_scalar_config(single_tile_size * num_sram_tiles, 
+                                           {{cb_scalar_index, data_format}}
+    );
+    cb_scalar_config.set_page_size(cb_scalar_index, dram_buffer_size);
 
+    // MAYBE I CAN USE ONLY ONE CONFIG!
+    // CREATE CIRCULAR BUFFER MUST BE CALLED IN ORDER
     CBHandle cb_0 = tt_metal::CreateCircularBuffer(program, core, cb_0_config);
     CBHandle cb_1 = tt_metal::CreateCircularBuffer(program, core, cb_1_config); 
     CBHandle cb_2 = tt_metal::CreateCircularBuffer(program, core, cb_2_config);
     CBHandle cb_3 = tt_metal::CreateCircularBuffer(program, core, cb_3_config);
     CBHandle cb_4 = tt_metal::CreateCircularBuffer(program, core, cb_4_config);
     CBHandle cb_5 = tt_metal::CreateCircularBuffer(program, core, cb_5_config);
-    CBHandle cb_scalar = tt_metal::CreateCircularBuffer(program, core, cb_scalar_config);
     CBHandle cb_output = tt_metal::CreateCircularBuffer(program, core, cb_output_config);
+    CBHandle cb_scalar = tt_metal::CreateCircularBuffer(program, core, cb_scalar_config);
 
     // ---------------------------------------------------------
     // KERNELS CREATION: We need a reader, writer and then a compute
