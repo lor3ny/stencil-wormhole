@@ -54,45 +54,24 @@ inline void PrintGrid(double *grid, int dim){
     }
 }
 
+// IMPORTANT
+// Tenstorrent works with BFP16, TT-Metaliu requires uint32_t buffers, and packs on it two BFP16.
+// So it packs on every uint32_t cel two bfloat16 values. Checks printf("Result = %x\n", result_vec[0]);
+// You will see the two copies of the same HEX. 
+
+void TT_printMatrix(uint32_t* matrix, size_t rows, size_t cols) {
+    bfloat16* a_bf16 = reinterpret_cast<bfloat16*>(matrix);
+
+    for(int i =0; i<rows; i++){
+        for(int j =0; j<cols; j++){
+            std::cout << a_bf16[i*cols + j].to_float() << " ";
+        }
+        std::cout << "\n";
+    }
+    std::cout << std::flush;
+}
+
 int main(int argc, char** argv) {
-
-    // ---------------------------------------------------------
-    // ---------------------------------------------------------
-    // HEAT PROPAGATION STENCIL SETUP
-    // ---------------------------------------------------------
-    // ---------------------------------------------------------
-
-    cout << "Setting up heat propagation stencil..." << endl;
-
-    int dim = 1000; // Grid Size
-    double lx = 10.0, ly = 10.0;   // Domain Size
-    float max_time = 1;
-
-    double dx = lx / (double) (dim - 1);
-    double dy = ly / (double) (dim - 1);
-    double dt = 0.0001;  // Time step
-    double alpha = 0.1;  // Coefficient of diffusion
-
-    double* temp = (double*) malloc(dim * dim * sizeof(double));
-    double* res_temp = (double*) malloc(dim * dim * sizeof(double));
-    if (!temp || !res_temp) {
-        cerr << "Errore: allocazione di memoria fallita!" << endl;
-        free(temp);
-        free(res_temp);
-        return 1;
-    }
-    memset(temp, 0, dim * dim * sizeof(double));
-    memset(res_temp, 0, dim * dim * sizeof(double));
-
-    temp[(dim/2)*dim + (dim/2)] = 100.0;
-    res_temp[(dim/2)*dim + (dim/2)] = 100.0;
-
-    // CFL Stability Condition (Courant-Friedrichs-Lewy)
-    double CFL = (double) alpha * (double) dt / (double) powf(dx, 2);
-    if(CFL > 0.25){
-        cerr << "CFL: " << CFL << " Instabilità numerica: ridurre dt o aumentare dx." << endl;
-        return 1;
-    }
 
     // ---------------------------------------------------------
     // ---------------------------------------------------------
@@ -111,9 +90,9 @@ int main(int argc, char** argv) {
 
     constexpr CoreCoord core = {0, 0};  
     constexpr uint32_t single_tile_size = 32*32; // 1KiB for every tile
-    constexpr uint32_t num_tiles = 16; // Number of tiles
+    constexpr uint32_t num_tiles = 8; // Number of tiles
     constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; // Total size of the DRAM buffer: 64 KiB 
-    DataFormat data_format = DataFormat::Float32;
+    DataFormat data_format = DataFormat::Float16;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
 
     // ---------------------------------------------------------
@@ -139,7 +118,7 @@ int main(int argc, char** argv) {
 
     cout << "Creating SRAM buffers..." << endl;
 
-    uint32_t num_sram_tiles = 16;
+    uint32_t num_sram_tiles = num_tiles;
     uint32_t cb_input_index = CBIndex::c_0;  // 0
     // size, page_size
     CircularBufferConfig cb_input_config( single_tile_size * num_sram_tiles, 
@@ -209,25 +188,18 @@ int main(int argc, char** argv) {
     
     cout << "Enqueueing write buffers..." << endl;
 
-    cout << dram_buffer_size << endl;
-    cout << dram_buffer_size/4 << endl;
-
     vector<uint32_t> input_vec(dram_buffer_size/4);
     vector<uint32_t> output_vec(dram_buffer_size/4);
-    memset(input_vec.data(), 1, dram_buffer_size);
-    memset(output_vec.data(), 0, dram_buffer_size);
+    input_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 11.5f);
+    output_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 0.0f);
 
-    cout << "Input buffer before: ";
-    for(uint32_t i = 0; i < dram_buffer_size/4; ++i){
-        cout << input_vec[i] << " ";
-    }
-    cout << endl;
-    
-    cout << "Output buffer before: ";
-    for(uint32_t i = 0; i < dram_buffer_size/4; ++i){
-        cout << output_vec[i] << " ";
-    }
-    cout << endl;
+    size_t n = dram_buffer_size / sizeof(bfloat16);
+
+    std::cout << "Input: " << std::endl;
+    TT_printMatrix(input_vec.data(), 1, n);
+
+    std::cout << "Output: " << std::endl;
+    TT_printMatrix(output_vec.data(), 1, n);
 
     EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
     EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ          
@@ -273,24 +245,13 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
     // ---------------------------------------------------------
 
-    cout << "Saving results..." << endl;
+    std::cout << "Input: " << std::endl;
+    TT_printMatrix(input_vec.data(), 1, n);
+
+    std::cout << "Output: " << std::endl;
+    TT_printMatrix(output_vec.data(), 1, n);
 
     //saveGridCSV("result.csv", res_temp, dim, dim);
-
-    cout << "Input buffer before: ";
-    for(uint32_t i = 0; i < dram_buffer_size/4; ++i){
-        cout << input_vec[i] << " ";
-    }
-    cout << endl;
-    
-    cout << "Output buffer before: ";
-    for(uint32_t i = 0; i < dram_buffer_size/4; ++i){
-        cout << output_vec[i] << " ";
-    }
-    cout << endl;
-
-    free(res_temp);
-    free(temp);
 
     return 0;
 }

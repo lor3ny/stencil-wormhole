@@ -35,29 +35,6 @@ inline void saveGridCSV(const std::string& filename, double* grid, int dim_x, in
     file.close();
 }
 
-inline void InitializeGrid(double *grid, int dim){
-    int i, j;
-    for(i = 0; i < dim; ++i){
-        for(j = 0; j < dim; ++j){
-            grid[i*dim +j] = 0.0;
-        }
-    }
-}
-
-inline void PrintGrid(double *grid, int dim){
-    int i, j;
-    for(i = 0; i < dim; ++i){
-        for(j = 0; j < dim; ++j){
-            cout << " " << grid[i*dim + j] << " ";
-        }
-        cout << endl;
-    }
-}
-
-// IMPORTANT
-// Tenstorrent works with BFP16, TT-Metaliu requires uint32_t buffers, and packs on it two BFP16.
-// So it packs on every uint32_t cel two bfloat16 values. Checks printf("Result = %x\n", result_vec[0]);
-// You will see the two copies of the same HEX. 
 
 void TT_printMatrix(uint32_t* matrix, size_t rows, size_t cols) {
     bfloat16* a_bf16 = reinterpret_cast<bfloat16*>(matrix);
@@ -71,7 +48,72 @@ void TT_printMatrix(uint32_t* matrix, size_t rows, size_t cols) {
     std::cout << std::flush;
 }
 
+
 int main(int argc, char** argv) {
+
+    // ---------------------------------------------------------
+    // ---------------------------------------------------------
+    // HEAT PROPAGATION STENCIL SETUP
+    // ---------------------------------------------------------
+    // ---------------------------------------------------------
+
+    cout << "Setting up heat propagation stencil..." << endl;
+
+    int mat_cols = 514;
+    int mat_rows = 3;
+
+    int submat_cols = 512;  //corrisponde a single_tile_size in values
+    int submat_rows = 1;  //corrisponde a num_tiles
+
+    constexpr uint32_t single_tile_size = 32*32; 
+    constexpr uint32_t num_tiles = 1; 
+    constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; // SUB MATRIX SIZE
+
+    uint32_t* submat_center = (uint32_t*) malloc(dram_buffer_size); 
+    uint32_t* submat_up = (uint32_t*) malloc(dram_buffer_size); 
+    uint32_t* submat_left = (uint32_t*) malloc(dram_buffer_size); 
+    uint32_t* submat_right = (uint32_t*) malloc(dram_buffer_size); 
+    uint32_t* submat_down = (uint32_t*) malloc(dram_buffer_size); 
+    uint32_t* scalar = (uint32_t*) malloc(dram_buffer_size); 
+    uint32_t* input_matrix = (uint32_t*) malloc(mat_rows*mat_cols*2); // It is a BFP16
+    uint32_t* output_matrix = (uint32_t*) malloc(dram_buffer_size);
+
+    bfloat16* center_bf16 = reinterpret_cast<bfloat16*>(submat_center);
+    bfloat16* up_bf16 = reinterpret_cast<bfloat16*>(submat_up);
+    bfloat16* left_bf16 = reinterpret_cast<bfloat16*>(submat_left);
+    bfloat16* right_bf16 = reinterpret_cast<bfloat16*>(submat_right);
+    bfloat16* down_bf16 = reinterpret_cast<bfloat16*>(submat_down);
+    bfloat16* input_bf16 = reinterpret_cast<bfloat16*>(input_matrix);
+    bfloat16* scalar_bf16 = reinterpret_cast<bfloat16*>(scalar);
+
+    for(int i = 0; i<mat_rows; i++){
+        for(int j = 0; j<mat_cols; j++){
+            bfloat16 val = 0.0f;
+            if(i==0)
+                val = 2.0f;
+            else if(j==0)
+                val = 2.0f;
+            else if (j==mat_cols-1)
+                val = 2.0f;
+            else if (i==mat_rows-1)
+                val = 2.0f;
+
+            input_bf16[i*mat_cols + j] = val;
+        }
+    }
+
+    for(int i = 0; i<submat_rows; i++){
+        for(int j = 0; j<submat_cols; j++){
+            center_bf16[i*submat_cols + j] = input_bf16[(i+1)*mat_cols + (j+1)]; //CENTRAL
+            up_bf16[i*submat_cols + j] = input_bf16[i*submat_cols + (j+1)]; //UP
+            left_bf16[i*submat_cols + j] = input_bf16[(i+1)*mat_cols + j]; //LEFT
+            right_bf16[i*submat_cols + j] = input_bf16[(i+1)*mat_cols + (j+2)]; //RIGHT
+            down_bf16[i*submat_cols + j] = input_bf16[(i+2)*mat_cols + (j+1)]; //DOWN
+
+            scalar_bf16[i*submat_cols + j] = 1.0f; //SCALAR
+        }
+    }
+
 
     // ---------------------------------------------------------
     // ---------------------------------------------------------
@@ -89,10 +131,7 @@ int main(int argc, char** argv) {
 
 
     constexpr CoreCoord core = {0, 0};  
-    constexpr uint32_t single_tile_size = 32*32; // 1KiB for every tile
-    constexpr uint32_t num_tiles = 8; // Number of tiles
-    constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; // Total size of the DRAM buffer: 64 KiB 
-    DataFormat data_format = DataFormat::Float16;
+    DataFormat data_format = DataFormat::Float16_b; 
     MathFidelity math_fidelity = MathFidelity::HiFi4;
 
     // ---------------------------------------------------------
@@ -104,12 +143,19 @@ int main(int argc, char** argv) {
     // Both input and output have the same configuration, in this case I have chosen Interleaved instead of Shreaded
 
     // deivce, size, page_size, buffer_type
-    tt_metal::InterleavedBufferConfig dram_config{.device = device, 
-                                                  .size = dram_buffer_size, 
-                                                  .page_size = single_tile_size,  
-                                                  .buffer_type = tt_metal::BufferType::DRAM};
-    std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer = CreateBuffer(dram_config);
-    std::shared_ptr<tt::tt_metal::Buffer> output_dram_buffer = CreateBuffer(dram_config);
+    tt_metal::InterleavedBufferConfig dram_submat_config{
+        .device = device, 
+        .size = dram_buffer_size, 
+        .page_size = single_tile_size,  
+        .buffer_type = tt_metal::BufferType::DRAM
+    };
+    std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer_CENTER = CreateBuffer(dram_submat_config);
+    std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer_UP = CreateBuffer(dram_submat_config);
+    std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer_LEFT = CreateBuffer(dram_submat_config);
+    std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer_RIGHT = CreateBuffer(dram_submat_config);
+    std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer_DOWN = CreateBuffer(dram_submat_config);
+    std::shared_ptr<tt::tt_metal::Buffer> scalar_dram_buffer = CreateBuffer(dram_submat_config);
+    std::shared_ptr<tt::tt_metal::Buffer> output_dram_buffer = CreateBuffer(dram_submat_config);
     
 
     // ---------------------------------------------------------
@@ -119,21 +165,64 @@ int main(int argc, char** argv) {
     cout << "Creating SRAM buffers..." << endl;
 
     uint32_t num_sram_tiles = num_tiles;
-    uint32_t cb_input_index = CBIndex::c_0;  // 0
-    // size, page_size
-    CircularBufferConfig cb_input_config( single_tile_size * num_sram_tiles, 
-                                          {{cb_input_index, data_format}}
-    );
-    cb_input_config.set_page_size(cb_input_index, dram_buffer_size);
 
-    uint32_t cb_output_index = CBIndex::c_16;  // 16
-    // size, page_size
+    uint32_t cb_0_index = CBIndex::c_0;  // 0
+    CircularBufferConfig cb_0_config( single_tile_size * num_sram_tiles, 
+                                          {{cb_0_index, data_format}}
+    );
+    cb_0_config.set_page_size(cb_0_index, dram_buffer_size);
+
+    uint32_t cb_1_index = CBIndex::c_1;  // 1
+    CircularBufferConfig cb_1_config( single_tile_size * num_sram_tiles, 
+                                          {{cb_1_index, data_format}}
+    );
+    cb_1_config.set_page_size(cb_1_index, dram_buffer_size);
+
+    uint32_t cb_2_index = CBIndex::c_2;  // 2
+    CircularBufferConfig cb_2_config( single_tile_size * num_sram_tiles, 
+                                          {{cb_2_index, data_format}}
+    );
+    cb_2_config.set_page_size(cb_2_index, dram_buffer_size);
+
+    uint32_t cb_3_index = CBIndex::c_3;  // 3
+    CircularBufferConfig cb_3_config( single_tile_size * num_sram_tiles, 
+                                          {{cb_3_index, data_format}}
+    );
+    cb_3_config.set_page_size(cb_3_index, dram_buffer_size);
+
+    uint32_t cb_4_index = CBIndex::c_4;  // 4
+    CircularBufferConfig cb_4_config(single_tile_size * num_sram_tiles, 
+                                          {{cb_4_index, data_format}}
+    );
+    cb_4_config.set_page_size(cb_4_index, dram_buffer_size);
+
+    uint32_t cb_5_index = CBIndex::c_5;  // 5
+    CircularBufferConfig cb_5_config(single_tile_size * num_sram_tiles, 
+                                           {{cb_5_index, data_format}}
+    );
+    cb_5_config.set_page_size(cb_5_index, dram_buffer_size);
+
+    uint32_t cb_scalar_index = CBIndex::c_7;  // 6
+    CircularBufferConfig cb_scalar_config( single_tile_size * num_sram_tiles, 
+                                           {{cb_scalar_index, data_format}}
+    );
+    cb_scalar_config.set_page_size(cb_scalar_index, dram_buffer_size);
+
+    uint32_t cb_output_index = CBIndex::c_6;  // 6
     CircularBufferConfig cb_output_config( single_tile_size * num_sram_tiles, 
                                            {{cb_output_index, data_format}}
     );
     cb_output_config.set_page_size(cb_output_index, dram_buffer_size);
 
-    CBHandle cb_input = tt_metal::CreateCircularBuffer(program, core, cb_input_config);
+    // MAYBE I CAN USE ONLY ONE CONFIG!
+
+    CBHandle cb_0 = tt_metal::CreateCircularBuffer(program, core, cb_0_config);
+    CBHandle cb_1 = tt_metal::CreateCircularBuffer(program, core, cb_1_config); 
+    CBHandle cb_2 = tt_metal::CreateCircularBuffer(program, core, cb_2_config);
+    CBHandle cb_3 = tt_metal::CreateCircularBuffer(program, core, cb_3_config);
+    CBHandle cb_4 = tt_metal::CreateCircularBuffer(program, core, cb_4_config);
+    CBHandle cb_5 = tt_metal::CreateCircularBuffer(program, core, cb_5_config);
+    CBHandle cb_scalar = tt_metal::CreateCircularBuffer(program, core, cb_scalar_config);
     CBHandle cb_output = tt_metal::CreateCircularBuffer(program, core, cb_output_config);
 
     // ---------------------------------------------------------
@@ -143,7 +232,7 @@ int main(int argc, char** argv) {
     
     cout << "Creating kernels..." << endl;
 
-    bool input_is_dram = input_dram_buffer->buffer_type() == tt_metal::BufferType::DRAM ? 1 : 0;
+    bool input_is_dram = input_dram_buffer_UP->buffer_type() == tt_metal::BufferType::DRAM ? 1 : 0;
     std::vector<uint32_t> reader_compile_time_args = {(uint32_t)input_is_dram};
 
     bool output_is_dram = output_dram_buffer->buffer_type() == tt_metal::BufferType::DRAM ? 1 : 0;
@@ -187,22 +276,15 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
     
     cout << "Enqueueing write buffers..." << endl;
+    cout << endl;
 
-    vector<uint32_t> input_vec(dram_buffer_size/4);
-    vector<uint32_t> output_vec(dram_buffer_size/4);
-    input_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 11.5f);
-    output_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 0.0f);
-
-    size_t n = dram_buffer_size / sizeof(bfloat16);
-
-    std::cout << "Input: " << std::endl;
-    TT_printMatrix(input_vec.data(), 1, n);
-
-    std::cout << "Output: " << std::endl;
-    TT_printMatrix(output_vec.data(), 1, n);
-
-    EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
-    EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ          
+    EnqueueWriteBuffer(cq, input_dram_buffer_CENTER, submat_center, false);  // E' UNA MEMCPY, NULLA DI PIÙ
+    EnqueueWriteBuffer(cq, input_dram_buffer_UP, submat_up, false);  // E' UNA MEMCPY, NULLA DI PIÙ
+    EnqueueWriteBuffer(cq, input_dram_buffer_LEFT, submat_left, false);  // E' UNA MEMCPY, NULLA DI PIÙ
+    EnqueueWriteBuffer(cq, input_dram_buffer_RIGHT, submat_right, false);  // E' UNA MEMCPY, NULLA DI PIÙ
+    EnqueueWriteBuffer(cq, input_dram_buffer_DOWN, submat_down, false);  // E' UNA MEMCPY, NULLA DI PIÙ
+    EnqueueWriteBuffer(cq, output_dram_buffer, output_matrix, false);  // E' UNA MEMCPY, NULLA DI PIÙ      
+    EnqueueWriteBuffer(cq, scalar_dram_buffer, scalar, false);    
     
     // ---------------------------------------------------------
     // SETUP RUNTIME ARGS: Set the runtime arguments for the kernels
@@ -212,32 +294,48 @@ int main(int argc, char** argv) {
 
     const uint32_t input_bank_id = 0;
     const uint32_t output_bank_id = 0;
+    const uint32_t stencil_scalar = 1; // SETTING IT TO uint32_t means to have an integer than? maybe
 
     // QUI SETTO RUNTIME ARGS PER READER
-    tt_metal::SetRuntimeArgs( program, reader_kernel_id, core,
-            {input_dram_buffer->address(), num_tiles, input_bank_id, input_dram_buffer->size()});
+    tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
+        input_dram_buffer_CENTER->address(), 
+        input_dram_buffer_UP->address(), 
+        input_dram_buffer_LEFT->address(), 
+        input_dram_buffer_RIGHT->address(), 
+        input_dram_buffer_DOWN->address(), 
+        scalar_dram_buffer->address(), 
+        num_tiles, 
+        input_bank_id
+    });
+
     // QUI SETTO RUNTIME ARGS PER WRITER
     tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, 
             {output_dram_buffer->address(), num_tiles, output_bank_id, output_dram_buffer->size()});
 
-    
     tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {});
-    
-
 
     // ---------------------------------------------------------
     // LAUNCH AND WAIT TERMINATION: Set the runtime arguments for the kernels
     // ---------------------------------------------------------
 
+    std::cout << "Input: " << std::endl;
+    TT_printMatrix(input_matrix, mat_rows, mat_cols);
+
+
+    std::cout << "Input UP: " << std::endl;
+    TT_printMatrix(submat_up, submat_rows, submat_cols);
+    std::cout << "Input DOWN: " << std::endl;
+    TT_printMatrix(submat_down, submat_rows, submat_cols);
+    std::cout << "Input CENTER: " << std::endl;
+    TT_printMatrix(submat_center, submat_rows, submat_cols);
+
     cout << "Enqueueing kernels..." << endl;	
         
     EnqueueProgram(cq, program, false);
-    // Wait Until Program Finishes
-    EnqueueReadBuffer(cq, output_dram_buffer, output_vec.data(), true); // Read the result from the device
+    EnqueueReadBuffer(cq, output_dram_buffer, submat_center, true); // Read the result from the device
     Finish(cq);
     printf("Core {0, 0} on Device 0 completed the task.\n");
     CloseDevice(device);
-
 
     // ---------------------------------------------------------
     // ---------------------------------------------------------
@@ -245,13 +343,16 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
     // ---------------------------------------------------------
 
-    std::cout << "Input: " << std::endl;
-    TT_printMatrix(input_vec.data(), 1, n);
+    std::cout << "Output CENTER: " << std::endl;
+    TT_printMatrix(submat_center, submat_rows, submat_cols);
 
-    std::cout << "Output: " << std::endl;
-    TT_printMatrix(output_vec.data(), 1, n);
-
-    //saveGridCSV("result.csv", res_temp, dim, dim);
+    free(submat_center);
+    free(submat_up);
+    free(submat_left);
+    free(submat_right);
+    free(submat_down);
+    free(input_matrix);
+    free(output_matrix);
 
     return 0;
 }
