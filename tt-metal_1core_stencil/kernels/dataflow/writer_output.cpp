@@ -12,8 +12,6 @@ void kernel_main() {
     DPRINT << "WRITER GO" << ENDL();
     
     uint32_t dst_addr = get_arg_val<uint32_t>(0);
-    uint32_t num_tiles = get_arg_val<uint32_t>(1);
-    uint32_t my_tile = get_arg_val<uint32_t>(2);
 
     constexpr uint32_t cb_id_out = tt::CBIndex::c_6;
 
@@ -26,7 +24,7 @@ void kernel_main() {
 
     cb_wait_front(cb_id_out, 1);
     uint32_t l1_addr_out = get_write_ptr(cb_id_out);
-    noc_async_write_tile(my_tile, dst_noc_addr, l1_addr_out);
+    noc_async_write_tile(0, dst_noc_addr, l1_addr_out);
     noc_async_write_barrier();
     cb_pop_front(cb_id_out, 1);
     

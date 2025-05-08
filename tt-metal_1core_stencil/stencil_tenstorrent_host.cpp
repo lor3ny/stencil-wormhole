@@ -12,7 +12,6 @@
 #include <tt-metalium/command_queue.hpp>
 #include <tt-metalium/tilize_untilize.hpp>
 #include <vector>
-#include <chrono>
 
 using namespace tt;
 using namespace tt::tt_metal;
@@ -52,19 +51,9 @@ void TT_printMatrix(uint32_t* matrix, size_t rows, size_t cols) {
 
 int main(int argc, char** argv) {
 
-    // Create the device and the program
-    int device_id = 0;
-    IDevice* device = CreateDevice(device_id);
-    CommandQueue& cq = device->command_queue(); // Take the command_queue from the device created
-    Program program = CreateProgram();
 
-    // SINGLE CORE
-    //constexpr uint16_t rows = 16;  
-    //constexpr uint16_t cols = 32;
-    
-    // MULTI CORE
     constexpr uint16_t rows = 16;  
-    constexpr uint16_t cols = 512;
+    constexpr uint16_t cols = 32;  
     constexpr uint16_t stencil_neighbours = 1;
 
     constexpr uint16_t padding = stencil_neighbours*2;  //corrisponde a num_tile
@@ -74,23 +63,14 @@ int main(int argc, char** argv) {
     constexpr uint32_t single_tile_size = 32*32; 
     constexpr uint16_t num_tiles = 1; 
     constexpr uint16_t num_sram_tiles = num_tiles;
-
-    auto compute_with_storage_grid_size = device->compute_with_storage_grid_size();
-    uint32_t num_cores_x = 4;//compute_with_storage_grid_size.x;
-    uint32_t num_cores_y = 4;//compute_with_storage_grid_size.y;
-    uint32_t num_cores_total = num_cores_x * num_cores_y;
-    cout << num_cores_total << endl;
-    auto all_device_cores = CoreRange({0, 0}, {num_cores_x - 1, num_cores_y - 1});
-
-    const uint32_t dram_buffer_size = single_tile_size * num_tiles * num_cores_total; // SUB MATRIX SIZE
-    constexpr uint32_t input_buffer_size = padded_rows*padded_cols*sizeof(bfloat16); // SUB MATRIX SIZE
+    constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; // SUB MATRIX SIZE
 
     if(rows*cols*2 != dram_buffer_size){
         cerr << "Error: DRAM buffer must be equal to ROWS x COLS x SIZE OF BFP16" << endl;
         return EXIT_FAILURE;
     }
 
-    uint32_t* input_mat = (uint32_t*) malloc(input_buffer_size); // It is a BFP16
+    uint32_t* input_mat = (uint32_t*) malloc(padded_rows*padded_cols*sizeof(bfloat16)); // It is a BFP16
     uint32_t* submat_center = (uint32_t*) malloc(dram_buffer_size); 
     uint32_t* submat_up = (uint32_t*) malloc(dram_buffer_size); 
     uint32_t* submat_left = (uint32_t*) malloc(dram_buffer_size); 
@@ -156,7 +136,14 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
     // ---------------------------------------------------------
 
-    //constexpr CoreCoord core = {0, 0};  
+    // Create the device and the program
+    int device_id = 0;
+    IDevice* device = CreateDevice(device_id);
+    CommandQueue& cq = device->command_queue(); // Take the command_queue from the device created
+    Program program = CreateProgram();
+
+
+    constexpr CoreCoord core = {0, 0};  
     DataFormat data_format = DataFormat::Float16_b; 
     MathFidelity math_fidelity = MathFidelity::HiFi4;
 
@@ -206,8 +193,8 @@ int main(int argc, char** argv) {
         CircularBufferConfig cb_config( single_tile_size * num_sram_tiles, 
                                             {{cb_indices[i], data_format}}
         );
-        cb_config.set_page_size(cb_indices[i], single_tile_size);   
-        tt_metal::CreateCircularBuffer(program, all_device_cores, cb_config);
+        cb_config.set_page_size(cb_indices[i], dram_buffer_size);   
+        tt_metal::CreateCircularBuffer(program, core, cb_config);
     }
 
     /*
@@ -282,27 +269,17 @@ int main(int argc, char** argv) {
     bool output_is_dram = output_dram_buffer->buffer_type() == tt_metal::BufferType::DRAM ? 1 : 0;
     std::vector<uint32_t> writer_compile_time_args = {(uint32_t)output_is_dram};
 
-    auto reader_kernel_id = tt_metal::CreateKernel( 
-        program, 
-        "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/kernels/dataflow/reader_input.cpp",
-        all_device_cores, 
-        tt_metal::DataMovementConfig{ 
-            .processor = DataMovementProcessor::RISCV_1,      
-            .noc = NOC::RISCV_1_default,
-            .compile_args = reader_compile_time_args
-        }
+    auto reader_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/kernels/dataflow/reader_input.cpp",
+        core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_1, 
+                                            .noc = NOC::RISCV_1_default,
+                                            .compile_args = reader_compile_time_args}
     );
 
     
-    auto writer_kernel_id = tt_metal::CreateKernel( 
-        program, 
-        "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/kernels/dataflow/writer_output.cpp",
-        all_device_cores, 
-        tt_metal::DataMovementConfig{ 
-            .processor = DataMovementProcessor::RISCV_0,
-            .noc = NOC::RISCV_0_default,
-            .compile_args = writer_compile_time_args
-        }
+    auto writer_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/kernels/dataflow/writer_output.cpp",
+        core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_0,
+                                            .noc = NOC::RISCV_0_default,
+                                            .compile_args = writer_compile_time_args}
     );
     
 
@@ -310,7 +287,7 @@ int main(int argc, char** argv) {
     KernelHandle stencil_kernel_id = tt_metal::CreateKernel( 
         program, 
         "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/kernels/compute/stencil.cpp",
-        all_device_cores, 
+        core, 
         tt_metal::ComputeConfig{ 
             .math_fidelity = math_fidelity,
             .fp32_dest_acc_en = false, 
@@ -340,30 +317,21 @@ int main(int argc, char** argv) {
 
     cout << "Setting up runtime arguments..." << endl;
 
+    tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
+        input_dram_buffer_CENTER->address(), 
+        input_dram_buffer_UP->address(), 
+        input_dram_buffer_LEFT->address(), 
+        input_dram_buffer_RIGHT->address(), 
+        input_dram_buffer_DOWN->address(), 
+        scalar_dram_buffer->address(), 
+    });
 
-    for(uint32_t i = 0; i < num_cores_total; i++) {
+    tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
+        output_dram_buffer->address(), 
+        num_tiles, 
+    });
 
-        CoreCoord core = {i / num_cores_y, i % num_cores_y}; // Compute the core coordinates
-        uint32_t my_tile_index = i;
-
-        tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
-            input_dram_buffer_CENTER->address(), 
-            input_dram_buffer_UP->address(), 
-            input_dram_buffer_LEFT->address(), 
-            input_dram_buffer_RIGHT->address(), 
-            input_dram_buffer_DOWN->address(), 
-            scalar_dram_buffer->address(), 
-            my_tile_index,
-        });
-    
-        tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
-            output_dram_buffer->address(), 
-            num_tiles, 
-            my_tile_index,
-        });
-    
-        tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {});
-    }
+    tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {});
 
     // ---------------------------------------------------------
     // LAUNCH AND WAIT TERMINATION: Set the runtime arguments for the kernels
@@ -371,11 +339,10 @@ int main(int argc, char** argv) {
 
     cout << "Enqueueing kernels..." << endl;	
         
-    auto start = std::chrono::high_resolution_clock::now();
     EnqueueProgram(cq, program, false);
     EnqueueReadBuffer(cq, output_dram_buffer, output_mat, true); // Read the result from the device
     Finish(cq);
-    auto end = std::chrono::high_resolution_clock::now();
+    printf("Core {0, 0} on Device 0 completed the task.\n");
     CloseDevice(device);
 
     // ---------------------------------------------------------
@@ -394,9 +361,6 @@ int main(int argc, char** argv) {
     free(submat_down);
     free(input_mat);
     free(output_mat);
-
-    std::chrono::duration<double> duration = end - start;
-    std::cout << "Time taken: " << duration.count() << " seconds" << std::endl;
 
     return EXIT_SUCCESS;
 }

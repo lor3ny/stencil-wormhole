@@ -18,7 +18,6 @@ void kernel_main() {
     uint32_t src_addr_RIGHT = get_arg_val<uint32_t>(3);
     uint32_t src_addr_DOWN = get_arg_val<uint32_t>(4);
     uint32_t src_addr_SCALAR = get_arg_val<uint32_t>(5);
-    uint32_t my_tile = get_arg_val<uint32_t>(6);
 
     constexpr uint32_t cb_id_0 = tt::CBIndex::c_0; // CENTER
     constexpr uint32_t cb_id_1 = tt::CBIndex::c_1; // UP
@@ -82,19 +81,19 @@ void kernel_main() {
     uint32_t l1_write_addr_in0 = get_write_ptr(cb_id_0);
     uint32_t l1_write_addr_in7 = get_write_ptr(cb_id_7);
     
-    noc_async_read_tile(my_tile, src_UP, l1_write_addr_in1);
-    noc_async_read_tile(my_tile, src_DOWN, l1_write_addr_in4);
-    noc_async_read_tile(my_tile, src_LEFT, l1_write_addr_in2);
-    noc_async_read_tile(my_tile, src_RIGHT, l1_write_addr_in3);
-    noc_async_read_tile(my_tile, src_CENTER, l1_write_addr_in0);
-    noc_async_read_tile(my_tile, src_SCALAR, l1_write_addr_in7);
+    noc_async_read_tile(0, src_UP, l1_write_addr_in1);
+    noc_async_read_tile(0, src_DOWN, l1_write_addr_in4);
+    noc_async_read_tile(0, src_LEFT, l1_write_addr_in2);
+    noc_async_read_tile(0, src_RIGHT, l1_write_addr_in3);
+    noc_async_read_tile(0, src_CENTER, l1_write_addr_in0);
+    noc_async_read_tile(0, src_SCALAR, l1_write_addr_in7);
 
     noc_async_read_barrier();
     cb_push_back(cb_id_1, 1);
     cb_push_back(cb_id_4, 1);
     cb_push_back(cb_id_2, 1);
     cb_push_back(cb_id_3, 1);
-    cb_push_back(cb_id_0, 0);
+    cb_push_back(cb_id_4, 0);
     cb_push_back(cb_id_7, 1);
 
 
