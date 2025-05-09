@@ -11,6 +11,7 @@
 #include <tt-metalium/test_tiles.hpp>
 #include <tt-metalium/command_queue.hpp>
 #include <tt-metalium/tilize_untilize.hpp>
+#include <tt-metalium/work_split.hpp>
 #include <vector>
 #include <chrono>
 
@@ -77,7 +78,7 @@ int main(int argc, char** argv) {
 
     auto compute_with_storage_grid_size = device->compute_with_storage_grid_size();
     uint32_t num_cores_x = 4;//compute_with_storage_grid_size.x;
-    uint32_t num_cores_y = 4;//compute_with_storage_grid_size.y;
+    uint32_t num_cores_y = 4;//compute_with_storage_grid_size.y; forse dipende dal banco di dram
     uint32_t num_cores_total = num_cores_x * num_cores_y;
     cout << num_cores_total << endl;
     auto all_device_cores = CoreRange({0, 0}, {num_cores_x - 1, num_cores_y - 1});
@@ -340,11 +341,32 @@ int main(int argc, char** argv) {
 
     cout << "Setting up runtime arguments..." << endl;
 
+    auto
+        [num_cores,
+         all_cores,
+         core_group_1,
+         core_group_2,
+         num_output_tiles_per_core_group_1,
+         num_output_tiles_per_core_group_2] =
+            split_work_to_cores(compute_with_storage_grid_size, num_output_tiles_total);
+
+    bool row_major = false;
+    auto cores = grid_to_cores(num_cores_total, num_cores_x, num_cores_y, row_major);
 
     for(uint32_t i = 0; i < num_cores_total; i++) {
 
-        CoreCoord core = {i / num_cores_y, i % num_cores_y}; // Compute the core coordinates
+        //CoreCoord core = {i / num_cores_y, i % num_cores_y}; // Compute the core coordinates
+        const auto& core = cores[i]; // Get the core coordinates from the vector
         uint32_t my_tile_index = i;
+
+        uint32_t num_output_tiles_per_core = 0;
+        if (core_group_1.contains(core)) {
+            num_output_tiles_per_core = num_output_tiles_per_core_group_1;
+        } else if (core_group_2.contains(core)) {
+            num_output_tiles_per_core = num_output_tiles_per_core_group_2;
+        } else {
+            TT_ASSERT(false, "Core not in specified core ranges");
+        }
 
         tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
             input_dram_buffer_CENTER->address(), 
