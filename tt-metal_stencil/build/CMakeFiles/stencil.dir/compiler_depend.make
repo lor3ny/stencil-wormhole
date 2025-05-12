@@ -125,6 +125,7 @@ CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: /home/lpiarulli_tt/st
   /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/util.hpp \
   /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/utils.hpp \
   /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/work_executor.hpp \
+  /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/work_split.hpp \
   /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/worker_config_buffer.hpp \
   /home/lpiarulli_tt/tt-metal/tt_metal/hostdevcommon/api/hostdevcommon/common_values.hpp \
   /home/lpiarulli_tt/tt-metal/tt_metal/hostdevcommon/api/hostdevcommon/dprint_common.h \
@@ -1411,6 +1412,8 @@ CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: /home/lpiarulli_tt/st
 
 /usr/lib/llvm-17/include/c++/v1/locale.h:
 
+/usr/lib/llvm-17/include/c++/v1/locale:
+
 /usr/lib/llvm-17/include/c++/v1/__chrono/convert_to_timespec.h:
 
 /usr/include/limits.h:
@@ -1927,11 +1930,7 @@ CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: /home/lpiarulli_tt/st
 
 /usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
 
-/home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/dispatch_core_common.hpp:
-
-/usr/lib/llvm-17/include/c++/v1/__format/extended_grapheme_cluster_table.h:
-
-/usr/lib/llvm-17/include/c++/v1/__type_traits/conditional.h:
+/usr/include/x86_64-linux-gnu/bits/types/time_t.h:
 
 /usr/lib/llvm-17/include/c++/v1/numeric:
 
@@ -1942,6 +1941,12 @@ CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: /home/lpiarulli_tt/st
 /usr/lib/llvm-17/include/c++/v1/__memory/builtin_new_allocator.h:
 
 /usr/lib/llvm-17/include/c++/v1/__random/chi_squared_distribution.h:
+
+/home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/dispatch_core_common.hpp:
+
+/usr/lib/llvm-17/include/c++/v1/__format/extended_grapheme_cluster_table.h:
+
+/usr/lib/llvm-17/include/c++/v1/__type_traits/conditional.h:
 
 /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/test_tiles.hpp:
 
@@ -1954,6 +1959,8 @@ CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: /home/lpiarulli_tt/st
 /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/buffer.hpp:
 
 /usr/lib/llvm-17/include/c++/v1/__algorithm/copy_backward.h:
+
+/home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/work_split.hpp:
 
 /usr/lib/llvm-17/include/c++/v1/__random/weibull_distribution.h:
 
@@ -2008,8 +2015,6 @@ CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: /home/lpiarulli_tt/st
 /usr/lib/llvm-17/lib/clang/17/include/__wmmintrin_pclmul.h:
 
 /usr/lib/llvm-17/include/c++/v1/__algorithm/any_of.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/time_t.h:
 
 /home/lpiarulli_tt/tt-metal/tt_metal/third_party/umd/device/api/umd/device/driver_atomics.h:
 
@@ -2417,10 +2422,6 @@ CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: /home/lpiarulli_tt/st
 
 /usr/lib/llvm-17/include/c++/v1/__random/subtract_with_carry_engine.h:
 
-/usr/lib/llvm-17/include/c++/v1/__chrono/day.h:
-
-/usr/lib/llvm-17/include/c++/v1/__algorithm/is_permutation.h:
-
 /usr/lib/llvm-17/include/c++/v1/__algorithm/includes.h:
 
 /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/type_name.hpp:
@@ -2730,6 +2731,10 @@ CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: /home/lpiarulli_tt/st
 /usr/lib/llvm-17/include/c++/v1/__algorithm/pop_heap.h:
 
 /usr/include/x86_64-linux-gnu/bits/math-vector.h:
+
+/usr/lib/llvm-17/include/c++/v1/__algorithm/is_permutation.h:
+
+/usr/lib/llvm-17/include/c++/v1/__chrono/day.h:
 
 /usr/include/x86_64-linux-gnu/bits/posix_opt.h:
 
@@ -3744,5 +3749,3 @@ CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o: /home/lpiarulli_tt/st
 /usr/lib/llvm-17/include/c++/v1/__algorithm/unwrap_range.h:
 
 /usr/lib/llvm-17/include/c++/v1/iostream:
-
-/usr/lib/llvm-17/include/c++/v1/locale:

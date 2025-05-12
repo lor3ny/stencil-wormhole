@@ -126,6 +126,7 @@ CMakeFiles/stencil.dir/src/stencil_tenstorrent_host.cpp.o
  /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/util.hpp
  /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/utils.hpp
  /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/work_executor.hpp
+ /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/work_split.hpp
  /home/lpiarulli_tt/tt-metal/tt_metal/api/tt-metalium/worker_config_buffer.hpp
  /home/lpiarulli_tt/tt-metal/tt_metal/hostdevcommon/api/hostdevcommon/common_values.hpp
  /home/lpiarulli_tt/tt-metal/tt_metal/hostdevcommon/api/hostdevcommon/dprint_common.h

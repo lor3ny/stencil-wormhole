@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
     //constexpr uint16_t cols = 32;
     
     // MULTI CORE
-    constexpr uint16_t rows = 16;  
+    constexpr uint16_t rows = 64;  
     constexpr uint16_t cols = 512;
     constexpr uint16_t stencil_neighbours = 1;
 
@@ -73,17 +73,17 @@ int main(int argc, char** argv) {
     constexpr uint16_t padded_rows = rows + padding; //16
 
     constexpr uint32_t single_tile_size = 32*32; 
-    constexpr uint16_t num_tiles = 1; 
-    constexpr uint16_t num_sram_tiles = num_tiles;
+    constexpr uint16_t num_tiles = 8*8; 
+    constexpr uint16_t num_sram_tiles = 1;//num_tiles;
 
     auto compute_with_storage_grid_size = device->compute_with_storage_grid_size();
-    uint32_t num_cores_x = 4;//compute_with_storage_grid_size.x;
-    uint32_t num_cores_y = 4;//compute_with_storage_grid_size.y; forse dipende dal banco di dram
+    uint32_t num_cores_x = 8;//compute_with_storage_grid_size.x;
+    uint32_t num_cores_y = 8;//compute_with_storage_grid_size.y; forse dipende dal banco di dram
     uint32_t num_cores_total = num_cores_x * num_cores_y;
     cout << num_cores_total << endl;
     auto all_device_cores = CoreRange({0, 0}, {num_cores_x - 1, num_cores_y - 1});
 
-    const uint32_t dram_buffer_size = single_tile_size * num_tiles * num_cores_total; // SUB MATRIX SIZE
+    const uint32_t dram_buffer_size = single_tile_size * num_tiles; // SUB MATRIX SIZE
     constexpr uint32_t input_buffer_size = padded_rows*padded_cols*sizeof(bfloat16); // SUB MATRIX SIZE
 
     if(rows*cols*2 != dram_buffer_size){
@@ -341,6 +341,7 @@ int main(int argc, char** argv) {
 
     cout << "Setting up runtime arguments..." << endl;
 
+    bool row_major = false;
     auto
         [num_cores,
          all_cores,
@@ -348,9 +349,7 @@ int main(int argc, char** argv) {
          core_group_2,
          num_output_tiles_per_core_group_1,
          num_output_tiles_per_core_group_2] =
-            split_work_to_cores(compute_with_storage_grid_size, num_output_tiles_total);
-
-    bool row_major = false;
+            split_work_to_cores(compute_with_storage_grid_size, num_tiles, row_major);
     auto cores = grid_to_cores(num_cores_total, num_cores_x, num_cores_y, row_major);
 
     for(uint32_t i = 0; i < num_cores_total; i++) {
@@ -359,14 +358,16 @@ int main(int argc, char** argv) {
         const auto& core = cores[i]; // Get the core coordinates from the vector
         uint32_t my_tile_index = i;
 
-        uint32_t num_output_tiles_per_core = 0;
+        /*
+        uint32_t num_tiles_per_core = 1;
         if (core_group_1.contains(core)) {
-            num_output_tiles_per_core = num_output_tiles_per_core_group_1;
+            num_tiles_per_core = num_output_tiles_per_core_group_1;
         } else if (core_group_2.contains(core)) {
-            num_output_tiles_per_core = num_output_tiles_per_core_group_2;
+            num_tiles_per_core = num_output_tiles_per_core_group_2;
         } else {
             TT_ASSERT(false, "Core not in specified core ranges");
         }
+        */
 
         tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
             input_dram_buffer_CENTER->address(), 
