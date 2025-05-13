@@ -1,0 +1,2 @@
+/usr/bin/llvm-ar-17 qc libboost_container.a CMakeFiles/boost_container.dir/src/alloc_lib.c.o CMakeFiles/boost_container.dir/src/dlmalloc.cpp.o CMakeFiles/boost_container.dir/src/global_resource.cpp.o CMakeFiles/boost_container.dir/src/monotonic_buffer_resource.cpp.o CMakeFiles/boost_container.dir/src/pool_resource.cpp.o CMakeFiles/boost_container.dir/src/synchronized_pool_resource.cpp.o CMakeFiles/boost_container.dir/src/unsynchronized_pool_resource.cpp.o
+/usr/bin/llvm-ranlib-17 libboost_container.a

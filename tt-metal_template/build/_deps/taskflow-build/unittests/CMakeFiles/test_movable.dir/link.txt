@@ -1,0 +1,1 @@
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/test_movable.dir/test_movable.cpp.o -o test_movable  -lpthread

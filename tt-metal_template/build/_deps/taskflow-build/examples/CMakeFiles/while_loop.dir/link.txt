@@ -1,0 +1,1 @@
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/while_loop.dir/while_loop.cpp.o -o while_loop  -lpthread

@@ -14,9 +14,9 @@ void kernel_main() {
 
     uint32_t src_addr_CENTER = get_arg_val<uint32_t>(0);
     uint32_t src_addr_UP = get_arg_val<uint32_t>(1);
-    uint32_t src_addr_LEFT= get_arg_val<uint32_t>(2);
-    uint32_t src_addr_RIGHT = get_arg_val<uint32_t>(3);
-    uint32_t src_addr_DOWN = get_arg_val<uint32_t>(4);
+    uint32_t src_addr_DOWN= get_arg_val<uint32_t>(2);
+    uint32_t src_addr_LEFT = get_arg_val<uint32_t>(3);
+    uint32_t src_addr_RIGHT = get_arg_val<uint32_t>(4);
     uint32_t src_addr_SCALAR = get_arg_val<uint32_t>(5);
     uint32_t my_tile = get_arg_val<uint32_t>(6);
 
@@ -26,7 +26,7 @@ void kernel_main() {
     constexpr uint32_t cb_id_3 = tt::CBIndex::c_3; // RIGHT
     constexpr uint32_t cb_id_4 = tt::CBIndex::c_4; // DOWN
 
-    constexpr uint32_t cb_id_7 = tt::CBIndex::c_7; // SCALAR
+    constexpr uint32_t cb_id_5 = tt::CBIndex::c_5; // SCALAR
     
     const DataFormat src_data_format = get_dataformat(cb_id_0);
     const uint32_t src_tile_bytes = get_tile_size(cb_id_0);
@@ -73,29 +73,29 @@ void kernel_main() {
     cb_reserve_back(cb_id_2, 1);
     cb_reserve_back(cb_id_3, 1);
     cb_reserve_back(cb_id_0, 1);
-    cb_reserve_back(cb_id_7, 1);
+    cb_reserve_back(cb_id_5, 1);
 
     uint32_t l1_write_addr_in1 = get_write_ptr(cb_id_1);
     uint32_t l1_write_addr_in4 = get_write_ptr(cb_id_2);
     uint32_t l1_write_addr_in2 = get_write_ptr(cb_id_3);
     uint32_t l1_write_addr_in3 = get_write_ptr(cb_id_4);
     uint32_t l1_write_addr_in0 = get_write_ptr(cb_id_0);
-    uint32_t l1_write_addr_in7 = get_write_ptr(cb_id_7);
+    uint32_t l1_write_addr_in5 = get_write_ptr(cb_id_5);
     
     noc_async_read_tile(my_tile, src_UP, l1_write_addr_in1);
     noc_async_read_tile(my_tile, src_DOWN, l1_write_addr_in4);
     noc_async_read_tile(my_tile, src_LEFT, l1_write_addr_in2);
     noc_async_read_tile(my_tile, src_RIGHT, l1_write_addr_in3);
     noc_async_read_tile(my_tile, src_CENTER, l1_write_addr_in0);
-    noc_async_read_tile(my_tile, src_SCALAR, l1_write_addr_in7);
+    noc_async_read_tile(my_tile, src_SCALAR, l1_write_addr_in5);
 
     noc_async_read_barrier();
     cb_push_back(cb_id_1, 1);
     cb_push_back(cb_id_4, 1);
     cb_push_back(cb_id_2, 1);
     cb_push_back(cb_id_3, 1);
-    cb_push_back(cb_id_0, 0);
-    cb_push_back(cb_id_7, 1);
+    cb_push_back(cb_id_0, 1);
+    cb_push_back(cb_id_5, 1);
 
 
     DPRINT << "READER STOP" << ENDL();

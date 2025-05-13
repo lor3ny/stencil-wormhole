@@ -1,0 +1,48 @@
+
+
+
+HOST:
+
+    float *matrix[rows*columns]
+
+    vector<vector<float>> matrix[rows]
+    For i in rows:
+        matrix[i] = malloc(columns)
+
+    vector<std::shared_ptr<tt::tt_metal::Buffer>> input_dram_rows[rows]; 
+    
+    unint32_t address_buffer_host[rows];
+    std::shared_ptr<tt::tt_metal::Buffer> addresses_buffer[rows]
+
+    tt_metal::InterleavedBufferConfig dram_row_config{
+        .device = device, 
+        .size = dram_buffer_size, 
+        .page_size = single_tile_size,  
+        .buffer_type = tt_metal::BufferType::DRAM
+    };
+        
+    for i in rows:        
+        input_dram_rows[i] = CreateBuffer(dram_rows_config);
+        addresses_buffer_host[i] = input_dram_rows[i]->address;
+    adresses_buffer = CreateBuffer(dram_rows_config);
+
+
+    tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
+        adresses_buffer->address()
+        scalar_dram_buffer->address(), 
+        my_tile_index,
+    });
+
+
+
+# Però a quel punto anche l'output deve essere formato in questo modo, altrimenti per fare jacobi
+# è necessario rifare la suddivisione e le fottute memcpy :(
+# Però è conveniente avere tutti questi virtual buffers? Forse ho dei limiti, non posso allocare # più di tot virtual buffers.
+
+# Quindi il reader dovrebbe solo sostituire output rows con input rows e si va, è iterativo (forse lento)
+
+
+# FORSE LA COSA PIÙ CONVENIENTE
+
+
+
