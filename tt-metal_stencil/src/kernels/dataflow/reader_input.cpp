@@ -14,9 +14,9 @@ void kernel_main() {
 
     uint32_t src_addr_CENTER = get_arg_val<uint32_t>(0);
     uint32_t src_addr_UP = get_arg_val<uint32_t>(1);
-    uint32_t src_addr_DOWN= get_arg_val<uint32_t>(2);
-    uint32_t src_addr_LEFT = get_arg_val<uint32_t>(3);
-    uint32_t src_addr_RIGHT = get_arg_val<uint32_t>(4);
+    uint32_t src_addr_LEFT= get_arg_val<uint32_t>(2);
+    uint32_t src_addr_RIGHT = get_arg_val<uint32_t>(3);
+    uint32_t src_addr_DOWN = get_arg_val<uint32_t>(4);
     uint32_t src_addr_SCALAR = get_arg_val<uint32_t>(5);
     uint32_t my_tile = get_arg_val<uint32_t>(6);
 

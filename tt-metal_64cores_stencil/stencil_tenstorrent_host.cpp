@@ -298,7 +298,7 @@ int main(int argc, char** argv) {
     auto writer_kernel_id = tt_metal::CreateKernel( 
         program, 
         "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/kernels/dataflow/writer_output.cpp",
-        all_device_cores, 
+        core, 
         tt_metal::DataMovementConfig{ 
             .processor = DataMovementProcessor::RISCV_0,
             .noc = NOC::RISCV_0_default,
@@ -311,7 +311,7 @@ int main(int argc, char** argv) {
     KernelHandle stencil_kernel_id = tt_metal::CreateKernel( 
         program, 
         "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/kernels/compute/stencil.cpp",
-        all_device_cores, 
+        core, 
         tt_metal::ComputeConfig{ 
             .math_fidelity = math_fidelity,
             .fp32_dest_acc_en = false, 
@@ -341,52 +341,23 @@ int main(int argc, char** argv) {
 
     cout << "Setting up runtime arguments..." << endl;
 
-    bool row_major = false;
-    auto
-        [num_cores,
-         all_cores,
-         core_group_1,
-         core_group_2,
-         num_output_tiles_per_core_group_1,
-         num_output_tiles_per_core_group_2] =
-            split_work_to_cores(compute_with_storage_grid_size, num_tiles, row_major);
-    auto cores = grid_to_cores(num_cores_total, num_cores_x, num_cores_y, row_major);
+    tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
+        input_dram_buffer_CENTER->address(), 
+        input_dram_buffer_UP->address(), 
+        input_dram_buffer_LEFT->address(), 
+        input_dram_buffer_RIGHT->address(), 
+        input_dram_buffer_DOWN->address(), 
+        scalar_dram_buffer->address(), 
+        0//my_tile_index,
+    });
 
-    for(uint32_t i = 0; i < num_cores_total; i++) {
+    tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
+        output_dram_buffer->address(), 
+        num_tiles, 
+        0//my_tile_index,
+    });
 
-        //CoreCoord core = {i / num_cores_y, i % num_cores_y}; // Compute the core coordinates
-        const auto& core = cores[i]; // Get the core coordinates from the vector
-        uint32_t my_tile_index = i;
-
-        /*
-        uint32_t num_tiles_per_core = 1;
-        if (core_group_1.contains(core)) {
-            num_tiles_per_core = num_output_tiles_per_core_group_1;
-        } else if (core_group_2.contains(core)) {
-            num_tiles_per_core = num_output_tiles_per_core_group_2;
-        } else {
-            TT_ASSERT(false, "Core not in specified core ranges");
-        }
-        */
-
-        tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
-            input_dram_buffer_CENTER->address(), 
-            input_dram_buffer_UP->address(), 
-            input_dram_buffer_LEFT->address(), 
-            input_dram_buffer_RIGHT->address(), 
-            input_dram_buffer_DOWN->address(), 
-            scalar_dram_buffer->address(), 
-            my_tile_index,
-        });
-    
-        tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
-            output_dram_buffer->address(), 
-            num_tiles, 
-            my_tile_index,
-        });
-    
-        tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {});
-    }
+    tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {});
 
     // ---------------------------------------------------------
     // LAUNCH AND WAIT TERMINATION: Set the runtime arguments for the kernels
