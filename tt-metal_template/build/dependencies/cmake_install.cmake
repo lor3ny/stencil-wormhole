@@ -1,4 +1,4 @@
-# Install script for directory: /home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/dependencies
+# Install script for directory: /home/lpiarulli_tt/stencil_wormhole/tt-metal_template/dependencies
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -37,59 +37,58 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-# Set path to fallback-tool for dependency-resolution.
+# Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
   set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump-17")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/boost-build/cmake_install.cmake")
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/boost-build/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/yaml-cpp-build/cmake_install.cmake")
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/yaml-cpp-build/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/googletest-build/cmake_install.cmake")
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/googletest-build/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/magic_enum-build/cmake_install.cmake")
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/magic_enum-build/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/fmt-build/cmake_install.cmake")
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/fmt-build/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/range-v3-build/cmake_install.cmake")
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/range-v3-build/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/json-build/cmake_install.cmake")
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/json-build/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/taskflow-build/cmake_install.cmake")
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/taskflow-build/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/flatbuffers-build/cmake_install.cmake")
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/flatbuffers-build/cmake_install.cmake")
 endif()
 
-string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
-       "${CMAKE_INSTALL_MANIFEST_FILES}")
-if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/dependencies/install_local_manifest.txt"
-     "${CMAKE_INSTALL_MANIFEST_CONTENT}")
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/tt-logger-build/cmake_install.cmake")
 endif()
+

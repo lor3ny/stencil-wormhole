@@ -37,7 +37,7 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-# Set path to fallback-tool for dependency-resolution.
+# Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
   set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump-17")
 endif()
@@ -137,9 +137,3 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/build/_deps/boost-build/libs/winapi/cmake_install.cmake")
 endif()
 
-string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
-       "${CMAKE_INSTALL_MANIFEST_FILES}")
-if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/build/_deps/boost-build/install_local_manifest.txt"
-     "${CMAKE_INSTALL_MANIFEST_CONTENT}")
-endif()

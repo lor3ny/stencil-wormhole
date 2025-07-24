@@ -11,12 +11,8 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/.cpmcache/taskflow/52063f60902bfeb362fa4616b1394ab5efe30994/unittests/test_data_pipelines.cpp" "_deps/taskflow-build/unittests/CMakeFiles/test_data_pipelines.dir/test_data_pipelines.cpp.o" "gcc" "_deps/taskflow-build/unittests/CMakeFiles/test_data_pipelines.dir/test_data_pipelines.cpp.o.d"
   )
 
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
-  )
-
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
   )
 
 # Fortran module output directory.

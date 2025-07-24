@@ -8,15 +8,11 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/.cpmcache/taskflow/52063f60902bfeb362fa4616b1394ab5efe30994/examples/run.cpp" "_deps/taskflow-build/examples/CMakeFiles/run.dir/run.cpp.o" "gcc" "_deps/taskflow-build/examples/CMakeFiles/run.dir/run.cpp.o.d"
+  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/.cpmcache/taskflow/52063f60902bfeb362fa4616b1394ab5efe30994/examples/run.cpp" "_deps/taskflow-build/examples/CMakeFiles/run.dir/run.cpp.o" "gcc" "_deps/taskflow-build/examples/CMakeFiles/run.dir/run.cpp.o.d"
   )
 
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
-  )
-
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
   )
 
 # Fortran module output directory.

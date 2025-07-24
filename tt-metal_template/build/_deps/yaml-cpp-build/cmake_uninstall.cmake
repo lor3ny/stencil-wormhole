@@ -1,14 +1,14 @@
-if(NOT EXISTS "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/install_manifest.txt")
-  message(FATAL_ERROR "Cannot find install manifest: /home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/install_manifest.txt")
+if(NOT EXISTS "/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/install_manifest.txt")
+  message(FATAL_ERROR "Cannot find install manifest: /home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/install_manifest.txt")
 endif()
 
-file(READ "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/install_manifest.txt" files)
+file(READ "/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/install_manifest.txt" files)
 string(REGEX REPLACE "\n" ";" files "${files}")
 foreach(file ${files})
   message(STATUS "Uninstalling $ENV{DESTDIR}${file}")
   if(IS_SYMLINK "$ENV{DESTDIR}${file}" OR EXISTS "$ENV{DESTDIR}${file}")
     exec_program(
-      "/home/lpiarulli_tt/cmake/bin/cmake" ARGS "-E remove \"$ENV{DESTDIR}${file}\""
+      "/usr/bin/cmake" ARGS "-E remove \"$ENV{DESTDIR}${file}\""
       OUTPUT_VARIABLE rm_out
       RETURN_VALUE rm_retval
       )

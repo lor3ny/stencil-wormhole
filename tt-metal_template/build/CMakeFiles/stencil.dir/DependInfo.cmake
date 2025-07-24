@@ -8,15 +8,14 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/src/hello_world_compute_kernel.cpp" "CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o" "gcc" "CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o.d"
+  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/src/hello_world_compute_kernel.cpp" "CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o" "gcc" "CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o.d"
   )
 
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
-  )
-
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
+  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/fmt-build/CMakeFiles/fmt.dir/DependInfo.cmake"
+  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/yaml-cpp-build/CMakeFiles/yaml-cpp.dir/DependInfo.cmake"
+  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/boost-build/libs/container/CMakeFiles/boost_container.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

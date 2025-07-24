@@ -4,8 +4,8 @@
 
 
 # Configuration directories and files
-SourceDirectory: /home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/.cpmcache/yaml-cpp/f9d1820fd4b44ce21a08ab1eaba4ab1558ca3baf
-BuildDirectory: /home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/yaml-cpp-build
+SourceDirectory: /home/lpiarulli_tt/stencil_wormhole/tt-metal_template/.cpmcache/yaml-cpp/4269e41de05c6bc9f1405247cb55239e2b40c4fb
+BuildDirectory: /home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/yaml-cpp-build
 
 # Where to place the cost data store
 CostDataFile: 
@@ -21,14 +21,13 @@ LabelsForSubprojects:
 
 # Submission information
 SubmitURL: http://
-SubmitInactivityTimeout: 
 
 # Dashboard start time
 NightlyStartTime: 00:00:00 EDT
 
 # Commands for the build/test/submit cycle
-ConfigureCommand: "/home/lpiarulli_tt/cmake/bin/cmake" "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/.cpmcache/yaml-cpp/f9d1820fd4b44ce21a08ab1eaba4ab1558ca3baf"
-MakeCommand: /home/lpiarulli_tt/cmake/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
+ConfigureCommand: "/usr/bin/cmake" "/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/.cpmcache/yaml-cpp/4269e41de05c6bc9f1405247cb55239e2b40c4fb"
+MakeCommand: /usr/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
 DefaultCTestConfigurationType: Release
 
 # version control
@@ -81,7 +80,7 @@ MemoryCheckCommandOptions:
 MemoryCheckSuppressionFile: 
 
 # Coverage
-CoverageCommand: /home/lpiarulli_tt/local/gcc-11/bin/gcov
+CoverageCommand: /usr/bin/gcov
 CoverageExtraFlags: -l
 
 # Testing options
@@ -94,9 +93,6 @@ TimeOut: 1500
 # During parallel testing CTest will not start a new test if doing
 # so would cause the system load to exceed this value.
 TestLoad: 
-
-TLSVerify: 
-TLSVersion: 
 
 UseLaunchers: 
 CurlOptions: 

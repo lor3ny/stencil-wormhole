@@ -11,12 +11,9 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/.cpmcache/googletest/96129d89f45386492ae46d6bb8c027bc3df5f949/googletest/src/gtest_main.cc" "_deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o" "gcc" "_deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o.d"
   )
 
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
-  )
-
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
+  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/build/_deps/googletest-build/googletest/CMakeFiles/gtest.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

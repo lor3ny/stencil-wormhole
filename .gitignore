@@ -33,9 +33,16 @@
 
 *.png
 
-/tt-metal_compilation_template/CMakeCache.txt
-/tt-metal_compilation_template/CMakeFiles
-/tt-metal_compilation_template/build
-/tt-metal_compilation_template/_deps
-/tt-metal_compilation_template/.cpmcache
-/tt-metal_compilation_template/CPM_modules
+/tt-metal_template/CMakeCache.txt
+/tt-metal_template/CMakeFiles
+/tt-metal_template/build
+/tt-metal_template/_deps
+/tt-metal_template/.cpmcache
+/tt-metal_template/CPM_modules
+
+/tt-metal_stencil/CMakeCache.txt
+/tt-metal_stencil/CMakeFiles
+/tt-metal_stencil/build
+/tt-metal_stencil/_deps
+/tt-metal_stencil/.cpmcache
+/tt-metal_stencil/CPM_modules

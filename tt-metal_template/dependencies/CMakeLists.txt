@@ -205,3 +205,17 @@ if(flatbuffers_ADDED)
     target_compile_options(flatc PRIVATE -Wno-restrict)
     target_compile_options(flatbuffers PRIVATE -Wno-restrict)
 endif()
+
+
+####################################################################################################################
+# tt-logger
+####################################################################################################################
+
+CPMAddPackage(
+    NAME tt-logger
+    GITHUB_REPOSITORY tenstorrent/tt-logger
+    VERSION 1.1.5
+    OPTIONS
+        "TT_LOGGER_INSTALL ON"
+        "TT_LOGGER_BUILD_TESTING OFF"
+)

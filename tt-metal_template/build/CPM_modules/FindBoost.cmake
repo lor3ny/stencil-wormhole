@@ -1,3 +1,3 @@
-include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/.cpmcache/cpm/CPM_0.40.2.cmake")
+include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/.cpmcache/cpm/CPM_0.40.2.cmake")
 CPMAddPackage("NAME;Boost;VERSION;1.86.0;URL;https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.tar.xz;URL_HASH;SHA256=2c5ec5edcdff47ff55e27ed9560b0a0b94b07bd07ed9928b476150e16b0efc57;OPTIONS;BOOST_ENABLE_CMAKE ON;BOOST_SKIP_INSTALL_RULES ON;BUILD_SHARED_LIBS OFF;BOOST_INCLUDE_LIBRARIES core\\;container\\;smart_ptr\\;interprocess")
 set(Boost_FOUND TRUE)

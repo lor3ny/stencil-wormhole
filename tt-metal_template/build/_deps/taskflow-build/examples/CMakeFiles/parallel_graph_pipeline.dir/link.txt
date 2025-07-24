@@ -1,1 +1,1 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/parallel_graph_pipeline.dir/parallel_graph_pipeline.cpp.o -o parallel_graph_pipeline  -lpthread
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/parallel_graph_pipeline.dir/parallel_graph_pipeline.cpp.o -o parallel_graph_pipeline 

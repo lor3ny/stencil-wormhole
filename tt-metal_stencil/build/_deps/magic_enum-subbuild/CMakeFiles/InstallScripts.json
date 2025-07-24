@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/build/_deps/magic_enum-subbuild/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

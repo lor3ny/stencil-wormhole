@@ -1,1 +1,1 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/exclusive_scan.dir/exclusive_scan.cpp.o -o exclusive_scan  -lpthread
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/exclusive_scan.dir/exclusive_scan.cpp.o -o exclusive_scan 

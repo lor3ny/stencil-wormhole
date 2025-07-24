@@ -1,1 +1,1 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/if_else.dir/if_else.cpp.o -o if_else  -lpthread
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/if_else.dir/if_else.cpp.o -o if_else 

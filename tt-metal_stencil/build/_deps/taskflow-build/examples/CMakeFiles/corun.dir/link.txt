@@ -1,1 +1,1 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/corun.dir/corun.cpp.o -o corun  -lpthread
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/corun.dir/corun.cpp.o -o corun 

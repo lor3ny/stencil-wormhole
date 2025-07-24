@@ -1,1 +1,1 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/fibonacci.dir/fibonacci.cpp.o -o fibonacci  -lpthread
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/fibonacci.dir/fibonacci.cpp.o -o fibonacci 

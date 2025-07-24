@@ -1,4 +1,4 @@
-# Install script for directory: /home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/.cpmcache/yaml-cpp/f9d1820fd4b44ce21a08ab1eaba4ab1558ca3baf
+# Install script for directory: /home/lpiarulli_tt/stencil_wormhole/tt-metal_template/.cpmcache/yaml-cpp/4269e41de05c6bc9f1405247cb55239e2b40c4fb
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -37,14 +37,8 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-# Set path to fallback-tool for dependency-resolution.
+# Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
   set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump-17")
 endif()
 
-string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
-       "${CMAKE_INSTALL_MANIFEST_FILES}")
-if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/yaml-cpp-build/install_local_manifest.txt"
-     "${CMAKE_INSTALL_MANIFEST_CONTENT}")
-endif()

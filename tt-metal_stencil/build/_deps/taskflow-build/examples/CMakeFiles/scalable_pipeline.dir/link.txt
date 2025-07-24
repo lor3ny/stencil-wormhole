@@ -1,1 +1,1 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/scalable_pipeline.dir/scalable_pipeline.cpp.o -o scalable_pipeline  -lpthread
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/scalable_pipeline.dir/scalable_pipeline.cpp.o -o scalable_pipeline 

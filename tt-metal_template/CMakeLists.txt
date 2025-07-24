@@ -82,48 +82,38 @@ target_compile_options(stencil PRIVATE
     $<$<CXX_COMPILER_ID:GNU>:-Wno-non-template-friend>
     $<$<CXX_COMPILER_ID:GNU>:-Wno-error=non-template-friend>
 )
+# THIS LINES MAKE LINKER CRASH
+# target_compile_options(stencil PRIVATE -stdlib=libc++)
+# target_link_options(stencil PRIVATE -lc++ -lc++abi)
 
 target_include_directories(stencil PRIVATE
     $ENV{TT_METAL_HOME}
     $ENV{TT_METAL_HOME}/tt_metal
     $ENV{TT_METAL_HOME}/tt_metal/api/
+    $ENV{TT_METAL_HOME}/tt_metal/include
+    $ENV{TT_METAL_HOME}/tt_metal/hostdevcommon/api
     $ENV{TT_METAL_HOME}/tt_metal/third_party/umd
     $ENV{TT_METAL_HOME}/tt_metal/third_party/umd/device
-    $ENV{TT_METAL_HOME}/tt_metal/third_party/umd/device/api
-    $ENV{TT_METAL_HOME}/tt_metal/hw/inc/${NORMALIZED_ARCH_NAME}
-    $ENV{TT_METAL_HOME}/tt_metal/hw/inc/
-    $ENV{TT_METAL_HOME}/tt_metal/third_party/umd/src/firmware/riscv/${NORMALIZED_ARCH_NAME}
-    $ENV{TT_METAL_HOME}/tt_metal/detail
-    $ENV{TT_METAL_HOME}/tt_metal/hostdevcommon
-    $ENV{TT_METAL_HOME}/tt_metal/hostdevcommon/api/
-    $ENV{TT_METAL_HOME}/tt_metal/include
-    $ENV{TT_METAL_HOME}/tt_metal/third_party/
+    $ENV{TT_METAL_HOME}/tt_metal/third_party/umd/device/api/
     $ENV{TT_METAL_HOME}/tt_metal/third_party/taskflow/3rd-party/
     $ENV{TT_METAL_HOME}/tt_metal/third_party/tracy/public/
-    $ENV{TT_METAL_HOME}/tt_metal/api/tt-metalium/
+    $ENV{TT_METAL_HOME}/tt_metal/hw/inc/
+    $ENV{TT_METAL_HOME}/tt_stl/
+    $ENV{TT_METAL_HOME}/tt_metal/third_party/magic_enum
 )
 
-#link_directories(stencil PRIVATE
-#    $ENV{TT_METAL_HOME}/build_Release/lib
-#)
-
 target_link_directories(stencil PRIVATE
-    $ENV{TT_METAL_HOME}/build_Release/lib
+    $ENV{TT_METAL_HOME}/build_Release/tt_metal
 )
 
 target_link_libraries(stencil PRIVATE
-    fmt  
+    fmt
     magic_enum
     Reflect::Reflect
     yaml-cpp
     Boost::core
-    Boost::smart_ptr
     Boost::container
-    tt_metal
     nlohmann_json::nlohmann_json
-    $ENV{TT_METAL_HOME}/build/lib/libdevice.so
-    #$ENV{TT_METAL_HOME}/build/lib/libtt_metal.a
+    tt_metal
+    tt-logger::tt-logger
 )
-
-target_compile_options(stencil PRIVATE -stdlib=libc++)
-target_link_options(stencil PRIVATE -lc++ -lc++abi)

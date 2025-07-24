@@ -41,12 +41,8 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/.cpmcache/yaml-cpp/9a0b521441c110058d8f8e145502d26d7e52386f/src/tag.cpp" "_deps/yaml-cpp-build/CMakeFiles/yaml-cpp.dir/src/tag.cpp.o" "gcc" "_deps/yaml-cpp-build/CMakeFiles/yaml-cpp.dir/src/tag.cpp.o.d"
   )
 
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
-  )
-
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
   )
 
 # Fortran module output directory.

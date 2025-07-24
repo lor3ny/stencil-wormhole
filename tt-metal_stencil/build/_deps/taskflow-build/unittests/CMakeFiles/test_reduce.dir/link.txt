@@ -1,1 +1,1 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/test_reduce.dir/test_reduce.cpp.o -o test_reduce  -lpthread
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/test_reduce.dir/test_reduce.cpp.o -o test_reduce 

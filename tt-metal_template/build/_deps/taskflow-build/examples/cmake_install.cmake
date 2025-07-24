@@ -1,4 +1,4 @@
-# Install script for directory: /home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/.cpmcache/taskflow/52063f60902bfeb362fa4616b1394ab5efe30994/examples
+# Install script for directory: /home/lpiarulli_tt/stencil_wormhole/tt-metal_template/.cpmcache/taskflow/52063f60902bfeb362fa4616b1394ab5efe30994/examples
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -37,14 +37,8 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-# Set path to fallback-tool for dependency-resolution.
+# Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
   set(CMAKE_OBJDUMP "/usr/bin/llvm-objdump-17")
 endif()
 
-string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
-       "${CMAKE_INSTALL_MANIFEST_FILES}")
-if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/taskflow-build/examples/install_local_manifest.txt"
-     "${CMAKE_INSTALL_MANIFEST_CONTENT}")
-endif()

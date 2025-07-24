@@ -1,1 +1,1 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/test_priorities.dir/test_priorities.cpp.o -o test_priorities  -lpthread
+/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/test_priorities.dir/test_priorities.cpp.o -o test_priorities 

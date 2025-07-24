@@ -1,5 +1,5 @@
-if(EXISTS "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/taskflow-build/unittests/test_data_pipelines_tests-b858cb2.cmake")
-  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/build/_deps/taskflow-build/unittests/test_data_pipelines_tests-b858cb2.cmake")
+if(EXISTS "/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/taskflow-build/unittests/test_data_pipelines_tests-b858cb2.cmake")
+  include("/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/build/_deps/taskflow-build/unittests/test_data_pipelines_tests-b858cb2.cmake")
 else()
   add_test(test_data_pipelines_NOT_BUILT-b858cb2 test_data_pipelines_NOT_BUILT-b858cb2)
 endif()

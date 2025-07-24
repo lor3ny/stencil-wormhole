@@ -8,16 +8,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/.cpmcache/fmt/73b5ec45edbd92babfd91c3777a9e1ab9cac8238/src/format.cc" "_deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o" "gcc" "_deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o.d"
-  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_compilation_template/.cpmcache/fmt/73b5ec45edbd92babfd91c3777a9e1ab9cac8238/src/os.cc" "_deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o" "gcc" "_deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o.d"
+  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/.cpmcache/fmt/73b5ec45edbd92babfd91c3777a9e1ab9cac8238/src/format.cc" "_deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o" "gcc" "_deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o.d"
+  "/home/lpiarulli_tt/stencil_wormhole/tt-metal_template/.cpmcache/fmt/73b5ec45edbd92babfd91c3777a9e1ab9cac8238/src/os.cc" "_deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o" "gcc" "_deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o.d"
   )
 
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
-  )
-
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
   )
 
 # Fortran module output directory.
