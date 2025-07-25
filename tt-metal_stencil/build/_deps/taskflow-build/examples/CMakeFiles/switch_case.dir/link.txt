@@ -1,1 +1,0 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/switch_case.dir/switch_case.cpp.o -o switch_case 

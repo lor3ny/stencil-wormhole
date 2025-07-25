@@ -1,1 +1,0 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/stencil.dir/src/hello_world_compute_kernel.cpp.o -o stencil   -L/home/lpiarulli_tt/tt-metal/build_Release/tt_metal  -Wl,-rpath,/home/lpiarulli_tt/tt-metal/build_Release/tt_metal _deps/fmt-build/libfmt.a _deps/yaml-cpp-build/libyaml-cpp.a _deps/boost-build/libs/container/libboost_container.a -ltt_metal 
