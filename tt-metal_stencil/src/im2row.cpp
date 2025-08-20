@@ -20,7 +20,7 @@ float stencil[9] = {
 };
 
 template<typename T>
-void im2row(vector<T> in, vector<T>& out, int stencil_order){
+void im2row(vector<T>& in, vector<T>& out, int stencil_order){
     
     int new_rows = (N-1) * (M-1);
     int new_cols = K * K;
@@ -36,21 +36,26 @@ void im2row(vector<T> in, vector<T>& out, int stencil_order){
     }
 }
 
+// it is implemented considering star stencils, not squared ones
 template<typename T>
-void addPadding(vector<T> in, vector<T>& out, int stencil_order){
-    // IMPLEMENT THIS
+vector<T> pad_with_zeros(vector<T>& in, int stencil_order){
+
+    size_t pad_size = stencil_order * 2
+
+    size_t new_rows = rows + pad_size;
+    size_t new_cols = cols + pad_size;
+    std::vector<T> output(new_rows * new_cols, bfloat(0));
+
+    for (size_t r = 0; r < rows; ++r) {
+        // Destination row start (skip first row + padding col)
+        bfloat* dest = output.data() + (r + stencil_order) * new_cols + stencil_order;
+        const bfloat* src = input.data() + r * cols;
+        std::memcpy(dest, src, cols * sizeof(bfloat));
+    }
+
+    return output;
 }
 
-template<typename T>
-void printMat(vector<T> matrix, int rows, int cols) {
-    for(int i=0; i<rows; i++){
-        for(int j=0; j<cols; j++){
-            std::cout << buffer[i*cols + j] << " ";
-        }
-        std::cout << "\n";
-    }
-    std::cout << std::flush;
-}
 
 void matVecMul(
     const std::vector<float>& matrix,

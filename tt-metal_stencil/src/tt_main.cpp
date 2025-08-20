@@ -11,7 +11,9 @@
 #include <tt-metalium/test_tiles.hpp>
 #include <tt-metalium/command_queue.hpp>
 #include <tt-metalium/tilize_untilize.hpp>
-#include <vector>
+
+#include "im2row.hpp"
+#include "utils.hpp"
 
 using namespace tt;
 using namespace tt::tt_metal;
@@ -20,56 +22,6 @@ using namespace std;
 
 //export TT_METAL_DPRINT_CORES="(0,0)-(7,7)"
 
-inline void saveGridCSV(const std::string& filename, double* grid, int dim_x, int dim_y) {
-    std::ofstream file(filename);
-    if (!file) {
-        cerr << "Errore nell'apertura del file" << endl;
-        return;
-    }
-    file << dim_x << " " << dim_y << endl;
-    for (size_t i=0; i<dim_x; ++i) {
-        for (size_t j = 0; j < dim_y; ++j) {
-            file << grid[i*dim_x + j] << (j + 1 == dim_y ? "\n" : " ");
-        }
-    }
-    file.close();
-}
-
-inline void InitializeGrid(double *grid, int dim){
-    int i, j;
-    for(i = 0; i < dim; ++i){
-        for(j = 0; j < dim; ++j){
-            grid[i*dim +j] = 0.0;
-        }
-    }
-}
-
-inline void PrintGrid(double *grid, int dim){
-    int i, j;
-    for(i = 0; i < dim; ++i){
-        for(j = 0; j < dim; ++j){
-            cout << " " << grid[i*dim + j] << " ";
-        }
-        cout << endl;
-    }
-}
-
-// IMPORTANT
-// Tenstorrent works with BFP16, TT-Metalium requires uint32_t buffers, and packs on it two BFP16.
-// So it packs on every uint32_t cel two bfloat16 values. Checks printf("Result = %x\n", result_vec[0]);
-// You will see the two copies of the same HEX. 
-
-void TT_printMatrix(uint32_t* matrix, size_t rows, size_t cols) {
-    bfloat16* a_bf16 = reinterpret_cast<bfloat16*>(matrix);
-
-    for(int i =0; i<rows; i++){
-        for(int j =0; j<cols; j++){
-            std::cout << a_bf16[i*cols + j].to_float() << " ";
-        }
-        std::cout << "\n";
-    }
-    std::cout << std::flush;
-}
 
 int main(int argc, char** argv) {
 
@@ -110,6 +62,9 @@ int main(int argc, char** argv) {
                                                   .buffer_type = tt_metal::BufferType::DRAM};
     std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer = CreateBuffer(dram_config);
     std::shared_ptr<tt::tt_metal::Buffer> output_dram_buffer = CreateBuffer(dram_config);
+
+    // ! In this case you should declare the starting address and the size of the region in the shared cache
+    // ! Then Is necessary a method to avoid contention, but for stencil could be avoided by the nature of the problem
     
 
     // ---------------------------------------------------------
@@ -140,7 +95,6 @@ int main(int argc, char** argv) {
     // KERNELS CREATION: We need a reader, writer and then a compute
     // ---------------------------------------------------------
 
-    
     cout << "Creating kernels..." << endl;
 
     bool input_is_dram = input_dram_buffer->buffer_type() == tt_metal::BufferType::DRAM ? 1 : 0;
@@ -188,18 +142,26 @@ int main(int argc, char** argv) {
     
     cout << "Enqueueing write buffers..." << endl;
 
-    vector<uint32_t> input_vec(dram_buffer_size/4);
-    vector<uint32_t> output_vec(dram_buffer_size/4);
-    input_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 11.5f);
+
+    size_t bfp16_count = dram_buffer_size / sizeof(bfloat16);
+    size_t uint32_count = dram_buffer_size / sizeof(uint32_t);
+
+    vector<uint32_t> input_vec(uint32_count);
+    vector<uint32_t> output_vec(uint32_count);
+    input_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 5.5f);
     output_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 0.0f);
 
-    size_t n = dram_buffer_size / sizeof(bfloat16);
+    // Five points stencil
+    
+    input_vec = pad_with_zeros(input_vec, 1);
 
     std::cout << "Input: " << std::endl;
-    TT_printMatrix(input_vec.data(), 1, n);
+    printMat(input_vec, 1, bfp16_count);
 
     std::cout << "Output: " << std::endl;
-    TT_printMatrix(output_vec.data(), 1, n);
+    printMat(output_vec, 1, bfp16_count);
+
+    //! This is the first memcpy, it should be done only one time at the beginnning
 
     EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
     EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ          
@@ -219,21 +181,42 @@ int main(int argc, char** argv) {
     // QUI SETTO RUNTIME ARGS PER WRITER
     tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, 
             {output_dram_buffer->address(), num_tiles, output_bank_id, output_dram_buffer->size()});
-
-    
     tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {});
     
-
 
     // ---------------------------------------------------------
     // LAUNCH AND WAIT TERMINATION: Set the runtime arguments for the kernels
     // ---------------------------------------------------------
 
     cout << "Enqueueing kernels..." << endl;	
-        
-    EnqueueProgram(cq, program, false);
-    // Wait Until Program Finishes
-    EnqueueReadBuffer(cq, output_dram_buffer, output_vec.data(), true); // Read the result from the device
+
+    //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
+
+    for(int i = 0; i<times; i++){
+
+        EnqueueProgram(cq, program, false);
+        // Wait Until Program Finishes
+        EnqueueReadBuffer(cq, output_dram_buffer, output_vec.data(), true); // Read the result from the device
+
+        //! pad the output
+
+        output_vec = pad_with_zeros(pad_with_zeros, 1);
+
+        //! Convert the output in im2row format
+
+        vector<uint32_t> conv_out_vec;
+        im2row(output_vec, conv_out_vec, 1);
+
+        //* Now you can start again
+
+        //! SE CI FOSSE LA SHARED MEM NON DOVREI FARE QUESTA SEZIONE
+        //? POSSIAMO MIGLIORARLA FACENDO TUTTO SULLO STESSO BUFFER, FORSE NON SU PUÒ PER VIA DEL PIPELINING
+        if (i == times -1){
+            EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
+            EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
+        }  
+    }
+
     Finish(cq);
     printf("Core {0, 0} on Device 0 completed the task.\n");
     CloseDevice(device);
@@ -246,10 +229,10 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
 
     std::cout << "Input: " << std::endl;
-    TT_printMatrix(input_vec.data(), 1, n);
+    printMat(input_vec, 1, bfp16_count);
 
     std::cout << "Output: " << std::endl;
-    TT_printMatrix(output_vec.data(), 1, n);
+    printMat(output_vec, 1, bfp16_count);
 
     //saveGridCSV("result.csv", res_temp, dim, dim);
 

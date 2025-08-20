@@ -30,16 +30,10 @@ constexpr float est_stencil[9] = {
 };
 
 template<typename T>
-void im2row(vector<T> in, vector<T>& out, int stencil_order);
+void im2row(vector<T>& in, vector<T>& out, int stencil_order);
 
 template<typename T>
-void addPadding(vector<T> in, vector<T>& out, int stencil_order);
-
-template<typename T>
-inline void printMat(T* buffer, size_t rows, size_t cols);
-
-template<typename T>
-inline void printMat(vector<T> buffer, size_t rows, size_t cols);
+void pad_with_zeros(vector<T>& in, int stencil_order);
 
 void matVecMul(
     const std::vector<float>& matrix,
