@@ -29,34 +29,39 @@ void im2row(vector<T>& in, vector<T>& out, int stencil_order){
         for(int j = stencil_order; j<M-stencil_order; j++){ //cols
             for(int k = -stencil_order; k<=stencil_order; k++){
                 for(int h = -stencil_order; h<=stencil_order; h++){
-                    out_A.push_back(input[(i+k)*M + j+h]);
+                    out.push_back(in[(i+k)*M + j+h]);
                 }
             }
         }
     }
 }
+// Explicit instantiation for uint32_t
+template void im2row<uint32_t>(vector<uint32_t>&, vector<uint32_t>&, int);
 
-// it is implemented considering star stencils, not squared ones
-template<typename T>
-vector<T> pad_with_zeros(vector<T>& in, int stencil_order){
+// // it is implemented considering star stencils, not squared ones
+//! This functino is not working properly, dependts on the usage of bfloat16
+vector<uint32_t> pad_with_zeros(vector<uint32_t>& in, int rows, int cols, int stencil_order){
 
-    size_t pad_size = stencil_order * 2
+    size_t pad_size = stencil_order * 2;
 
     size_t new_rows = rows + pad_size;
     size_t new_cols = cols + pad_size;
-    std::vector<T> output(new_rows * new_cols, bfloat(0));
+    std::vector<uint32_t> output(new_rows * new_cols);
+    create_constant_vector_of_bfloat16(new_rows * new_cols * sizeof(bfloat16), 0.0f);
 
     for (size_t r = 0; r < rows; ++r) {
         // Destination row start (skip first row + padding col)
-        bfloat* dest = output.data() + (r + stencil_order) * new_cols + stencil_order;
-        const bfloat* src = input.data() + r * cols;
-        std::memcpy(dest, src, cols * sizeof(bfloat));
+        uint32_t* dest = output.data() + (r + stencil_order) * new_cols + stencil_order;
+        const uint32_t* src = in.data() + r * cols;
+        std::memcpy(dest, src, cols * sizeof(bfloat16));
+
+
     }
 
     return output;
 }
 
-
+//! Tester function
 void matVecMul(
     const std::vector<float>& matrix,
     const float* vec,
@@ -73,38 +78,40 @@ void matVecMul(
 }
 
 
-int main(){
 
-    float *conv_stencil = (float*) malloc(sizeof(float) * K * K); 
-    std::vector<float> conv_input;
+//! Reference for function testing
+// int main(){
 
-    printMat(input, N, M);
+//     float *conv_stencil = (float*) malloc(sizeof(float) * K * K); 
+//     std::vector<float> conv_input;
 
-    if(K % 2 == 0){
-        cerr << "ERROR: Stencil size must be odd!" << endl;
-        return EXIT_FAILURE;
-    }
-    int stencil_order = (K-1)/2;
+//     printMat(input, N, M);
+
+//     if(K % 2 == 0){
+//         cerr << "ERROR: Stencil size must be odd!" << endl;
+//         return EXIT_FAILURE;
+//     }
+//     int stencil_order = (K-1)/2;
     
-    im2row(input, conv_input, stencil_order);
+//     im2row(input, conv_input, stencil_order);
 
-    int new_cols = K * K;
-    int new_rows = (N-stencil_order*2) * (M-stencil_order*2);
+//     int new_cols = K * K;
+//     int new_rows = (N-stencil_order*2) * (M-stencil_order*2);
 
-    printMat(conv_input.data(), conv_input.size()/(K*K), K*K);
-
-
-
-    float *result = (float*) malloc(sizeof(float) * new_cols * new_rows); 
-    matVecMul(conv_input, stencil, result, new_rows, new_cols);
-    // NOW MATRIX * VECTOR
+//     printMat(conv_input.data(), conv_input.size()/(K*K), K*K);
 
 
-    // Inserire funzioni di padding
-    // Creare una struttura che possia visualizzare tutto meglio? Forse
 
-    printMat(result, N-2, M-2);
+//     float *result = (float*) malloc(sizeof(float) * new_cols * new_rows); 
+//     matVecMul(conv_input, stencil, result, new_rows, new_cols);
+//     // NOW MATRIX * VECTOR
 
-    free(result);
-    free(conv_stencil);
-}
+
+//     // Inserire funzioni di padding
+//     // Creare una struttura che possia visualizzare tutto meglio? Forse
+
+//     printMat(result, N-2, M-2);
+
+//     free(result);
+//     free(conv_stencil);
+// }

@@ -1,8 +1,11 @@
 #pragma once
 
+#include <tt-metalium/bfloat16.hpp>
 #include <iostream>
 #include <vector>
-#include <omp.h>
+//#include <omp.h>
+
+#include "utils.hpp"
 
 
 #define N 10
@@ -32,8 +35,7 @@ constexpr float est_stencil[9] = {
 template<typename T>
 void im2row(vector<T>& in, vector<T>& out, int stencil_order);
 
-template<typename T>
-void pad_with_zeros(vector<T>& in, int stencil_order);
+vector<uint32_t> pad_with_zeros(vector<uint32_t>& in, int rows, int cols,  int stencil_order);
 
 void matVecMul(
     const std::vector<float>& matrix,
