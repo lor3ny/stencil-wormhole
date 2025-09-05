@@ -16,11 +16,54 @@ using namespace tt;
 using namespace tt::tt_metal;
 using namespace std;
 
+#define TILE_WIDTH 32 // bytes
+#define TILE_HEIGHT 32 // bytes
+#define TILE_SIZE TILE_WIDTH*TILE_HEIGHT
+#define TILE_VALUES_COUNT (TILE_WIDTH * TILE_HEIGHT) / sizeof(bfloat16)
 
 //export TT_METAL_DPRINT_CORES="(0,0)-(7,7)"
 
 
 int main(int argc, char** argv) {
+
+
+    // ---------------------------------------------------------
+    // ---------------------------------------------------------
+    // PROBLEM DATA - We are solving for 2D matrices
+    // 
+    // E.g.
+    // - Stencil of order 1: box of 9 elements, star of 5. Always 1 of padding.
+    // - Stencil of order 2: box of 25 elements, start of 9 elements, star of 13 elements. Always 2 of padding. 
+    // ..
+    // ---------------------------------------------------------
+    // ---------------------------------------------------------
+
+    //! To define by the input
+    uint32_t rows = 1, cols = 5;
+    uint32_t stencil_order = 1;
+    //! To define by the input
+
+    uint32_t rows_pad = rows + stencil_order*2, cols_pad = cols + stencil_order*2;
+
+    size_t dram_input_buf_size = rows_pad * cols_pad * sizeof(bfloat16);
+    if(dram_buffer_size % TILE_SIZE != 0){
+        uint32_t align = 1;
+    
+        while (dram_buffer_size + align) % TILE_SIZE != 0{
+            align += 1
+        }
+        
+        cols_pad += align;
+    }
+
+    //uint32_t padding_elements = 2*(rows_pad+cols_pad−2);
+    uint32_t bfp16_count = dram_buffer_size / sizeof(bfloat16);
+    uint32_t uint32_count = dram_buffer_size / sizeof(uint32_t);
+
+    vector<uint32_t> input_vec(uint32_count);
+    vector<uint32_t> output_vec(uint32_count);
+    input_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 5.5f);
+    output_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 0.0f);
 
     // ---------------------------------------------------------
     // ---------------------------------------------------------
@@ -29,13 +72,12 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
 
     cout << "Initializing..." << endl;
-
+    
     // Create the device and the program
     int device_id = 0;
     IDevice* device = CreateDevice(device_id);
     CommandQueue& cq = device->command_queue(); // Take the command_queue from the device created
     Program program = CreateProgram();
-
 
     constexpr CoreCoord core = {0, 0};  
     constexpr uint32_t single_tile_size = 32*32; // 1KiB for every tile
@@ -140,14 +182,6 @@ int main(int argc, char** argv) {
     cout << "Enqueueing write buffers..." << endl;
 
     // DRAM buffer size is 64 KiB
-    size_t bfp16_count = dram_buffer_size / sizeof(bfloat16);
-    size_t uint32_count = dram_buffer_size / sizeof(uint32_t);
-
-    int rows = 8, cols = bfp16_count/8;
-    vector<uint32_t> input_vec(uint32_count);
-    vector<uint32_t> output_vec(uint32_count);
-    input_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 5.5f);
-    output_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 0.0f);
 
     std::cout << "Input no padding: " << std::endl;
     printMat(input_vec, rows, cols);
@@ -197,7 +231,7 @@ int main(int argc, char** argv) {
         EnqueueReadBuffer(cq, output_dram_buffer, output_vec.data(), true); // Read the result from the device
 
         //! pad the output, still under study
-        output_vec = pad_with_zeros(input_vec, rows, cols, 1);
+        output_vec = pad_with_zeros(output_vec, rows, cols, 1);
 
         //! Convert the output in im2row format
         // vector<uint32_t> conv_out_vec;
