@@ -160,7 +160,7 @@ int main(int argc, char** argv) {
     printMat(input_vec, rows+2, cols+2);
 
     //! This is the first memcpy, it should be done only one time at the beginnning
-
+    //! WHY IT'S WORKING? input dram buffer is less than input_vec size
     EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
     EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ          
     
@@ -200,7 +200,6 @@ int main(int argc, char** argv) {
         output_vec = pad_with_zeros(input_vec, rows, cols, 1);
 
         //! Convert the output in im2row format
-
         // vector<uint32_t> conv_out_vec;
         // im2row<uint32_t>(output_vec, conv_out_vec, 1);
 
