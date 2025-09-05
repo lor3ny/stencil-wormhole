@@ -12,11 +12,12 @@
 
 
 
-template<typename T>
-inline void printMat(std::vector<T> matrix, int rows, int cols) {
-    for(int i=0; i<rows; i++){
-        for(int j=0; j<cols; j++){
-            std::cout << matrix[i*cols + j] << " ";
+//template<typename T>
+inline void printMat(std::vector<uint32_t> matrix, int rows, int cols) {
+    bfloat16* a_bf16 = reinterpret_cast<bfloat16*>(matrix.data());
+    for(int i =0; i<rows; i++){
+        for(int j =0; j<cols; j++){
+            std::cout << a_bf16[i*cols + j].to_float() << " ";
         }
         std::cout << "\n";
     }

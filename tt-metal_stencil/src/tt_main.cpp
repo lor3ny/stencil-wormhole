@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 
     constexpr CoreCoord core = {0, 0};  
     constexpr uint32_t single_tile_size = 32*32; // 1KiB for every tile
-    constexpr uint32_t num_tiles = 1; // Number of tiles
+    constexpr uint32_t num_tiles = 8; // Number of tiles
     constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; // Total size of the DRAM buffer: 64 KiB 
     DataFormat data_format = DataFormat::Float16;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
@@ -100,14 +100,14 @@ int main(int argc, char** argv) {
     bool output_is_dram = output_dram_buffer->buffer_type() == tt_metal::BufferType::DRAM ? 1 : 0;
     std::vector<uint32_t> writer_compile_time_args = {(uint32_t)output_is_dram};
 
-    auto reader_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/kernels/dataflow/reader_input.cpp",
+    auto reader_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_stencil/src/kernels/dataflow/reader_input.cpp",
         core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_1, 
                                             .noc = NOC::RISCV_1_default,
                                             .compile_args = reader_compile_time_args}
     );
 
     
-    auto writer_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/kernels/dataflow/writer_output.cpp",
+    auto writer_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_stencil/src/kernels/dataflow/writer_output.cpp",
         core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_0,
                                             .noc = NOC::RISCV_0_default,
                                             .compile_args = writer_compile_time_args}
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
     std::vector<uint32_t> compute_args = {};
     KernelHandle stencil_kernel_id = tt_metal::CreateKernel( 
         program, 
-        "/home/lpiarulli_tt/stencil_wormhole/tt-metal_stencil/src/kernels/compute/stencil.cpp",
+        "/home/lpiarulli_tt/stencil-wormhole/tt-metal_stencil/src/kernels/compute/stencil.cpp",
         core, 
         tt_metal::ComputeConfig{ 
             .math_fidelity = math_fidelity,
@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
     size_t bfp16_count = dram_buffer_size / sizeof(bfloat16);
     size_t uint32_count = dram_buffer_size / sizeof(uint32_t);
 
-    int cols = 1, rows = bfp16_count;
+    int rows = 8, cols = bfp16_count/8;
     vector<uint32_t> input_vec(uint32_count);
     vector<uint32_t> output_vec(uint32_count);
     input_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 5.5f);
@@ -157,10 +157,7 @@ int main(int argc, char** argv) {
     input_vec = pad_with_zeros(input_vec, rows, cols, 1);
 
     std::cout << "Input padding: " << std::endl;
-    printMat(input_vec, rows, cols);
-
-    std::cout << "Output: " << std::endl;
-    printMat(output_vec, rows, cols);
+    printMat(input_vec, rows+2, cols+2);
 
     //! This is the first memcpy, it should be done only one time at the beginnning
 
@@ -191,31 +188,31 @@ int main(int argc, char** argv) {
 
     cout << "Enqueueing kernels..." << endl;	
 
-    // //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
-    // int times = 1;
-    // for(int i = 0; i<times; i++){
+    //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
+    int times = 1;
+    for(int i = 0; i<times; i++){
 
-    //     EnqueueProgram(cq, program, false);
-    //     // Wait Until Program Finishes
-    //     EnqueueReadBuffer(cq, output_dram_buffer, output_vec.data(), true); // Read the result from the device
+        EnqueueProgram(cq, program, false);
+        // Wait Until Program Finishes
+        EnqueueReadBuffer(cq, output_dram_buffer, output_vec.data(), true); // Read the result from the device
 
-    //     //! pad the output, still under study
-    //     //output_vec = pad_with_zeros(pad_with_zeros, 1);
+        //! pad the output, still under study
+        output_vec = pad_with_zeros(input_vec, rows, cols, 1);
 
-    //     //! Convert the output in im2row format
+        //! Convert the output in im2row format
 
-    //     vector<uint32_t> conv_out_vec;
-    //     im2row<uint32_t>(output_vec, conv_out_vec, 1);
+        // vector<uint32_t> conv_out_vec;
+        // im2row<uint32_t>(output_vec, conv_out_vec, 1);
 
-    //     //* Now you can start again
+        //* Now you can start again
 
-    //     //! SE CI FOSSE LA SHARED MEM NON DOVREI FARE QUESTA SEZIONE
-    //     //? POSSIAMO MIGLIORARLA FACENDO TUTTO SULLO STESSO BUFFER, FORSE NON SU PUÒ PER VIA DEL PIPELINING
-    //     if (i == times -1){
-    //         EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
-    //         EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
-    //     }  
-    // }
+        //! SE CI FOSSE LA SHARED MEM NON DOVREI FARE QUESTA SEZIONE
+        //? POSSIAMO MIGLIORARLA FACENDO TUTTO SULLO STESSO BUFFER, FORSE NON SU PUÒ PER VIA DEL PIPELINING
+        if (i == times -1){
+            EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
+            EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
+        }  
+    }
 
     Finish(cq);
     printf("Core {0, 0} on Device 0 completed the task.\n");
@@ -228,8 +225,8 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
     // ---------------------------------------------------------
 
-    // std::cout << "Input: " << std::endl;
-    // printMat(input_vec, 1, bfp16_count);
+    std::cout << "Input padding: " << std::endl;
+    printMat(output_vec, rows+2, cols+2);
 
     // std::cout << "Output: " << std::endl;
     // printMat(output_vec, 1, bfp16_count);

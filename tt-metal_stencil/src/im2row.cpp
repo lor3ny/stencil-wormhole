@@ -38,27 +38,28 @@ void im2row(vector<T>& in, vector<T>& out, int stencil_order){
 // Explicit instantiation for uint32_t
 template void im2row<uint32_t>(vector<uint32_t>&, vector<uint32_t>&, int);
 
-// // it is implemented considering star stencils, not squared ones
-//! This functino is not working properly, dependts on the usage of bfloat16
+// it is implemented considering star stencils, not squared ones
 vector<uint32_t> pad_with_zeros(vector<uint32_t>& in, int rows, int cols, int stencil_order){
 
     size_t pad_size = stencil_order * 2;
 
     size_t new_rows = rows + pad_size;
     size_t new_cols = cols + pad_size;
-    std::vector<uint32_t> output(new_rows * new_cols);
+    std::vector<uint32_t> out(new_rows * new_cols);
     create_constant_vector_of_bfloat16(new_rows * new_cols * sizeof(bfloat16), 0.0f);
 
     for (size_t r = 0; r < rows; ++r) {
         // Destination row start (skip first row + padding col)
-        uint32_t* dest = output.data() + (r + stencil_order) * new_cols + stencil_order;
-        const uint32_t* src = in.data() + r * cols;
+        bfloat16* out_bf16 = reinterpret_cast<bfloat16*>(out.data());
+        bfloat16* in_bf16 = reinterpret_cast<bfloat16*>(in.data());
+
+        bfloat16* dest = out_bf16 + (r + stencil_order) * new_cols + stencil_order;
+        const bfloat16* src = in_bf16 + r * cols;
+
         std::memcpy(dest, src, cols * sizeof(bfloat16));
-
-
     }
 
-    return output;
+    return out;
 }
 
 //! Tester function
