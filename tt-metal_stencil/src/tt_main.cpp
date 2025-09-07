@@ -39,43 +39,73 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
 
     //! To define by the input
-    uint32_t rows = 1, cols = 5;
-    uint32_t stencil_order = 1;
+    constexpr uint32_t rows = 16, cols = 32;
+    constexpr uint32_t stencil_order = 1;
+    const uint32_t rows_pad = rows + stencil_order * 2; 
+    const uint32_t cols_pad = cols + stencil_order * 2;
+    const uint32_t padding_elements = 2*(rows_pad+cols_pad - 2);
+    size_t buffer_size = rows_pad * cols_pad * sizeof(bfloat16);
     //! To define by the input
+
+    if (buffer_size < TILE_SIZE){
+        cerr << "Error: problem size must be at least " << TILE_SIZE << " elements." << endl;
+        return -1;
+    }
+
+    // Initilize starting buffers
+    uint32_t uint32_count = buffer_size / sizeof(uint32_t);
+    vector<uint32_t> input_vec(uint32_count);
+    vector<uint32_t> output_vec(uint32_count);
+    input_vec = create_constant_vector_of_bfloat16(buffer_size, 5.5f);
+    output_vec = create_constant_vector_of_bfloat16(buffer_size, 0.0f);
+
+    // Pad the input, and the output but it's not necessary
+    input_vec = pad_with_zeros(input_vec, rows, cols, 1);
+    output_vec = pad_with_zeros(output_vec, rows, cols, 1);
 
     cout << "Problem size: " << rows << "x" << cols << endl;
     cout << "Stencil order: " << stencil_order << endl;
-
-    uint32_t rows_pad = rows + stencil_order*2, cols_pad = cols + stencil_order*2;
-
     cout << "Padded size: " << rows_pad << "x" << cols_pad << endl;
 
-    size_t dram_buffer_size = rows_pad * cols_pad * sizeof(bfloat16);
+    // Now we need to compute the size of the DRAM buffer, it must be multiple of the tile size
 
-    cout << "DRAM buffer size (bytes): " << dram_buffer_size << endl;
-    if(dram_buffer_size % TILE_SIZE != 0 || dram_buffer_size < TILE_SIZE){
+    size_t pad_buffer_size = rows_pad * cols_pad * sizeof(bfloat16);
+    size_t dram_buffer_size = pad_buffer_size;
+    cout << "DRAM buffer size (bytes): " << pad_buffer_size << endl;
 
+    if(dram_buffer_size % TILE_SIZE != 0){
         uint32_t align = 1;
-    
-        while ((dram_buffer_size + align) % TILE_SIZE != 0 || (dram_buffer_size + align) < TILE_SIZE){
+        while ((dram_buffer_size + align) % TILE_SIZE != 0){
             align += 1;
-        }
-        
+        }    
         dram_buffer_size += align;
     }
 
-    //uint32_t padding_elements = 2*(rows_pad+cols_pad−2);
-    uint32_t bfp16_count = dram_buffer_size / sizeof(bfloat16);
-    uint32_t uint32_count = dram_buffer_size / sizeof(uint32_t);
-
     cout << "DRAM buffer size aligned to tile size (bytes): " << dram_buffer_size << endl;
-    cout << "-> bfloat16 elements: " << bfp16_count << endl;
-    cout << "-> uint32 elements: " << uint32_count << endl;
 
-    vector<uint32_t> input_vec(uint32_count);
-    vector<uint32_t> output_vec(uint32_count);
-    input_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 5.5f);
-    output_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 0.0f);
+    // now we have a buffer that is aligned with tile size, we need to enlarge the and output input buffer
+    if (input_vec.size() < uint32_count){
+        input_vec.resize(uint32_count, 0);
+    }
+
+    uint32_count = dram_buffer_size / sizeof(uint32_t);
+    output_vec.resize(uint32_count, 0);
+    input_vec.resize(uint32_count, 0);
+
+    uint32_t diff_dram = (dram_buffer_size - pad_buffer_size) / sizeof(bfloat16);
+
+    std::cout << "Input: " << std::endl;
+    printMat(input_vec, rows_pad, cols_pad);
+
+    std::cout << "Aligned: " << std::endl;
+    printMat(input_vec, rows_pad + diff_dram, cols_pad);
+
+    // // Five points stencil
+    // //! I need to fix the function
+    // input_vec = pad_with_zeros(input_vec, rows, cols, 1);
+
+    // std::cout << "Input padding: " << std::endl;
+    // printMat(input_vec, rows+2, cols+2);
 
     // ---------------------------------------------------------
     // ---------------------------------------------------------
@@ -98,7 +128,7 @@ int main(int argc, char** argv) {
     MathFidelity math_fidelity = MathFidelity::HiFi4;
 
     cout << "Number of tiles: " << num_tiles << endl;
-    
+
     // ---------------------------------------------------------
     // DRAM BUFFER CREATION: OFFCHIP GDDR6 MEMORY 12GB
     // ---------------------------------------------------------
@@ -193,18 +223,6 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
     
     cout << "Enqueueing write buffers..." << endl;
-
-    // DRAM buffer size is 64 KiB
-
-    std::cout << "Input no padding: " << std::endl;
-    printMat(input_vec, rows, cols);
-
-    // Five points stencil
-    //! I need to fix the function
-    input_vec = pad_with_zeros(input_vec, rows, cols, 1);
-
-    std::cout << "Input padding: " << std::endl;
-    printMat(input_vec, rows+2, cols+2);
 
     //! This is the first memcpy, it should be done only one time at the beginnning
     //! WHY IT'S WORKING? input dram buffer is less than input_vec size
