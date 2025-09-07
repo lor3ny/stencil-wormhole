@@ -41,14 +41,15 @@ int main(int argc, char** argv) {
     //! To define by the input
     constexpr uint32_t rows = 16, cols = 32;
     constexpr uint32_t stencil_order = 1;
+    const uint32_t single_tile_size = TILE_SIZE;
     const uint32_t rows_pad = rows + stencil_order * 2; 
     const uint32_t cols_pad = cols + stencil_order * 2;
     const uint32_t padding_elements = 2*(rows_pad+cols_pad - 2);
     size_t buffer_size = rows_pad * cols_pad * sizeof(bfloat16);
     //! To define by the input
 
-    if (buffer_size < TILE_SIZE){
-        cerr << "Error: problem size must be at least " << TILE_SIZE << " elements." << endl;
+    if (buffer_size < single_tile_size){
+        cerr << "Error: problem size must be at least " << single_tile_size << " elements." << endl;
         return -1;
     }
 
@@ -73,9 +74,9 @@ int main(int argc, char** argv) {
     size_t dram_buffer_size = pad_buffer_size;
     cout << "DRAM buffer size (bytes): " << pad_buffer_size << endl;
 
-    if(dram_buffer_size % TILE_SIZE != 0){
+    if(dram_buffer_size % single_tile_size != 0){
         uint32_t align = 1;
-        while ((dram_buffer_size + align) % TILE_SIZE != 0){
+        while ((dram_buffer_size + align) % single_tile_size != 0){
             align += 1;
         }    
         dram_buffer_size += align;
@@ -100,13 +101,6 @@ int main(int argc, char** argv) {
     std::cout << "Aligned: " << std::endl;
     printMat(input_vec, rows_pad + diff_dram, cols_pad);
 
-    // // Five points stencil
-    // //! I need to fix the function
-    // input_vec = pad_with_zeros(input_vec, rows, cols, 1);
-
-    // std::cout << "Input padding: " << std::endl;
-    // printMat(input_vec, rows+2, cols+2);
-
     // ---------------------------------------------------------
     // ---------------------------------------------------------
     // HOST INITIALIZATION
@@ -122,7 +116,6 @@ int main(int argc, char** argv) {
     Program program = CreateProgram();
 
     constexpr CoreCoord core = {0, 0};  
-    const uint32_t single_tile_size = TILE_SIZE;
     const uint32_t num_tiles = dram_buffer_size / single_tile_size; // Number of tiles 
     DataFormat data_format = DataFormat::Float16;
     MathFidelity math_fidelity = MathFidelity::HiFi4;

@@ -1,0 +1,19 @@
+
+# Consider dependencies only in project.
+set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
+
+# The set of languages for which implicit dependencies are needed:
+set(CMAKE_DEPENDS_LANGUAGES
+  )
+
+# The set of dependency files which are needed:
+set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/.cpmcache/taskflow/52063f60902bfeb362fa4616b1394ab5efe30994/unittests/test_deferred_scalable_pipelines.cpp" "_deps/taskflow-build/unittests/CMakeFiles/test_deferred_scalable_pipelines.dir/test_deferred_scalable_pipelines.cpp.o" "gcc" "_deps/taskflow-build/unittests/CMakeFiles/test_deferred_scalable_pipelines.dir/test_deferred_scalable_pipelines.cpp.o.d"
+  )
+
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
+  )
+
+# Fortran module output directory.
+set(CMAKE_Fortran_TARGET_MODULE_DIR "")
