@@ -43,22 +43,34 @@ int main(int argc, char** argv) {
     uint32_t stencil_order = 1;
     //! To define by the input
 
+    cout << "Problem size: " << rows << "x" << cols << endl;
+    cout << "Stencil order: " << stencil_order << endl;
+
     uint32_t rows_pad = rows + stencil_order*2, cols_pad = cols + stencil_order*2;
 
-    size_t dram_input_buf_size = rows_pad * cols_pad * sizeof(bfloat16);
-    if(dram_buffer_size % TILE_SIZE != 0){
+    cout << "Padded size: " << rows_pad << "x" << cols_pad << endl;
+
+    size_t dram_buffer_size = rows_pad * cols_pad * sizeof(bfloat16);
+
+    cout << "DRAM buffer size (bytes): " << dram_buffer_size << endl;
+    if(dram_buffer_size % TILE_SIZE != 0 || dram_buffer_size < TILE_SIZE){
+
         uint32_t align = 1;
     
-        while (dram_buffer_size + align) % TILE_SIZE != 0{
-            align += 1
+        while ((dram_buffer_size + align) % TILE_SIZE != 0 || (dram_buffer_size + align) < TILE_SIZE){
+            align += 1;
         }
         
-        cols_pad += align;
+        dram_buffer_size += align;
     }
 
     //uint32_t padding_elements = 2*(rows_pad+cols_pad−2);
     uint32_t bfp16_count = dram_buffer_size / sizeof(bfloat16);
     uint32_t uint32_count = dram_buffer_size / sizeof(uint32_t);
+
+    cout << "DRAM buffer size aligned to tile size (bytes): " << dram_buffer_size << endl;
+    cout << "-> bfloat16 elements: " << bfp16_count << endl;
+    cout << "-> uint32 elements: " << uint32_count << endl;
 
     vector<uint32_t> input_vec(uint32_count);
     vector<uint32_t> output_vec(uint32_count);
@@ -80,12 +92,13 @@ int main(int argc, char** argv) {
     Program program = CreateProgram();
 
     constexpr CoreCoord core = {0, 0};  
-    constexpr uint32_t single_tile_size = 32*32; // 1KiB for every tile
-    constexpr uint32_t num_tiles = 8; // Number of tiles
-    constexpr uint32_t dram_buffer_size = single_tile_size * num_tiles; // Total size of the DRAM buffer: 64 KiB 
+    const uint32_t single_tile_size = TILE_SIZE;
+    const uint32_t num_tiles = dram_buffer_size / single_tile_size; // Number of tiles 
     DataFormat data_format = DataFormat::Float16;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
 
+    cout << "Number of tiles: " << num_tiles << endl;
+    
     // ---------------------------------------------------------
     // DRAM BUFFER CREATION: OFFCHIP GDDR6 MEMORY 12GB
     // ---------------------------------------------------------
@@ -94,7 +107,7 @@ int main(int argc, char** argv) {
 
     // Both input and output have the same configuration, in this case I have chosen Interleaved instead of Shreaded
 
-    // deivce, size, page_size, buffer_type
+    // device, size, page_size, buffer_type
     tt_metal::InterleavedBufferConfig dram_config{.device = device, 
                                                   .size = dram_buffer_size, 
                                                   .page_size = single_tile_size,  
@@ -239,7 +252,7 @@ int main(int argc, char** argv) {
 
         //* Now you can start again
 
-        //! SE CI FOSSE LA SHARED MEM NON DOVREI FARE QUESTA SEZIONE
+        //! SE CI FOSSE LA UPM NON DOVREI FARE QUESTA SEZIONE
         //? POSSIAMO MIGLIORARLA FACENDO TUTTO SULLO STESSO BUFFER, FORSE NON SU PUÒ PER VIA DEL PIPELINING
         if (i == times -1){
             EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
