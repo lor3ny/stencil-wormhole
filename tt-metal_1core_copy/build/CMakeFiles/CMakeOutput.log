@@ -15,10 +15,10 @@ The CXX compiler identification is Clang, found in "/home/lpiarulli_tt/stencil-w
 Detecting CXX compiler ABI info compiled with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_68f43/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_68f43.dir/build.make CMakeFiles/cmTC_68f43.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_81f61/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_81f61.dir/build.make CMakeFiles/cmTC_81f61.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o
-/usr/bin/clang++-17   -v -MD -MT CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp
+Building CXX object CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o
+/usr/bin/clang++-17   -v -MD -MT CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp
 Ubuntu clang version 17.0.6 (++20231208085846+6009708b4367-1~exp1~20231208085949.74)
 Target: x86_64-pc-linux-gnu
 Thread model: posix
@@ -30,7 +30,7 @@ Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/12
 Candidate multilib: .;@m64
 Selected multilib: .;@m64
  (in-process)
- "/usr/lib/llvm-17/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -resource-dir /usr/lib/llvm-17/lib/clang/17 -dependency-file CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward -internal-isystem /usr/lib/llvm-17/lib/clang/17/include -internal-isystem /usr/local/include -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -x c++ /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp
+ "/usr/lib/llvm-17/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -resource-dir /usr/lib/llvm-17/lib/clang/17 -dependency-file CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward -internal-isystem /usr/lib/llvm-17/lib/clang/17/include -internal-isystem /usr/local/include -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -x c++ /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp
 clang -cc1 version 17.0.6 based upon LLVM 17.0.6 default target x86_64-pc-linux-gnu
 ignoring nonexistent directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include"
 ignoring nonexistent directory "/include"
@@ -44,9 +44,9 @@ ignoring nonexistent directory "/include"
  /usr/include/x86_64-linux-gnu
  /usr/include
 End of search list.
-Linking CXX executable cmTC_68f43
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_68f43.dir/link.txt --verbose=1
-/usr/bin/clang++-17  -v CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_68f43 
+Linking CXX executable cmTC_81f61
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_81f61.dir/link.txt --verbose=1
+/usr/bin/clang++-17  -v CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_81f61 
 Ubuntu clang version 17.0.6 (++20231208085846+6009708b4367-1~exp1~20231208085949.74)
 Target: x86_64-pc-linux-gnu
 Thread model: posix
@@ -57,7 +57,7 @@ Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/9
 Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/12
 Candidate multilib: .;@m64
 Selected multilib: .;@m64
- "/usr/bin/ld" -pie -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_68f43 /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/llvm-17/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtendS.o /lib/x86_64-linux-gnu/crtn.o
+ "/usr/bin/ld" -pie -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_81f61 /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/llvm-17/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtendS.o /lib/x86_64-linux-gnu/crtn.o
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -87,10 +87,10 @@ Parsed CXX implicit link information from above output:
   link line regex: [^( *|.*[/\])(ld\.lld-17|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
   ignore line: [Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp]
   ignore line: []
-  ignore line: [Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_68f43/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_68f43.dir/build.make CMakeFiles/cmTC_68f43.dir/build]
+  ignore line: [Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_81f61/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_81f61.dir/build.make CMakeFiles/cmTC_81f61.dir/build]
   ignore line: [gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp']
-  ignore line: [Building CXX object CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o]
-  ignore line: [/usr/bin/clang++-17   -v -MD -MT CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [Building CXX object CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [/usr/bin/clang++-17   -v -MD -MT CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp]
   ignore line: [Ubuntu clang version 17.0.6 (++20231208085846+6009708b4367-1~exp1~20231208085949.74)]
   ignore line: [Target: x86_64-pc-linux-gnu]
   ignore line: [Thread model: posix]
@@ -104,7 +104,7 @@ Parsed CXX implicit link information from above output:
   ignore line: [Selected multilib: .]
   ignore line: [@m64]
   ignore line: [ (in-process)]
-  ignore line: [ "/usr/lib/llvm-17/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -resource-dir /usr/lib/llvm-17/lib/clang/17 -dependency-file CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward -internal-isystem /usr/lib/llvm-17/lib/clang/17/include -internal-isystem /usr/local/include -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -x c++ /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [ "/usr/lib/llvm-17/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -resource-dir /usr/lib/llvm-17/lib/clang/17 -dependency-file CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward -internal-isystem /usr/lib/llvm-17/lib/clang/17/include -internal-isystem /usr/local/include -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -x c++ /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp]
   ignore line: [clang -cc1 version 17.0.6 based upon LLVM 17.0.6 default target x86_64-pc-linux-gnu]
   ignore line: [ignoring nonexistent directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include"]
   ignore line: [ignoring nonexistent directory "/include"]
@@ -118,9 +118,9 @@ Parsed CXX implicit link information from above output:
   ignore line: [ /usr/include/x86_64-linux-gnu]
   ignore line: [ /usr/include]
   ignore line: [End of search list.]
-  ignore line: [Linking CXX executable cmTC_68f43]
-  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_68f43.dir/link.txt --verbose=1]
-  ignore line: [/usr/bin/clang++-17  -v CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_68f43 ]
+  ignore line: [Linking CXX executable cmTC_81f61]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_81f61.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/clang++-17  -v CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_81f61 ]
   ignore line: [Ubuntu clang version 17.0.6 (++20231208085846+6009708b4367-1~exp1~20231208085949.74)]
   ignore line: [Target: x86_64-pc-linux-gnu]
   ignore line: [Thread model: posix]
@@ -133,7 +133,7 @@ Parsed CXX implicit link information from above output:
   ignore line: [@m64]
   ignore line: [Selected multilib: .]
   ignore line: [@m64]
-  link line: [ "/usr/bin/ld" -pie -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_68f43 /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/llvm-17/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtendS.o /lib/x86_64-linux-gnu/crtn.o]
+  link line: [ "/usr/bin/ld" -pie -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_81f61 /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/llvm-17/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtendS.o /lib/x86_64-linux-gnu/crtn.o]
     arg [/usr/bin/ld] ==> ignore
     arg [-pie] ==> ignore
     arg [-zrelro] ==> ignore
@@ -145,7 +145,7 @@ Parsed CXX implicit link information from above output:
     arg [-dynamic-linker] ==> ignore
     arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
     arg [-o] ==> ignore
-    arg [cmTC_68f43] ==> ignore
+    arg [cmTC_81f61] ==> ignore
     arg [/lib/x86_64-linux-gnu/Scrt1.o] ==> obj [/lib/x86_64-linux-gnu/Scrt1.o]
     arg [/lib/x86_64-linux-gnu/crti.o] ==> obj [/lib/x86_64-linux-gnu/crti.o]
     arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o] ==> obj [/usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o]
@@ -158,7 +158,7 @@ Parsed CXX implicit link information from above output:
     arg [-L/usr/lib/llvm-17/bin/../lib] ==> dir [/usr/lib/llvm-17/bin/../lib]
     arg [-L/lib] ==> dir [/lib]
     arg [-L/usr/lib] ==> dir [/usr/lib]
-    arg [CMakeFiles/cmTC_68f43.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [CMakeFiles/cmTC_81f61.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
     arg [-lstdc++] ==> lib [stdc++]
     arg [-lm] ==> lib [m]
     arg [-lgcc_s] ==> lib [gcc_s]
@@ -201,10 +201,10 @@ The C compiler identification is Clang, found in "/home/lpiarulli_tt/stencil-wor
 Detecting C compiler ABI info compiled with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_db2e8/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_db2e8.dir/build.make CMakeFiles/cmTC_db2e8.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_0529a/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_0529a.dir/build.make CMakeFiles/cmTC_0529a.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o
-/usr/bin/clang-17   -v -MD -MT CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c
+Building C object CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o
+/usr/bin/clang-17   -v -MD -MT CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c
 Ubuntu clang version 17.0.6 (++20231208085846+6009708b4367-1~exp1~20231208085949.74)
 Target: x86_64-pc-linux-gnu
 Thread model: posix
@@ -216,7 +216,7 @@ Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/12
 Candidate multilib: .;@m64
 Selected multilib: .;@m64
  (in-process)
- "/usr/lib/llvm-17/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -resource-dir /usr/lib/llvm-17/lib/clang/17 -dependency-file CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -sys-header-deps -internal-isystem /usr/lib/llvm-17/lib/clang/17/include -internal-isystem /usr/local/include -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdebug-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -x c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c
+ "/usr/lib/llvm-17/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -resource-dir /usr/lib/llvm-17/lib/clang/17 -dependency-file CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -sys-header-deps -internal-isystem /usr/lib/llvm-17/lib/clang/17/include -internal-isystem /usr/local/include -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdebug-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -x c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c
 clang -cc1 version 17.0.6 based upon LLVM 17.0.6 default target x86_64-pc-linux-gnu
 ignoring nonexistent directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include"
 ignoring nonexistent directory "/include"
@@ -227,9 +227,9 @@ ignoring nonexistent directory "/include"
  /usr/include/x86_64-linux-gnu
  /usr/include
 End of search list.
-Linking C executable cmTC_db2e8
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_db2e8.dir/link.txt --verbose=1
-/usr/bin/clang-17  -v CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -o cmTC_db2e8 
+Linking C executable cmTC_0529a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0529a.dir/link.txt --verbose=1
+/usr/bin/clang-17  -v CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -o cmTC_0529a 
 Ubuntu clang version 17.0.6 (++20231208085846+6009708b4367-1~exp1~20231208085949.74)
 Target: x86_64-pc-linux-gnu
 Thread model: posix
@@ -240,7 +240,7 @@ Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/9
 Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/12
 Candidate multilib: .;@m64
 Selected multilib: .;@m64
- "/usr/bin/ld" -pie -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_db2e8 /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/llvm-17/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtendS.o /lib/x86_64-linux-gnu/crtn.o
+ "/usr/bin/ld" -pie -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_0529a /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/llvm-17/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtendS.o /lib/x86_64-linux-gnu/crtn.o
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -264,10 +264,10 @@ Parsed C implicit link information from above output:
   link line regex: [^( *|.*[/\])(ld\.lld-17|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
   ignore line: [Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp]
   ignore line: []
-  ignore line: [Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_db2e8/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_db2e8.dir/build.make CMakeFiles/cmTC_db2e8.dir/build]
+  ignore line: [Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_0529a/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_0529a.dir/build.make CMakeFiles/cmTC_0529a.dir/build]
   ignore line: [gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp']
-  ignore line: [Building C object CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o]
-  ignore line: [/usr/bin/clang-17   -v -MD -MT CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c]
+  ignore line: [Building C object CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o]
+  ignore line: [/usr/bin/clang-17   -v -MD -MT CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c]
   ignore line: [Ubuntu clang version 17.0.6 (++20231208085846+6009708b4367-1~exp1~20231208085949.74)]
   ignore line: [Target: x86_64-pc-linux-gnu]
   ignore line: [Thread model: posix]
@@ -281,7 +281,7 @@ Parsed C implicit link information from above output:
   ignore line: [Selected multilib: .]
   ignore line: [@m64]
   ignore line: [ (in-process)]
-  ignore line: [ "/usr/lib/llvm-17/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -resource-dir /usr/lib/llvm-17/lib/clang/17 -dependency-file CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -sys-header-deps -internal-isystem /usr/lib/llvm-17/lib/clang/17/include -internal-isystem /usr/local/include -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdebug-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -x c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c]
+  ignore line: [ "/usr/lib/llvm-17/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -resource-dir /usr/lib/llvm-17/lib/clang/17 -dependency-file CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -sys-header-deps -internal-isystem /usr/lib/llvm-17/lib/clang/17/include -internal-isystem /usr/local/include -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdebug-compilation-dir=/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -x c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c]
   ignore line: [clang -cc1 version 17.0.6 based upon LLVM 17.0.6 default target x86_64-pc-linux-gnu]
   ignore line: [ignoring nonexistent directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include"]
   ignore line: [ignoring nonexistent directory "/include"]
@@ -292,9 +292,9 @@ Parsed C implicit link information from above output:
   ignore line: [ /usr/include/x86_64-linux-gnu]
   ignore line: [ /usr/include]
   ignore line: [End of search list.]
-  ignore line: [Linking C executable cmTC_db2e8]
-  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_db2e8.dir/link.txt --verbose=1]
-  ignore line: [/usr/bin/clang-17  -v CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -o cmTC_db2e8 ]
+  ignore line: [Linking C executable cmTC_0529a]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0529a.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/clang-17  -v CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -o cmTC_0529a ]
   ignore line: [Ubuntu clang version 17.0.6 (++20231208085846+6009708b4367-1~exp1~20231208085949.74)]
   ignore line: [Target: x86_64-pc-linux-gnu]
   ignore line: [Thread model: posix]
@@ -307,7 +307,7 @@ Parsed C implicit link information from above output:
   ignore line: [@m64]
   ignore line: [Selected multilib: .]
   ignore line: [@m64]
-  link line: [ "/usr/bin/ld" -pie -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_db2e8 /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/llvm-17/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtendS.o /lib/x86_64-linux-gnu/crtn.o]
+  link line: [ "/usr/bin/ld" -pie -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_0529a /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/llvm-17/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtendS.o /lib/x86_64-linux-gnu/crtn.o]
     arg [/usr/bin/ld] ==> ignore
     arg [-pie] ==> ignore
     arg [-zrelro] ==> ignore
@@ -319,7 +319,7 @@ Parsed C implicit link information from above output:
     arg [-dynamic-linker] ==> ignore
     arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
     arg [-o] ==> ignore
-    arg [cmTC_db2e8] ==> ignore
+    arg [cmTC_0529a] ==> ignore
     arg [/lib/x86_64-linux-gnu/Scrt1.o] ==> obj [/lib/x86_64-linux-gnu/Scrt1.o]
     arg [/lib/x86_64-linux-gnu/crti.o] ==> obj [/lib/x86_64-linux-gnu/crti.o]
     arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o] ==> obj [/usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o]
@@ -332,7 +332,7 @@ Parsed C implicit link information from above output:
     arg [-L/usr/lib/llvm-17/bin/../lib] ==> dir [/usr/lib/llvm-17/bin/../lib]
     arg [-L/lib] ==> dir [/lib]
     arg [-L/usr/lib] ==> dir [/usr/lib]
-    arg [CMakeFiles/cmTC_db2e8.dir/CMakeCCompilerABI.c.o] ==> ignore
+    arg [CMakeFiles/cmTC_0529a.dir/CMakeCCompilerABI.c.o] ==> ignore
     arg [-lgcc] ==> lib [gcc]
     arg [--as-needed] ==> ignore
     arg [-lgcc_s] ==> lib [gcc_s]
@@ -364,13 +364,13 @@ Parsed C implicit link information from above output:
 Determining if the include file pthread.h exists passed with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_33a95/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_33a95.dir/build.make CMakeFiles/cmTC_33a95.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_abc0c/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_abc0c.dir/build.make CMakeFiles/cmTC_abc0c.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_33a95.dir/CheckIncludeFile.c.o
-/usr/bin/clang-17    -MD -MT CMakeFiles/cmTC_33a95.dir/CheckIncludeFile.c.o -MF CMakeFiles/cmTC_33a95.dir/CheckIncludeFile.c.o.d -o CMakeFiles/cmTC_33a95.dir/CheckIncludeFile.c.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
-Linking C executable cmTC_33a95
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_33a95.dir/link.txt --verbose=1
-/usr/bin/clang-17 CMakeFiles/cmTC_33a95.dir/CheckIncludeFile.c.o -o cmTC_33a95 
+Building C object CMakeFiles/cmTC_abc0c.dir/CheckIncludeFile.c.o
+/usr/bin/clang-17    -MD -MT CMakeFiles/cmTC_abc0c.dir/CheckIncludeFile.c.o -MF CMakeFiles/cmTC_abc0c.dir/CheckIncludeFile.c.o.d -o CMakeFiles/cmTC_abc0c.dir/CheckIncludeFile.c.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_abc0c
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_abc0c.dir/link.txt --verbose=1
+/usr/bin/clang-17 CMakeFiles/cmTC_abc0c.dir/CheckIncludeFile.c.o -o cmTC_abc0c 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -378,13 +378,13 @@ gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_
 Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_39716/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_39716.dir/build.make CMakeFiles/cmTC_39716.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_2b69f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_2b69f.dir/build.make CMakeFiles/cmTC_2b69f.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_39716.dir/src.c.o
-/usr/bin/clang-17 -DCMAKE_HAVE_LIBC_PTHREAD   -MD -MT CMakeFiles/cmTC_39716.dir/src.c.o -MF CMakeFiles/cmTC_39716.dir/src.c.o.d -o CMakeFiles/cmTC_39716.dir/src.c.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.c
-Linking C executable cmTC_39716
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_39716.dir/link.txt --verbose=1
-/usr/bin/clang-17 CMakeFiles/cmTC_39716.dir/src.c.o -o cmTC_39716 
+Building C object CMakeFiles/cmTC_2b69f.dir/src.c.o
+/usr/bin/clang-17 -DCMAKE_HAVE_LIBC_PTHREAD   -MD -MT CMakeFiles/cmTC_2b69f.dir/src.c.o -MF CMakeFiles/cmTC_2b69f.dir/src.c.o.d -o CMakeFiles/cmTC_2b69f.dir/src.c.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_2b69f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2b69f.dir/link.txt --verbose=1
+/usr/bin/clang-17 CMakeFiles/cmTC_2b69f.dir/src.c.o -o cmTC_2b69f 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -412,13 +412,13 @@ int main(void)
 Performing C++ SOURCE FILE Test HAS_NULLPTR_WARNING succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_cedb3/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_cedb3.dir/build.make CMakeFiles/cmTC_cedb3.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_54fdc/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_54fdc.dir/build.make CMakeFiles/cmTC_54fdc.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_cedb3.dir/src.cxx.o
-/usr/bin/clang++-17 -DHAS_NULLPTR_WARNING  -Wzero-as-null-pointer-constant -MD -MT CMakeFiles/cmTC_cedb3.dir/src.cxx.o -MF CMakeFiles/cmTC_cedb3.dir/src.cxx.o.d -o CMakeFiles/cmTC_cedb3.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_cedb3
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cedb3.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_cedb3.dir/src.cxx.o -o cmTC_cedb3 
+Building CXX object CMakeFiles/cmTC_54fdc.dir/src.cxx.o
+/usr/bin/clang++-17 -DHAS_NULLPTR_WARNING  -Wzero-as-null-pointer-constant -MD -MT CMakeFiles/cmTC_54fdc.dir/src.cxx.o -MF CMakeFiles/cmTC_54fdc.dir/src.cxx.o.d -o CMakeFiles/cmTC_54fdc.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_54fdc
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_54fdc.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_54fdc.dir/src.cxx.o -o cmTC_54fdc 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -427,13 +427,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_CXXSTD succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_24b03/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_24b03.dir/build.make CMakeFiles/cmTC_24b03.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_861a2/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_861a2.dir/build.make CMakeFiles/cmTC_861a2.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_24b03.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_CXXSTD  -std=c++14 -MD -MT CMakeFiles/cmTC_24b03.dir/src.cxx.o -MF CMakeFiles/cmTC_24b03.dir/src.cxx.o.d -o CMakeFiles/cmTC_24b03.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_24b03
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_24b03.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_24b03.dir/src.cxx.o -o cmTC_24b03 
+Building CXX object CMakeFiles/cmTC_861a2.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_CXXSTD  -std=c++14 -MD -MT CMakeFiles/cmTC_861a2.dir/src.cxx.o -MF CMakeFiles/cmTC_861a2.dir/src.cxx.o.d -o CMakeFiles/cmTC_861a2.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_861a2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_861a2.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_861a2.dir/src.cxx.o -o cmTC_861a2 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -442,13 +442,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_WALL succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_52019/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_52019.dir/build.make CMakeFiles/cmTC_52019.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_a8fae/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_a8fae.dir/build.make CMakeFiles/cmTC_a8fae.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_52019.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_WALL  -Wall -MD -MT CMakeFiles/cmTC_52019.dir/src.cxx.o -MF CMakeFiles/cmTC_52019.dir/src.cxx.o.d -o CMakeFiles/cmTC_52019.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_52019
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_52019.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_52019.dir/src.cxx.o -o cmTC_52019 
+Building CXX object CMakeFiles/cmTC_a8fae.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_WALL  -Wall -MD -MT CMakeFiles/cmTC_a8fae.dir/src.cxx.o -MF CMakeFiles/cmTC_a8fae.dir/src.cxx.o.d -o CMakeFiles/cmTC_a8fae.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_a8fae
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a8fae.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_a8fae.dir/src.cxx.o -o cmTC_a8fae 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -457,13 +457,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_WEXTRA succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_27caf/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_27caf.dir/build.make CMakeFiles/cmTC_27caf.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_272e0/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_272e0.dir/build.make CMakeFiles/cmTC_272e0.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_27caf.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_WEXTRA  -Wextra -MD -MT CMakeFiles/cmTC_27caf.dir/src.cxx.o -MF CMakeFiles/cmTC_27caf.dir/src.cxx.o.d -o CMakeFiles/cmTC_27caf.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_27caf
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_27caf.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_27caf.dir/src.cxx.o -o cmTC_27caf 
+Building CXX object CMakeFiles/cmTC_272e0.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_WEXTRA  -Wextra -MD -MT CMakeFiles/cmTC_272e0.dir/src.cxx.o -MF CMakeFiles/cmTC_272e0.dir/src.cxx.o.d -o CMakeFiles/cmTC_272e0.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_272e0
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_272e0.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_272e0.dir/src.cxx.o -o cmTC_272e0 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -472,13 +472,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_WERROR succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_5aef3/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_5aef3.dir/build.make CMakeFiles/cmTC_5aef3.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_010cb/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_010cb.dir/build.make CMakeFiles/cmTC_010cb.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_5aef3.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_WERROR  -Werror -MD -MT CMakeFiles/cmTC_5aef3.dir/src.cxx.o -MF CMakeFiles/cmTC_5aef3.dir/src.cxx.o.d -o CMakeFiles/cmTC_5aef3.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_5aef3
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5aef3.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_5aef3.dir/src.cxx.o -o cmTC_5aef3 
+Building CXX object CMakeFiles/cmTC_010cb.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_WERROR  -Werror -MD -MT CMakeFiles/cmTC_010cb.dir/src.cxx.o -MF CMakeFiles/cmTC_010cb.dir/src.cxx.o.d -o CMakeFiles/cmTC_010cb.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_010cb
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_010cb.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_010cb.dir/src.cxx.o -o cmTC_010cb 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -487,13 +487,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_D__EXTERN_ALWAYS_INLINE succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_8573a/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_8573a.dir/build.make CMakeFiles/cmTC_8573a.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_be23a/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_be23a.dir/build.make CMakeFiles/cmTC_be23a.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_8573a.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_D__EXTERN_ALWAYS_INLINE -D__extern_always_inline=inline   -MD -MT CMakeFiles/cmTC_8573a.dir/src.cxx.o -MF CMakeFiles/cmTC_8573a.dir/src.cxx.o.d -o CMakeFiles/cmTC_8573a.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_8573a
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8573a.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_8573a.dir/src.cxx.o -o cmTC_8573a 
+Building CXX object CMakeFiles/cmTC_be23a.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_D__EXTERN_ALWAYS_INLINE -D__extern_always_inline=inline   -MD -MT CMakeFiles/cmTC_be23a.dir/src.cxx.o -MF CMakeFiles/cmTC_be23a.dir/src.cxx.o.d -o CMakeFiles/cmTC_be23a.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_be23a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_be23a.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_be23a.dir/src.cxx.o -o cmTC_be23a 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -502,13 +502,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_FDIAGNOSTIC_SHOW_TEMPLATE_TREE succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_ec90c/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_ec90c.dir/build.make CMakeFiles/cmTC_ec90c.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_c4fab/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_c4fab.dir/build.make CMakeFiles/cmTC_c4fab.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_ec90c.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_FDIAGNOSTIC_SHOW_TEMPLATE_TREE  -fdiagnostics-show-template-tree -MD -MT CMakeFiles/cmTC_ec90c.dir/src.cxx.o -MF CMakeFiles/cmTC_ec90c.dir/src.cxx.o.d -o CMakeFiles/cmTC_ec90c.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_ec90c
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ec90c.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_ec90c.dir/src.cxx.o -o cmTC_ec90c 
+Building CXX object CMakeFiles/cmTC_c4fab.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_FDIAGNOSTIC_SHOW_TEMPLATE_TREE  -fdiagnostics-show-template-tree -MD -MT CMakeFiles/cmTC_c4fab.dir/src.cxx.o -MF CMakeFiles/cmTC_c4fab.dir/src.cxx.o.d -o CMakeFiles/cmTC_c4fab.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_c4fab
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c4fab.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_c4fab.dir/src.cxx.o -o cmTC_c4fab 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -517,13 +517,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_FTEMPLATE_BACKTRACE_LIMIT succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_ea9b8/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_ea9b8.dir/build.make CMakeFiles/cmTC_ea9b8.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_5f697/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_5f697.dir/build.make CMakeFiles/cmTC_5f697.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_ea9b8.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_FTEMPLATE_BACKTRACE_LIMIT  -ftemplate-backtrace-limit=0 -MD -MT CMakeFiles/cmTC_ea9b8.dir/src.cxx.o -MF CMakeFiles/cmTC_ea9b8.dir/src.cxx.o.d -o CMakeFiles/cmTC_ea9b8.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_ea9b8
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ea9b8.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_ea9b8.dir/src.cxx.o -o cmTC_ea9b8 
+Building CXX object CMakeFiles/cmTC_5f697.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_FTEMPLATE_BACKTRACE_LIMIT  -ftemplate-backtrace-limit=0 -MD -MT CMakeFiles/cmTC_5f697.dir/src.cxx.o -MF CMakeFiles/cmTC_5f697.dir/src.cxx.o.d -o CMakeFiles/cmTC_5f697.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_5f697
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5f697.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_5f697.dir/src.cxx.o -o cmTC_5f697 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -532,13 +532,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_FMACRO_BACKTRACE_LIMIT succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_9d3ab/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_9d3ab.dir/build.make CMakeFiles/cmTC_9d3ab.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_3ada2/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_3ada2.dir/build.make CMakeFiles/cmTC_3ada2.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_9d3ab.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_FMACRO_BACKTRACE_LIMIT  -fmacro-backtrace-limit=1 -MD -MT CMakeFiles/cmTC_9d3ab.dir/src.cxx.o -MF CMakeFiles/cmTC_9d3ab.dir/src.cxx.o.d -o CMakeFiles/cmTC_9d3ab.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_9d3ab
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9d3ab.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_9d3ab.dir/src.cxx.o -o cmTC_9d3ab 
+Building CXX object CMakeFiles/cmTC_3ada2.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_FMACRO_BACKTRACE_LIMIT  -fmacro-backtrace-limit=1 -MD -MT CMakeFiles/cmTC_3ada2.dir/src.cxx.o -MF CMakeFiles/cmTC_3ada2.dir/src.cxx.o.d -o CMakeFiles/cmTC_3ada2.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_3ada2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3ada2.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_3ada2.dir/src.cxx.o -o cmTC_3ada2 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -547,13 +547,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_OMIT_FRAME_POINTER succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_9a0ba/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_9a0ba.dir/build.make CMakeFiles/cmTC_9a0ba.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_16caf/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_16caf.dir/build.make CMakeFiles/cmTC_16caf.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_9a0ba.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_OMIT_FRAME_POINTER  -fomit-frame-pointer -MD -MT CMakeFiles/cmTC_9a0ba.dir/src.cxx.o -MF CMakeFiles/cmTC_9a0ba.dir/src.cxx.o.d -o CMakeFiles/cmTC_9a0ba.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_9a0ba
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9a0ba.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_9a0ba.dir/src.cxx.o -o cmTC_9a0ba 
+Building CXX object CMakeFiles/cmTC_16caf.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_OMIT_FRAME_POINTER  -fomit-frame-pointer -MD -MT CMakeFiles/cmTC_16caf.dir/src.cxx.o -MF CMakeFiles/cmTC_16caf.dir/src.cxx.o.d -o CMakeFiles/cmTC_16caf.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_16caf
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_16caf.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_16caf.dir/src.cxx.o -o cmTC_16caf 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -562,13 +562,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_OFAST succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_c9c18/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_c9c18.dir/build.make CMakeFiles/cmTC_c9c18.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_8d074/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_8d074.dir/build.make CMakeFiles/cmTC_8d074.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_c9c18.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_OFAST  -Ofast -MD -MT CMakeFiles/cmTC_c9c18.dir/src.cxx.o -MF CMakeFiles/cmTC_c9c18.dir/src.cxx.o.d -o CMakeFiles/cmTC_c9c18.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_c9c18
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c9c18.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_c9c18.dir/src.cxx.o -o cmTC_c9c18 
+Building CXX object CMakeFiles/cmTC_8d074.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_OFAST  -Ofast -MD -MT CMakeFiles/cmTC_8d074.dir/src.cxx.o -MF CMakeFiles/cmTC_8d074.dir/src.cxx.o.d -o CMakeFiles/cmTC_8d074.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_8d074
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8d074.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_8d074.dir/src.cxx.o -o cmTC_8d074 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -577,13 +577,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_STRICT_ALIASING succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_eb4a5/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_eb4a5.dir/build.make CMakeFiles/cmTC_eb4a5.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_f2771/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_f2771.dir/build.make CMakeFiles/cmTC_f2771.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_eb4a5.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_STRICT_ALIASING  -fstrict-aliasing -MD -MT CMakeFiles/cmTC_eb4a5.dir/src.cxx.o -MF CMakeFiles/cmTC_eb4a5.dir/src.cxx.o.d -o CMakeFiles/cmTC_eb4a5.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_eb4a5
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_eb4a5.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_eb4a5.dir/src.cxx.o -o cmTC_eb4a5 
+Building CXX object CMakeFiles/cmTC_f2771.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_STRICT_ALIASING  -fstrict-aliasing -MD -MT CMakeFiles/cmTC_f2771.dir/src.cxx.o -MF CMakeFiles/cmTC_f2771.dir/src.cxx.o.d -o CMakeFiles/cmTC_f2771.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_f2771
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f2771.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_f2771.dir/src.cxx.o -o cmTC_f2771 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -592,13 +592,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_STRICT_VTABLE_POINTERS succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_cf926/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_cf926.dir/build.make CMakeFiles/cmTC_cf926.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_4cee4/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_4cee4.dir/build.make CMakeFiles/cmTC_4cee4.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_cf926.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_STRICT_VTABLE_POINTERS  -fstrict-vtable-pointers -MD -MT CMakeFiles/cmTC_cf926.dir/src.cxx.o -MF CMakeFiles/cmTC_cf926.dir/src.cxx.o.d -o CMakeFiles/cmTC_cf926.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_cf926
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cf926.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_cf926.dir/src.cxx.o -o cmTC_cf926 
+Building CXX object CMakeFiles/cmTC_4cee4.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_STRICT_VTABLE_POINTERS  -fstrict-vtable-pointers -MD -MT CMakeFiles/cmTC_4cee4.dir/src.cxx.o -MF CMakeFiles/cmTC_4cee4.dir/src.cxx.o.d -o CMakeFiles/cmTC_4cee4.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_4cee4
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4cee4.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_4cee4.dir/src.cxx.o -o cmTC_4cee4 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -607,13 +607,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_FAST_MATH succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_4c4b4/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_4c4b4.dir/build.make CMakeFiles/cmTC_4c4b4.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_3414f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_3414f.dir/build.make CMakeFiles/cmTC_3414f.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_4c4b4.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_FAST_MATH  -ffast-math -MD -MT CMakeFiles/cmTC_4c4b4.dir/src.cxx.o -MF CMakeFiles/cmTC_4c4b4.dir/src.cxx.o.d -o CMakeFiles/cmTC_4c4b4.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_4c4b4
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4c4b4.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_4c4b4.dir/src.cxx.o -o cmTC_4c4b4 
+Building CXX object CMakeFiles/cmTC_3414f.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_FAST_MATH  -ffast-math -MD -MT CMakeFiles/cmTC_3414f.dir/src.cxx.o -MF CMakeFiles/cmTC_3414f.dir/src.cxx.o.d -o CMakeFiles/cmTC_3414f.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_3414f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3414f.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_3414f.dir/src.cxx.o -o cmTC_3414f 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -622,13 +622,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_VECTORIZE succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_8041d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_8041d.dir/build.make CMakeFiles/cmTC_8041d.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_18074/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_18074.dir/build.make CMakeFiles/cmTC_18074.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_8041d.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_VECTORIZE  -fvectorize -MD -MT CMakeFiles/cmTC_8041d.dir/src.cxx.o -MF CMakeFiles/cmTC_8041d.dir/src.cxx.o.d -o CMakeFiles/cmTC_8041d.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_8041d
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8041d.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_8041d.dir/src.cxx.o -o cmTC_8041d 
+Building CXX object CMakeFiles/cmTC_18074.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_VECTORIZE  -fvectorize -MD -MT CMakeFiles/cmTC_18074.dir/src.cxx.o -MF CMakeFiles/cmTC_18074.dir/src.cxx.o.d -o CMakeFiles/cmTC_18074.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_18074
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_18074.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_18074.dir/src.cxx.o -o cmTC_18074 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -637,13 +637,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_SIZED_DEALLOCATION succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_86855/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_86855.dir/build.make CMakeFiles/cmTC_86855.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_2e1ce/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_2e1ce.dir/build.make CMakeFiles/cmTC_2e1ce.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_86855.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_SIZED_DEALLOCATION  -fsized-deallocation -MD -MT CMakeFiles/cmTC_86855.dir/src.cxx.o -MF CMakeFiles/cmTC_86855.dir/src.cxx.o.d -o CMakeFiles/cmTC_86855.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_86855
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_86855.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_86855.dir/src.cxx.o -o cmTC_86855 
+Building CXX object CMakeFiles/cmTC_2e1ce.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_SIZED_DEALLOCATION  -fsized-deallocation -MD -MT CMakeFiles/cmTC_2e1ce.dir/src.cxx.o -MF CMakeFiles/cmTC_2e1ce.dir/src.cxx.o.d -o CMakeFiles/cmTC_2e1ce.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_2e1ce
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2e1ce.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_2e1ce.dir/src.cxx.o -o cmTC_2e1ce 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -652,13 +652,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_MARCH_NATIVE succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_9de31/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_9de31.dir/build.make CMakeFiles/cmTC_9de31.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_833cf/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_833cf.dir/build.make CMakeFiles/cmTC_833cf.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_9de31.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_MARCH_NATIVE  -march=native -MD -MT CMakeFiles/cmTC_9de31.dir/src.cxx.o -MF CMakeFiles/cmTC_9de31.dir/src.cxx.o.d -o CMakeFiles/cmTC_9de31.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_9de31
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9de31.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_9de31.dir/src.cxx.o -o cmTC_9de31 
+Building CXX object CMakeFiles/cmTC_833cf.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_MARCH_NATIVE  -march=native -MD -MT CMakeFiles/cmTC_833cf.dir/src.cxx.o -MF CMakeFiles/cmTC_833cf.dir/src.cxx.o.d -o CMakeFiles/cmTC_833cf.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_833cf
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_833cf.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_833cf.dir/src.cxx.o -o cmTC_833cf 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -667,13 +667,13 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test RANGES_HAS_MTUNE_NATIVE succeeded with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_abbe3/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_abbe3.dir/build.make CMakeFiles/cmTC_abbe3.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_dfb71/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_dfb71.dir/build.make CMakeFiles/cmTC_dfb71.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_abbe3.dir/src.cxx.o
-/usr/bin/clang++-17 -DRANGES_HAS_MTUNE_NATIVE  -mtune=native -MD -MT CMakeFiles/cmTC_abbe3.dir/src.cxx.o -MF CMakeFiles/cmTC_abbe3.dir/src.cxx.o.d -o CMakeFiles/cmTC_abbe3.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
-Linking CXX executable cmTC_abbe3
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_abbe3.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_abbe3.dir/src.cxx.o -o cmTC_abbe3 
+Building CXX object CMakeFiles/cmTC_dfb71.dir/src.cxx.o
+/usr/bin/clang++-17 -DRANGES_HAS_MTUNE_NATIVE  -mtune=native -MD -MT CMakeFiles/cmTC_dfb71.dir/src.cxx.o -MF CMakeFiles/cmTC_dfb71.dir/src.cxx.o.d -o CMakeFiles/cmTC_dfb71.dir/src.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_dfb71
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_dfb71.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_dfb71.dir/src.cxx.o -o cmTC_dfb71 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -682,13 +682,13 @@ int main() { return 0; }
 Determining if the strtof_l exist passed with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_ae5fc/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_ae5fc.dir/build.make CMakeFiles/cmTC_ae5fc.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_e6930/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e6930.dir/build.make CMakeFiles/cmTC_e6930.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_ae5fc.dir/CheckSymbolExists.cxx.o
-/usr/bin/clang++-17    -MD -MT CMakeFiles/cmTC_ae5fc.dir/CheckSymbolExists.cxx.o -MF CMakeFiles/cmTC_ae5fc.dir/CheckSymbolExists.cxx.o.d -o CMakeFiles/cmTC_ae5fc.dir/CheckSymbolExists.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
-Linking CXX executable cmTC_ae5fc
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ae5fc.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_ae5fc.dir/CheckSymbolExists.cxx.o -o cmTC_ae5fc 
+Building CXX object CMakeFiles/cmTC_e6930.dir/CheckSymbolExists.cxx.o
+/usr/bin/clang++-17    -MD -MT CMakeFiles/cmTC_e6930.dir/CheckSymbolExists.cxx.o -MF CMakeFiles/cmTC_e6930.dir/CheckSymbolExists.cxx.o.d -o CMakeFiles/cmTC_e6930.dir/CheckSymbolExists.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Linking CXX executable cmTC_e6930
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e6930.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_e6930.dir/CheckSymbolExists.cxx.o -o cmTC_e6930 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -709,13 +709,13 @@ int main(int argc, char** argv)
 Determining if the strtoull_l exist passed with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_8ed89/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_8ed89.dir/build.make CMakeFiles/cmTC_8ed89.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_f462c/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_f462c.dir/build.make CMakeFiles/cmTC_f462c.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_8ed89.dir/CheckSymbolExists.cxx.o
-/usr/bin/clang++-17    -MD -MT CMakeFiles/cmTC_8ed89.dir/CheckSymbolExists.cxx.o -MF CMakeFiles/cmTC_8ed89.dir/CheckSymbolExists.cxx.o.d -o CMakeFiles/cmTC_8ed89.dir/CheckSymbolExists.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
-Linking CXX executable cmTC_8ed89
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8ed89.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_8ed89.dir/CheckSymbolExists.cxx.o -o cmTC_8ed89 
+Building CXX object CMakeFiles/cmTC_f462c.dir/CheckSymbolExists.cxx.o
+/usr/bin/clang++-17    -MD -MT CMakeFiles/cmTC_f462c.dir/CheckSymbolExists.cxx.o -MF CMakeFiles/cmTC_f462c.dir/CheckSymbolExists.cxx.o.d -o CMakeFiles/cmTC_f462c.dir/CheckSymbolExists.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Linking CXX executable cmTC_f462c
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f462c.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_f462c.dir/CheckSymbolExists.cxx.o -o cmTC_f462c 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -736,13 +736,13 @@ int main(int argc, char** argv)
 Determining if the realpath exist passed with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_bee4b/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_bee4b.dir/build.make CMakeFiles/cmTC_bee4b.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_53502/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_53502.dir/build.make CMakeFiles/cmTC_53502.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_bee4b.dir/CheckSymbolExists.cxx.o
-/usr/bin/clang++-17    -MD -MT CMakeFiles/cmTC_bee4b.dir/CheckSymbolExists.cxx.o -MF CMakeFiles/cmTC_bee4b.dir/CheckSymbolExists.cxx.o.d -o CMakeFiles/cmTC_bee4b.dir/CheckSymbolExists.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
-Linking CXX executable cmTC_bee4b
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bee4b.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_bee4b.dir/CheckSymbolExists.cxx.o -o cmTC_bee4b 
+Building CXX object CMakeFiles/cmTC_53502.dir/CheckSymbolExists.cxx.o
+/usr/bin/clang++-17    -MD -MT CMakeFiles/cmTC_53502.dir/CheckSymbolExists.cxx.o -MF CMakeFiles/cmTC_53502.dir/CheckSymbolExists.cxx.o.d -o CMakeFiles/cmTC_53502.dir/CheckSymbolExists.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Linking CXX executable cmTC_53502
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_53502.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_53502.dir/CheckSymbolExists.cxx.o -o cmTC_53502 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 
@@ -763,13 +763,13 @@ int main(int argc, char** argv)
 Determining if the fwrite_unlocked exist passed with the following output:
 Change Dir: /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_69d1e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_69d1e.dir/build.make CMakeFiles/cmTC_69d1e.dir/build
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_2ed9a/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_2ed9a.dir/build.make CMakeFiles/cmTC_2ed9a.dir/build
 gmake[1]: Entering directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_69d1e.dir/CheckSymbolExists.cxx.o
-/usr/bin/clang++-17   -std=c++11 -MD -MT CMakeFiles/cmTC_69d1e.dir/CheckSymbolExists.cxx.o -MF CMakeFiles/cmTC_69d1e.dir/CheckSymbolExists.cxx.o.d -o CMakeFiles/cmTC_69d1e.dir/CheckSymbolExists.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
-Linking CXX executable cmTC_69d1e
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_69d1e.dir/link.txt --verbose=1
-/usr/bin/clang++-17 CMakeFiles/cmTC_69d1e.dir/CheckSymbolExists.cxx.o -o cmTC_69d1e 
+Building CXX object CMakeFiles/cmTC_2ed9a.dir/CheckSymbolExists.cxx.o
+/usr/bin/clang++-17   -std=c++11 -MD -MT CMakeFiles/cmTC_2ed9a.dir/CheckSymbolExists.cxx.o -MF CMakeFiles/cmTC_2ed9a.dir/CheckSymbolExists.cxx.o.d -o CMakeFiles/cmTC_2ed9a.dir/CheckSymbolExists.cxx.o -c /home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Linking CXX executable cmTC_2ed9a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2ed9a.dir/link.txt --verbose=1
+/usr/bin/clang++-17 CMakeFiles/cmTC_2ed9a.dir/CheckSymbolExists.cxx.o -o cmTC_2ed9a 
 gmake[1]: Leaving directory '/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/CMakeFiles/CMakeTmp'
 
 

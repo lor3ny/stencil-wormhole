@@ -95,11 +95,15 @@ int main(int argc, char** argv) {
 
     uint32_t diff_dram = (dram_buffer_size - pad_buffer_size) / sizeof(bfloat16);
 
-    std::cout << "Input: " << std::endl;
-    printMat(input_vec, rows_pad, cols_pad);
+    // std::cout << "Input: " << std::endl;
+    // printMat(input_vec, rows_pad, cols_pad);
 
-    std::cout << "Aligned: " << std::endl;
-    printMat(input_vec, rows_pad + diff_dram, cols_pad);
+    // std::cout << "Aligned: " << std::endl;
+    // printMat(input_vec, rows_pad + diff_dram, cols_pad);
+
+    std::cout << input_vec.size() << " - " << output_vec.size() << std::endl;
+    std::cout << input_vec.size()*sizeof(uint32_t) << " - " << output_vec.size()*sizeof(uint32_t) << " - " << dram_buffer_size << std::endl;
+
 
     // ---------------------------------------------------------
     // ---------------------------------------------------------
@@ -237,7 +241,7 @@ int main(int argc, char** argv) {
     // QUI SETTO RUNTIME ARGS PER WRITER
     tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, 
             {output_dram_buffer->address(), num_tiles, output_bank_id, output_dram_buffer->size()});
-    tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {});
+    tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {num_tiles});
     
 
     // ---------------------------------------------------------
@@ -251,9 +255,10 @@ int main(int argc, char** argv) {
     for(int i = 0; i<times; i++){
 
         EnqueueProgram(cq, program, false);
+        std::cout << "Program enqueued " << i << " times" << std::endl;
         // Wait Until Program Finishes
         EnqueueReadBuffer(cq, output_dram_buffer, output_vec.data(), true); // Read the result from the device
-
+        std::cout << "Waiting..." << std::endl;
         //! pad the output, still under study
         output_vec = pad_with_zeros(output_vec, rows, cols, 1);
 
