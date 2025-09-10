@@ -1,1 +1,0 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/priority.dir/priority.cpp.o -o priority 

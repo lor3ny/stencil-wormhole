@@ -1,1 +1,0 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/test_utility.dir/test_utility.cpp.o -o test_utility 

@@ -32,15 +32,84 @@ constexpr float est_stencil[9] = {
     0,1,1
 };
 
-template<typename T>
-void im2row(vector<T>& in, vector<T>& out, int stencil_order);
+//! This function is specialized for star 5-point stencil
+void im2row_5p(vector<uint32_t>& in, vector<uint32_t>& out, uint32_t rows, uint32_t cols){
+    
+    bfloat16* in_bf16 = reinterpret_cast<bfloat16*>(in.data());
+    bfloat16* out_bf16 = reinterpret_cast<bfloat16*>(out.data());
+    
+    // This functin can be parallelized
+    int index = 0;
+    for(int i = 1; i<rows-1; i++){ //rows
+        for(int j = 1; j<cols-1; j++){ //cols
 
-vector<uint32_t> pad_with_zeros(vector<uint32_t>& in, int rows, int cols,  int stencil_order);
+            // This phase ca be SIMDized
+            out_bf16[index] = in_bf16[(i-1)*cols + j];
+            out_bf16[index+1] = in_bf16[i*cols + (j-1)];
+            out_bf16[index+2] = in_bf16[i*cols + j];
+            out_bf16[index+3] = in_bf16[i*cols + (j+1)];
+            out_bf16[index+4] = in_bf16[(i+1)*cols + j];
+            index += 5;
+        }
+    }
+}
 
+
+uint32_t align_vector_size(vector<uint32_t>& in, size_t starting_size, size_t single_tile_size){
+
+    uint32_t new_size = starting_size;
+
+    if(new_size % single_tile_size != 0){
+        uint32_t align = 1;
+        while ((new_size + align) % single_tile_size != 0){
+            align += 1;
+        }    
+        new_size += align;
+    }
+    uint32_t new_count = new_size / sizeof(uint32_t);
+    in.resize(new_count, 0.0f);
+
+    return new_size;
+}
+
+
+// it is implemented considering star stencils, not squared ones
+vector<uint32_t> pad_with_zeros(vector<uint32_t>& in, int rows, int cols, int stencil_order){
+
+    size_t pad_size = stencil_order * 2;
+
+    size_t new_rows = rows + pad_size;
+    size_t new_cols = cols + pad_size;
+    std::vector<uint32_t> out(new_rows * new_cols);
+    create_constant_vector_of_bfloat16(new_rows * new_cols * sizeof(bfloat16), 0.0f);
+
+    for (size_t r = 0; r < rows; ++r) {
+        // Destination row start (skip first row + padding col)
+        bfloat16* out_bf16 = reinterpret_cast<bfloat16*>(out.data());
+        bfloat16* in_bf16 = reinterpret_cast<bfloat16*>(in.data());
+
+        bfloat16* dest = out_bf16 + (r + stencil_order) * new_cols + stencil_order;
+        const bfloat16* src = in_bf16 + r * cols;
+
+        std::memcpy(dest, src, cols * sizeof(bfloat16));
+    }
+
+    return out;
+}
+
+//! Tester function
 void matVecMul(
     const std::vector<float>& matrix,
     const float* vec,
     float* result,
     size_t rows,
     size_t cols
-);
+) {
+    for (size_t i = 0; i < rows; ++i) {
+        result[i] = 0.0f;
+        for (size_t j = 0; j < cols; ++j) {
+            result[i] += matrix[i * cols + j] * vec[j];
+        }
+    }
+}
+

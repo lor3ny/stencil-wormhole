@@ -1,1 +1,0 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/multi_condition.dir/multi_condition.cpp.o -o multi_condition 

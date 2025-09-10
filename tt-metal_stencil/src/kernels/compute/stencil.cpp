@@ -43,24 +43,6 @@ void MAIN {
 
     tile_regs_release();
 
-
-    // SINGLE-TILE VERSION
-
-    // tile_regs_acquire();
-
-    // cb_wait_front(cb_in0, 1);
-
-    // copy_tile(cb_in0, 0, 0);
-
-    // tile_regs_commit();
-    // tile_regs_wait();
-
-    // pack_tile(0, cb_out16);
-    // tile_regs_release();
-
-    // cb_push_back(cb_out16, 1);
-    // cb_pop_front(cb_in0, 1);
-
     DPRINT << "End compute" << ENDL();
 }
 

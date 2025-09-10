@@ -1,5 +1,0 @@
-if(EXISTS "/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/_deps/taskflow-build/unittests/test_cancellation_tests-b858cb2.cmake")
-  include("/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/build/_deps/taskflow-build/unittests/test_cancellation_tests-b858cb2.cmake")
-else()
-  add_test(test_cancellation_NOT_BUILT-b858cb2 test_cancellation_NOT_BUILT-b858cb2)
-endif()

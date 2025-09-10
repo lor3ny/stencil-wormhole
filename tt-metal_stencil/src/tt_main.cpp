@@ -10,16 +10,16 @@
 #include <tt-metalium/bfloat16.hpp>
 #include <tt-metalium/command_queue.hpp>
 
+#include <unistd.h>
+
 #include "im2row.hpp"
 
 using namespace tt;
 using namespace tt::tt_metal;
 using namespace std;
 
-#define TILE_WIDTH 32 // bytes
-#define TILE_HEIGHT 32 // bytes
-#define TILE_SIZE TILE_WIDTH*TILE_HEIGHT
-#define TILE_VALUES_COUNT (TILE_WIDTH * TILE_HEIGHT) / sizeof(bfloat16)
+#define TILE_WIDTH 32 // bfloats
+#define TILE_HEIGHT 32 // bfloats
 
 //export TT_METAL_DPRINT_CORES="(0,0)-(7,7)"
 
@@ -38,17 +38,28 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
     // ---------------------------------------------------------
 
+    const size_t single_tile_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16); // bytes
+
     //! To define by the input
-    constexpr uint32_t rows = 16, cols = 32;
+    constexpr uint32_t rows = 32, cols = 32;
     constexpr uint32_t stencil_order = 1;
-    const uint32_t single_tile_size = TILE_SIZE;
+    //! To define by the input
+
+    //! direct from the input
+    size_t buffer_size = rows * cols * sizeof(bfloat16);
+    //* padding
     const uint32_t rows_pad = rows + stencil_order * 2; 
     const uint32_t cols_pad = cols + stencil_order * 2;
     const uint32_t padding_elements = 2*(rows_pad+cols_pad - 2);
-    size_t buffer_size = rows_pad * cols_pad * sizeof(bfloat16);
-    //! To define by the input
+    const size_t pad_buffer_size = rows_pad * cols_pad * sizeof(bfloat16);
+    //* i2r
+    const uint32_t rows_i2r = rows * cols;
+    const uint32_t cols_i2r = (stencil_order*4)+1; 
+    const size_t i2r_buffer_count = rows * cols * ((stencil_order*4)+1);
+    const size_t i2r_buffer_size = i2r_buffer_count * sizeof(bfloat16); 
+    //! direct from the input
 
-    if (buffer_size < single_tile_size){
+    if (i2r_buffer_size < single_tile_size){
         cerr << "Error: problem size must be at least " << single_tile_size << " elements." << endl;
         return -1;
     }
@@ -56,54 +67,55 @@ int main(int argc, char** argv) {
     // Initilize starting buffers
     uint32_t uint32_count = buffer_size / sizeof(uint32_t);
     vector<uint32_t> input_vec(uint32_count);
-    vector<uint32_t> output_vec(uint32_count);
     input_vec = create_constant_vector_of_bfloat16(buffer_size, 5.5f);
-    output_vec = create_constant_vector_of_bfloat16(buffer_size, 0.0f);
+
+    bfloat16* init_input_ptr = reinterpret_cast<bfloat16*>(input_vec.data());
+    for(int i = 0; i<uint32_count*2; i++){
+        init_input_ptr[i] = bfloat16((float)i);
+    }
+
+    //* ----------
+    //* PADDING
+    //* ----------
 
     // Pad the input, and the output but it's not necessary
     input_vec = pad_with_zeros(input_vec, rows, cols, 1);
-    output_vec = pad_with_zeros(output_vec, rows, cols, 1);
 
-    cout << "Problem size: " << rows << "x" << cols << endl;
+    cout << "Problem shape: " << rows << "x" << cols << endl;
     cout << "Stencil order: " << stencil_order << endl;
-    cout << "Padded size: " << rows_pad << "x" << cols_pad << endl;
+    cout << "Padded shape: " << rows_pad << "x" << cols_pad << endl;
+    cout << "i2r shape: " << rows_i2r << "x" << cols_i2r  << endl;
 
-    // Now we need to compute the size of the DRAM buffer, it must be multiple of the tile size
+    //* ----------
+    //* im2row CONVERTION
+    //* ----------
 
-    size_t pad_buffer_size = rows_pad * cols_pad * sizeof(bfloat16);
-    size_t dram_buffer_size = pad_buffer_size;
-    cout << "DRAM buffer size (bytes): " << pad_buffer_size << endl;
+    vector<uint32_t> input_vec_i2r(i2r_buffer_count);
+    im2row_5p(input_vec, input_vec_i2r, rows_pad, cols_pad);
+    
+    //* ----------
+    //* ALIGNEMENT
+    //* ----------
 
-    if(dram_buffer_size % single_tile_size != 0){
-        uint32_t align = 1;
-        while ((dram_buffer_size + align) % single_tile_size != 0){
-            align += 1;
-        }    
-        dram_buffer_size += align;
-    }
 
-    cout << "DRAM buffer size aligned to tile size (bytes): " << dram_buffer_size << endl;
+    cout << "DRAM buffer size (bytes): " << i2r_buffer_size << endl;
 
-    // now we have a buffer that is aligned with tile size, we need to enlarge the and output input buffer
-    if (input_vec.size() < uint32_count){
-        input_vec.resize(uint32_count, 0);
-    }
+    uint32_t dram_buffer_size = align_vector_size(input_vec_i2r, i2r_buffer_size, single_tile_size);
+    dram_buffer_size = align_vector_size(input_vec, pad_buffer_size, single_tile_size);
 
-    uint32_count = dram_buffer_size / sizeof(uint32_t);
-    output_vec.resize(uint32_count, 0);
-    input_vec.resize(uint32_count, 0);
+    uint32_t diff_dram = (dram_buffer_size - i2r_buffer_size) / sizeof(bfloat16);
 
-    uint32_t diff_dram = (dram_buffer_size - pad_buffer_size) / sizeof(bfloat16);
+    std::cout << "Input: " << std::endl;
+    printMat(input_vec, rows_pad, cols_pad);
 
-    // std::cout << "Input: " << std::endl;
-    // printMat(input_vec, rows_pad, cols_pad);
+    // std::cout << "Input Padded im2row-ed Aligned: " << std::endl;
+    // printMat(input_vec_i2r, rows_i2r+diff_dram/5, cols_i2r);
 
-    // std::cout << "Aligned: " << std::endl;
-    // printMat(input_vec, rows_pad + diff_dram, cols_pad);
-
-    std::cout << input_vec.size() << " - " << output_vec.size() << std::endl;
-    std::cout << input_vec.size()*sizeof(uint32_t) << " - " << output_vec.size()*sizeof(uint32_t) << " - " << dram_buffer_size << std::endl;
-
+    //! OUTPUT Device handling
+    vector<uint32_t> output_vec(dram_buffer_size/sizeof(uint32_t));
+    output_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 0.0f);
+    //! THIS SECTION HAVE TO BE ADAPATED TO THE TT KERNEL
+    //! Now works only for copy! 
 
     // ---------------------------------------------------------
     // ---------------------------------------------------------
@@ -121,7 +133,8 @@ int main(int argc, char** argv) {
 
     constexpr CoreCoord core = {0, 0};  
     const uint32_t num_tiles = dram_buffer_size / single_tile_size; // Number of tiles 
-    DataFormat data_format = DataFormat::Float16;
+    DataFormat data_format = DataFormat::Float16_b;
+    DataFormat::Float32;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
 
     cout << "Number of tiles: " << num_tiles << endl;
@@ -158,14 +171,14 @@ int main(int argc, char** argv) {
     CircularBufferConfig cb_input_config( single_tile_size * num_sram_tiles, 
                                           {{cb_input_index, data_format}}
     );
-    cb_input_config.set_page_size(cb_input_index, dram_buffer_size);
+    cb_input_config.set_page_size(cb_input_index, single_tile_size);
 
     uint32_t cb_output_index = CBIndex::c_16;  // 16
     // size, page_size
     CircularBufferConfig cb_output_config( single_tile_size * num_sram_tiles, 
                                            {{cb_output_index, data_format}}
     );
-    cb_output_config.set_page_size(cb_output_index, dram_buffer_size);
+    cb_output_config.set_page_size(cb_output_index, single_tile_size);
 
     CBHandle cb_input = tt_metal::CreateCircularBuffer(program, core, cb_input_config);
     CBHandle cb_output = tt_metal::CreateCircularBuffer(program, core, cb_output_config);
@@ -224,7 +237,7 @@ int main(int argc, char** argv) {
     //! This is the first memcpy, it should be done only one time at the beginnning
     //! WHY IT'S WORKING? input dram buffer is less than input_vec size
     EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
-    EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ          
+    //EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ          
     
     // ---------------------------------------------------------
     // SETUP RUNTIME ARGS: Set the runtime arguments for the kernels
@@ -255,24 +268,19 @@ int main(int argc, char** argv) {
     for(int i = 0; i<times; i++){
 
         EnqueueProgram(cq, program, false);
-        std::cout << "Program enqueued " << i << " times" << std::endl;
-        // Wait Until Program Finishes
-        EnqueueReadBuffer(cq, output_dram_buffer, output_vec.data(), true); // Read the result from the device
-        std::cout << "Waiting..." << std::endl;
-        //! pad the output, still under study
-        output_vec = pad_with_zeros(output_vec, rows, cols, 1);
+        EnqueueReadBuffer(cq, output_dram_buffer, output_vec.data(), true); // Read the result from the device, works also as a barrier i think
+   
+        //output_vec = pad_with_zeros(output_vec, rows, cols, 1);
 
         //! Convert the output in im2row format
         // vector<uint32_t> conv_out_vec;
-        // im2row<uint32_t>(output_vec, conv_out_vec, 1);
-
-        //* Now you can start again
+        // im2row_5p(output_vec, conv_out_vec, 1);
 
         //! SE CI FOSSE LA UPM NON DOVREI FARE QUESTA SEZIONE
         //? POSSIAMO MIGLIORARLA FACENDO TUTTO SULLO STESSO BUFFER, FORSE NON SU PUÒ PER VIA DEL PIPELINING
-        if (i == times -1){
-            EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
-            EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
+        if (i != times-1){
+            EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  
+            EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  
         }  
     }
 
@@ -280,20 +288,17 @@ int main(int argc, char** argv) {
     printf("Core {0, 0} on Device 0 completed the task.\n");
     CloseDevice(device);
 
-
     // ---------------------------------------------------------
     // ---------------------------------------------------------
     // SAVE RESULTS AND CLEANING
     // ---------------------------------------------------------
     // ---------------------------------------------------------
 
-    std::cout << "Input padding: " << std::endl;
-    printMat(output_vec, rows+2, cols+2);
+    sleep(10);
 
-    // std::cout << "Output: " << std::endl;
-    // printMat(output_vec, 1, bfp16_count);
+    std::cout << "Output: " << std::endl;
+    printMat(output_vec, rows_pad, cols_pad);
 
     //saveGridCSV("result.csv", res_temp, dim, dim);
-
     return 0;
 }

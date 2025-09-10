@@ -1,1 +1,0 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/exception.dir/exception.cpp.o -o exception 

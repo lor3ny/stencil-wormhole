@@ -1,1 +1,0 @@
-/usr/bin/clang++-17 -O3 -DNDEBUG CMakeFiles/run.dir/run.cpp.o -o run 
