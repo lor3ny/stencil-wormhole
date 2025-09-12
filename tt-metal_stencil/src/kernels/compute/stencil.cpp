@@ -14,34 +14,33 @@ void MAIN {
 
     constexpr auto cb_in0 = tt::CBIndex::c_0;
     constexpr auto cb_out16 = tt::CBIndex::c_16;
+    constexpr uint32_t dst_reg_index = 0;
 
     unary_op_init_common(cb_in0, cb_out16);
     copy_tile_init(cb_in0);
 
     // OPERATIONS ARE ASYNCH SO EVERYTHING IS PIPELINED
 
-    tile_regs_acquire();
-
     for(uint32_t i = 0; i < num_tiles; i++) {
 
-        DPRINT << i << ENDL();
+        tile_regs_acquire();
 
         cb_reserve_back(cb_out16, 1);
 
         cb_wait_front(cb_in0, 1);
 
-        copy_tile(cb_in0, i, i);
+        copy_tile(cb_in0, 0, dst_reg_index);
 
         tile_regs_commit();
         tile_regs_wait();
 
-        pack_tile(0, cb_out16);
+        pack_tile(dst_reg_index, cb_out16);
 
         cb_push_back(cb_out16, 1);
         cb_pop_front(cb_in0, 1);
-    }
 
-    tile_regs_release();
+        tile_regs_release();
+    }
 
     DPRINT << "End compute" << ENDL();
 }

@@ -45,8 +45,10 @@ void kernel_main() {
     for (uint32_t tile_i = 0; tile_i < num_tiles; tile_i++) {
         DPRINT << tile_i << ENDL();
         cb_reserve_back(cb_id_in0, 1);
+
         uint32_t l1_write_addr_in0 = get_write_ptr(cb_id_in0);
         noc_async_read_tile(tile_i, s0, l1_write_addr_in0);
+        
         noc_async_read_barrier();
         cb_push_back(cb_id_in0, 1);
     } 

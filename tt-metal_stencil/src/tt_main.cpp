@@ -101,12 +101,10 @@ int main(int argc, char** argv) {
     cout << "DRAM buffer size (bytes): " << i2r_buffer_size << endl;
 
     uint32_t dram_buffer_size = align_vector_size(input_vec_i2r, i2r_buffer_size, single_tile_size);
-    dram_buffer_size = align_vector_size(input_vec, pad_buffer_size, single_tile_size);
-
     uint32_t diff_dram = (dram_buffer_size - i2r_buffer_size) / sizeof(bfloat16);
 
     std::cout << "Input: " << std::endl;
-    printMat(input_vec, rows_pad, cols_pad);
+    printMat(input_vec, rows_i2r, cols_i2r);
 
     // std::cout << "Input Padded im2row-ed Aligned: " << std::endl;
     // printMat(input_vec_i2r, rows_i2r+diff_dram/5, cols_i2r);
@@ -134,7 +132,7 @@ int main(int argc, char** argv) {
     constexpr CoreCoord core = {0, 0};  
     const uint32_t num_tiles = dram_buffer_size / single_tile_size; // Number of tiles 
     DataFormat data_format = DataFormat::Float16_b;
-    DataFormat::Float32;
+
     MathFidelity math_fidelity = MathFidelity::HiFi4;
 
     cout << "Number of tiles: " << num_tiles << endl;
@@ -149,7 +147,7 @@ int main(int argc, char** argv) {
 
     // device, size, page_size, buffer_type
     tt_metal::InterleavedBufferConfig dram_config{.device = device, 
-                                                  .size = dram_buffer_size, 
+                                                  .size = num_tiles * single_tile_size, 
                                                   .page_size = single_tile_size,  
                                                   .buffer_type = tt_metal::BufferType::DRAM};
     std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer = CreateBuffer(dram_config);
@@ -236,7 +234,7 @@ int main(int argc, char** argv) {
 
     //! This is the first memcpy, it should be done only one time at the beginnning
     //! WHY IT'S WORKING? input dram buffer is less than input_vec size
-    EnqueueWriteBuffer(cq, input_dram_buffer, input_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
+    EnqueueWriteBuffer(cq, input_dram_buffer, input_vec_i2r.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
     //EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ          
     
     // ---------------------------------------------------------
@@ -297,7 +295,7 @@ int main(int argc, char** argv) {
     sleep(10);
 
     std::cout << "Output: " << std::endl;
-    printMat(output_vec, rows_pad, cols_pad);
+    printMat(output_vec, rows_i2r, cols_i2r);
 
     //saveGridCSV("result.csv", res_temp, dim, dim);
     return 0;

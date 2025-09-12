@@ -23,11 +23,12 @@ void kernel_main() {
         .bank_base_address = dst_addr, .page_size = dst_tile_bytes, .data_format = dst_data_format};    
 
 
-
     for(uint32_t tile_i=0; tile_i<tiles_count; ++tile_i){
         cb_wait_front(cb_id_out16, 1);
+        
         uint32_t l1_read_addr = get_read_ptr(cb_id_out16);
         noc_async_write_tile(tile_i, dst_noc_addr, l1_read_addr);
+
         noc_async_write_barrier();
         cb_pop_front(cb_id_out16, 1);
     }
