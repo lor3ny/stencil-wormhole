@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
     //? STENCIL IS NOT WORKING, AND IT IS CORRUPTING THE MEMORY OF THE OTHER BUFFERS
     //? THE BUFFER HAS 0 BUT IT SHOULDN'T AFTER I'VE ADDED 3 ZEROS IN ROWS_2IR
     uint32_t stencil_buffer_size = 5 * TILE_WIDTH * sizeof(bfloat16);
-    uint32_t stencil_final_buffer_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16)
+    uint32_t stencil_final_buffer_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16);
     uint32_t stencil_uint32_count = stencil_buffer_size / sizeof(uint32_t);
     vector<uint32_t> stencil_vec_i2r(stencil_uint32_count);
     stencil_vec_i2r = create_constant_vector_of_bfloat16(stencil_buffer_size, 1.0f);
