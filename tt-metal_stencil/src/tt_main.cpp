@@ -76,17 +76,19 @@ int main(int argc, char** argv) {
 
     //? STENCIL IS NOT WORKING, AND IT IS CORRUPTING THE MEMORY OF THE OTHER BUFFERS
     //? THE BUFFER HAS 0 BUT IT SHOULDN'T AFTER I'VE ADDED 3 ZEROS IN ROWS_2IR
-    // uint32_t stencil_buffer_size = 5 * TILE_WIDTH * sizeof(bfloat16);
-    // uint32_t stencil_uint32_count = stencil_buffer_size / sizeof(uint32_t);
-    // vector<uint32_t> stencil_vec_i2r(stencil_uint32_count);
-    // stencil_vec_i2r = create_constant_vector_of_bfloat16(stencil_buffer_size, 1.0f);
-    // bfloat16* init_stencil_ptr = reinterpret_cast<bfloat16*>(input_vec.data());
-    // for (int s_j = 0; s_j < TILE_WIDTH; s_j++){
-    //     init_stencil_ptr[2*TILE_WIDTH + s_j] = 1;
-    // }
-    // stencil_vec_i2r.resize((3 * TILE_WIDTH * 2)/sizeof(uint32_t), 0.0f);
-    // cout << "Stencil:" << endl;
-    // printMat(stencil_vec_i2r, TILE_HEIGHT, TILE_WIDTH);
+    uint32_t stencil_buffer_size = 5 * TILE_WIDTH * sizeof(bfloat16);
+    uint32_t stencil_final_buffer_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16)
+    uint32_t stencil_uint32_count = stencil_buffer_size / sizeof(uint32_t);
+    vector<uint32_t> stencil_vec_i2r(stencil_uint32_count);
+    stencil_vec_i2r = create_constant_vector_of_bfloat16(stencil_buffer_size, 1.0f);
+    bfloat16* init_stencil_ptr = reinterpret_cast<bfloat16*>(stencil_vec_i2r.data());
+
+    for (int s_j = 0; s_j < TILE_WIDTH; s_j++){
+        init_stencil_ptr[2*TILE_WIDTH + s_j] = 0.25f;
+    }
+    stencil_vec_i2r.resize(stencil_final_buffer_size/sizeof(uint32_t), 0.0f);
+    cout << "Stencil:" << endl;
+    printMat(stencil_vec_i2r, TILE_HEIGHT, TILE_WIDTH);
     //! INPUT BUFFER INITIALIZATION
     //! STENCIL BUFFER INITIALIZTION
 
