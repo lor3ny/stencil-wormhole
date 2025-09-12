@@ -26,6 +26,7 @@ void kernel_main() {
     for(uint32_t tile_i=0; tile_i<tiles_count; ++tile_i){
         cb_wait_front(cb_id_out16, 1);
         
+        //! The tile is taken from index 0 of CB_16
         uint32_t l1_read_addr = get_read_ptr(cb_id_out16);
         noc_async_write_tile(tile_i, dst_noc_addr, l1_read_addr);
 

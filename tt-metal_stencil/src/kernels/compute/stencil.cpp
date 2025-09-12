@@ -20,7 +20,8 @@ void MAIN {
     copy_tile_init(cb_in0);
 
     // OPERATIONS ARE ASYNCH SO EVERYTHING IS PIPELINED
-
+    //! Tile index is always 0, destination index is always
+    //! If you process more tile at once, then you need more indices
     for(uint32_t i = 0; i < num_tiles; i++) {
 
         tile_regs_acquire();

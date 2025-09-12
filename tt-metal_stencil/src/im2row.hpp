@@ -49,7 +49,10 @@ void im2row_5p(vector<uint32_t>& in, vector<uint32_t>& out, uint32_t rows, uint3
             out_bf16[index+2] = in_bf16[i*cols + j];
             out_bf16[index+3] = in_bf16[i*cols + (j+1)];
             out_bf16[index+4] = in_bf16[(i+1)*cols + j];
-            index += 5;
+            out_bf16[index+5] = 0; //! padding
+            out_bf16[index+6] = 0; //! padding
+            out_bf16[index+7] = 0; //! padding
+            index += 8;
         }
     }
 }

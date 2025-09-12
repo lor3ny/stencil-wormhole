@@ -18,8 +18,8 @@ using namespace tt;
 using namespace tt::tt_metal;
 using namespace std;
 
-#define TILE_WIDTH 32 // bfloats
-#define TILE_HEIGHT 32 // bfloats
+#define TILE_WIDTH 8 // bfloats
+#define TILE_HEIGHT 8 // bfloats
 
 //export TT_METAL_DPRINT_CORES="(0,0)-(7,7)"
 
@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
     const size_t pad_buffer_size = rows_pad * cols_pad * sizeof(bfloat16);
     //* i2r
     const uint32_t rows_i2r = rows * cols;
-    const uint32_t cols_i2r = (stencil_order*4)+1; 
+    const uint32_t cols_i2r = (stencil_order*4)+1 + 3; //! plus 3 is for the padding to become 8 
     const size_t i2r_buffer_count = rows * cols * ((stencil_order*4)+1);
     const size_t i2r_buffer_size = i2r_buffer_count * sizeof(bfloat16); 
     //! direct from the input
@@ -64,15 +64,31 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    // Initilize starting buffers
+    //! INPUT BUFFER INITIALIZATION
+    //! STENCIL BUFFER INITIALIZTION
     uint32_t uint32_count = buffer_size / sizeof(uint32_t);
     vector<uint32_t> input_vec(uint32_count);
     input_vec = create_constant_vector_of_bfloat16(buffer_size, 5.5f);
-
     bfloat16* init_input_ptr = reinterpret_cast<bfloat16*>(input_vec.data());
     for(int i = 0; i<uint32_count*2; i++){
         init_input_ptr[i] = bfloat16((float)i);
     }
+
+    //? STENCIL IS NOT WORKING, AND IT IS CORRUPTING THE MEMORY OF THE OTHER BUFFERS
+    //? THE BUFFER HAS 0 BUT IT SHOULDN'T AFTER I'VE ADDED 3 ZEROS IN ROWS_2IR
+    // uint32_t stencil_buffer_size = 5 * TILE_WIDTH * sizeof(bfloat16);
+    // uint32_t stencil_uint32_count = stencil_buffer_size / sizeof(uint32_t);
+    // vector<uint32_t> stencil_vec_i2r(stencil_uint32_count);
+    // stencil_vec_i2r = create_constant_vector_of_bfloat16(stencil_buffer_size, 1.0f);
+    // bfloat16* init_stencil_ptr = reinterpret_cast<bfloat16*>(input_vec.data());
+    // for (int s_j = 0; s_j < TILE_WIDTH; s_j++){
+    //     init_stencil_ptr[2*TILE_WIDTH + s_j] = 1;
+    // }
+    // stencil_vec_i2r.resize((3 * TILE_WIDTH * 2)/sizeof(uint32_t), 0.0f);
+    // cout << "Stencil:" << endl;
+    // printMat(stencil_vec_i2r, TILE_HEIGHT, TILE_WIDTH);
+    //! INPUT BUFFER INITIALIZATION
+    //! STENCIL BUFFER INITIALIZTION
 
     //* ----------
     //* PADDING
@@ -92,7 +108,7 @@ int main(int argc, char** argv) {
 
     vector<uint32_t> input_vec_i2r(i2r_buffer_count);
     im2row_5p(input_vec, input_vec_i2r, rows_pad, cols_pad);
-    
+
     //* ----------
     //* ALIGNEMENT
     //* ----------

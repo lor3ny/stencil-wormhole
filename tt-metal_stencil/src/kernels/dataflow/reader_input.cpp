@@ -46,9 +46,10 @@ void kernel_main() {
         DPRINT << tile_i << ENDL();
         cb_reserve_back(cb_id_in0, 1);
 
+        //! The tile is written in index 0 of CB_0
         uint32_t l1_write_addr_in0 = get_write_ptr(cb_id_in0);
         noc_async_read_tile(tile_i, s0, l1_write_addr_in0);
-        
+
         noc_async_read_barrier();
         cb_push_back(cb_id_in0, 1);
     } 
