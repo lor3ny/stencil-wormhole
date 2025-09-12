@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     const size_t single_tile_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16); // bytes
 
     //! To define by the input
-    constexpr uint32_t rows = 32, cols = 32;
+    constexpr uint32_t rows = 16, cols = 16;
     constexpr uint32_t stencil_order = 1;
     //! To define by the input
 
@@ -103,8 +103,8 @@ int main(int argc, char** argv) {
     uint32_t dram_buffer_size = align_vector_size(input_vec_i2r, i2r_buffer_size, single_tile_size);
     uint32_t diff_dram = (dram_buffer_size - i2r_buffer_size) / sizeof(bfloat16);
 
-    std::cout << "Input: " << std::endl;
-    printMat(input_vec, rows_i2r, cols_i2r);
+    std::cout << "Input I2R: " << std::endl;
+    printMat(input_vec_i2r, rows_i2r, cols_i2r);
 
     // std::cout << "Input Padded im2row-ed Aligned: " << std::endl;
     // printMat(input_vec_i2r, rows_i2r+diff_dram/5, cols_i2r);
@@ -291,8 +291,6 @@ int main(int argc, char** argv) {
     // SAVE RESULTS AND CLEANING
     // ---------------------------------------------------------
     // ---------------------------------------------------------
-
-    sleep(10);
 
     std::cout << "Output: " << std::endl;
     printMat(output_vec, rows_i2r, cols_i2r);
