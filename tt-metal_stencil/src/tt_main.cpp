@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
     //* i2r
     const uint32_t rows_i2r = rows * cols;
     const uint32_t cols_i2r = (stencil_order*4)+1 + 3; //! plus 3 is for the padding to become 8 
-    const size_t i2r_buffer_count = rows * cols * ((stencil_order*4)+1);
+    const size_t i2r_buffer_count = rows_i2r * cols_i2r;
     const size_t i2r_buffer_size = i2r_buffer_count * sizeof(bfloat16); 
     //! direct from the input
 
@@ -149,11 +149,13 @@ int main(int argc, char** argv) {
 
     constexpr CoreCoord core = {0, 0};  
     const uint32_t num_tiles = dram_buffer_size / single_tile_size; // Number of tiles 
-    DataFormat data_format = DataFormat::Float16_b;
+    const uint32_t stencil_tiles = 1;
 
+    DataFormat data_format = DataFormat::Float16_b;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
 
     cout << "Number of tiles: " << num_tiles << endl;
+    cout << "Number of stencil tiles: " << stencil_tiles << endl;
 
     // ---------------------------------------------------------
     // DRAM BUFFER CREATION: OFFCHIP GDDR6 MEMORY 12GB
@@ -164,12 +166,18 @@ int main(int argc, char** argv) {
     // Both input and output have the same configuration, in this case I have chosen Interleaved instead of Shreaded
 
     // device, size, page_size, buffer_type
-    tt_metal::InterleavedBufferConfig dram_config{.device = device, 
+    tt_metal::InterleavedBufferConfig dram_inout_config{.device = device, 
                                                   .size = num_tiles * single_tile_size, 
                                                   .page_size = single_tile_size,  
                                                   .buffer_type = tt_metal::BufferType::DRAM};
-    std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer = CreateBuffer(dram_config);
-    std::shared_ptr<tt::tt_metal::Buffer> output_dram_buffer = CreateBuffer(dram_config);
+    std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer = CreateBuffer(dram_inout_config);
+    std::shared_ptr<tt::tt_metal::Buffer> output_dram_buffer = CreateBuffer(dram_inout_config);
+
+    tt_metal::InterleavedBufferConfig dram_stencil_config{.device = device, 
+                                                .size = stencil_tiles * single_tile_size, 
+                                                .page_size = single_tile_size,  
+                                                .buffer_type = tt_metal::BufferType::DRAM};
+    std::shared_ptr<tt::tt_metal::Buffer> stencil_dram_buffer = CreateBuffer(dram_stencil_config);
 
     // ! In this case you should declare the starting address and the size of the region in the shared cache
     // ! Then Is necessary a method to avoid contention, but for stencil could be avoided by the nature of the problem
@@ -184,20 +192,30 @@ int main(int argc, char** argv) {
     uint32_t num_sram_tiles = num_tiles;
     uint32_t cb_input_index = CBIndex::c_0;  // 0
     // size, page_size
-    CircularBufferConfig cb_input_config( single_tile_size * num_sram_tiles, 
+    CircularBufferConfig cb_input_config(single_tile_size * num_sram_tiles, 
                                           {{cb_input_index, data_format}}
     );
     cb_input_config.set_page_size(cb_input_index, single_tile_size);
 
     uint32_t cb_output_index = CBIndex::c_16;  // 16
     // size, page_size
-    CircularBufferConfig cb_output_config( single_tile_size * num_sram_tiles, 
+    CircularBufferConfig cb_output_config(single_tile_size * num_sram_tiles, 
                                            {{cb_output_index, data_format}}
     );
     cb_output_config.set_page_size(cb_output_index, single_tile_size);
 
     CBHandle cb_input = tt_metal::CreateCircularBuffer(program, core, cb_input_config);
     CBHandle cb_output = tt_metal::CreateCircularBuffer(program, core, cb_output_config);
+
+    uint32_t cb_stencil_index = CBIndex::c_1;  // 1
+    // size, page_size
+    CircularBufferConfig cb_stencil_config(single_tile_size * stencil_tiles, 
+                                           {{cb_stencil_index, data_format}}
+    );
+    cb_stencil_config.set_page_size(cb_stencil_index, single_tile_size);
+
+    CBHandle cb_stencil = tt_metal::CreateCircularBuffer(program, core, cb_stencil_config);
+    
 
     // ---------------------------------------------------------
     // KERNELS CREATION: We need a reader, writer and then a compute
@@ -251,9 +269,9 @@ int main(int argc, char** argv) {
     cout << "Enqueueing write buffers..." << endl;
 
     //! This is the first memcpy, it should be done only one time at the beginnning
-    //! WHY IT'S WORKING? input dram buffer is less than input_vec size
-    EnqueueWriteBuffer(cq, input_dram_buffer, input_vec_i2r.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ
-    //EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  // E' UNA MEMCPY, NULLA DI PIÙ          
+    //! This is a memcpy, so output doesn't have to copied
+    EnqueueWriteBuffer(cq, input_dram_buffer, input_vec_i2r.data(), false); 
+    EnqueueWriteBuffer(cq, stencil_dram_buffer, stencil_vec_i2r.data(), false);         
     
     // ---------------------------------------------------------
     // SETUP RUNTIME ARGS: Set the runtime arguments for the kernels
@@ -261,12 +279,15 @@ int main(int argc, char** argv) {
 
     cout << "Setting up runtime arguments..." << endl;
 
+    //! I'm not sure about that, but seems to be not used in the kernels
     const uint32_t input_bank_id = 0;
     const uint32_t output_bank_id = 0;
+    const uint32_t stencil_bank_id = 0;
 
     // QUI SETTO RUNTIME ARGS PER READER
     tt_metal::SetRuntimeArgs( program, reader_kernel_id, core,
-            {input_dram_buffer->address(), num_tiles, input_bank_id, input_dram_buffer->size()});
+            {input_dram_buffer->address(), num_tiles, input_bank_id, input_dram_buffer->size(),
+             stencil_dram_buffer->address(), stencil_tiles, stencil_bank_id, stencil_dram_buffer->size()});
     // QUI SETTO RUNTIME ARGS PER WRITER
     tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, 
             {output_dram_buffer->address(), num_tiles, output_bank_id, output_dram_buffer->size()});
