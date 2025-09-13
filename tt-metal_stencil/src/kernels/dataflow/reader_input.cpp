@@ -22,59 +22,46 @@ void kernel_main() {
     uint32_t stencil_bank_id = get_arg_val<uint32_t>(6);
     uint32_t stencil_size = get_arg_val<uint32_t>(7);
 
-
-    constexpr uint32_t cb_id_in0 = tt::CBIndex::c_0;
-    constexpr uint32_t cb_id_in1 = tt::CBIndex::c_1;
+    constexpr uint32_t cb_id_in0 = 0;
+    constexpr uint32_t cb_id_in1 = 1;
 
     //! Same for stencil, input and output
-    const DataFormat data_format = get_dataformat(cb_id_in0);
-    const uint32_t tile_bytes = get_tile_size(cb_id_in0);
+    // const DataFormat data_format_cb0 = get_dataformat(cb_id_in0);
+    // const uint32_t tile_bytes_cb0 = get_tile_size(cb_id_in0);
+    // const DataFormat data_format_cb1 = get_dataformat(cb_id_in1);
+    // const uint32_t tile_bytes_cb1 = get_tile_size(cb_id_in1);
 
-    // is true because src0 is uploaded in DRAM
-    const InterleavedAddrGenFast<true> src_dram_loc = {
-        .bank_base_address = src_addr, .page_size = tile_bytes, .data_format = data_format};
+    // // is true because src0 is uploaded in DRAM
+    // const InterleavedAddrGenFast<true> src_dram_loc = {
+    //     .bank_base_address = src_addr, .page_size = tile_bytes_cb0, .data_format = data_format_cb0};
 
-    const InterleavedAddrGenFast<true> stencil_dram_loc = {
-        .bank_base_address = stencil_addr, .page_size = tile_bytes, .data_format = data_format};
+    // const InterleavedAddrGenFast<true> stencil_dram_loc = {
+    //     .bank_base_address = stencil_addr, .page_size = tile_bytes_cb1, .data_format = data_format_cb1};
 
+    constexpr auto s_args_0 = TensorAccessorArgs<0>();
+    const auto src_dram_loc = TensorAccessor(s_args_0, src_addr, get_tile_size(cb_id_in0));
 
-    // SINGLE-TILE VERSION
-
-    //uint32_t l1_write_addr_in0 = get_write_ptr(cb_id_in0);
-    //std::uint64_t dram_buffer_src_noc_addr = get_noc_addr_from_bank_id<true>(src_bank_id, src_addr);
-    //cb_reserve_back(cb_id_in0, 1);
-    //noc_async_read(dram_buffer_src_noc_addr, l1_write_addr_in0, src_size);
-    //noc_async_read_barrier();
-    //cb_push_back(cb_id_in0, 1);
-
-
-    /*
-    Qui leggiamo un tile alla volta da DRAM (s0), vorremmo fare una lettura scaglionata
-
-    */
-
-    //* STENCIL READING
-    cb_reserve_back(cb_id_in1, 1);
-
-    //! The tile is written in index 0 of CB_0
-    uint32_t l1_write_addr_in1 = get_write_ptr(cb_id_in1);
-    noc_async_read_tile(0, src_dram_loc, l1_write_addr_in1);
-
-    noc_async_read_barrier();
-    cb_push_back(cb_id_in1, 1);
+    constexpr auto s_args_1 = TensorAccessorArgs<1/*s_args_0.next_compile_time_args_offset()*/>();
+    const auto stencil_dram_loc = TensorAccessor(s_args_1, stencil_addr, get_tile_size(cb_id_in1));
 
     //* INPUT READING, pipelined with computation and writing
 
     for (uint32_t tile_i = 0; tile_i < num_tiles; tile_i++) {
+        {
+            cb_reserve_back(cb_id_in0, 1);
+            uint32_t l1_write_addr_in0 = get_write_ptr(cb_id_in0);
+            noc_async_read_tile(tile_i, src_dram_loc, l1_write_addr_in0);
+            noc_async_read_barrier();
+            cb_push_back(cb_id_in0, 1);
+        }
 
-        cb_reserve_back(cb_id_in0, 1);
-
-        //! The tile is written in index 0 of CB_0
-        uint32_t l1_write_addr_in0 = get_write_ptr(cb_id_in0);
-        noc_async_read_tile(tile_i, src_dram_loc, l1_write_addr_in0);
-
-        noc_async_read_barrier();
-        cb_push_back(cb_id_in0, 1);
+        {
+            cb_reserve_back(cb_id_in1, 1);
+            uint32_t l1_write_addr_in1 = get_write_ptr(cb_id_in1);
+            noc_async_read_tile(tile_i, stencil_dram_loc, l1_write_addr_in1);
+            noc_async_read_barrier();
+            cb_push_back(cb_id_in1, 1);
+        }
     } 
     
     DPRINT << "READER STOP" << ENDL();

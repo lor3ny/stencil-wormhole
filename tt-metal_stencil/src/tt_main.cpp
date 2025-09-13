@@ -71,24 +71,25 @@ int main(int argc, char** argv) {
     input_vec = create_constant_vector_of_bfloat16(buffer_size, 5.5f);
     bfloat16* init_input_ptr = reinterpret_cast<bfloat16*>(input_vec.data());
     for(int i = 0; i<uint32_count*2; i++){
-        init_input_ptr[i] = bfloat16((float)i);
+        init_input_ptr[i] = bfloat16(1.0f);//bfloat16((float)i);
     }
 
     //? STENCIL IS NOT WORKING, AND IT IS CORRUPTING THE MEMORY OF THE OTHER BUFFERS
     //? THE BUFFER HAS 0 BUT IT SHOULDN'T AFTER I'VE ADDED 3 ZEROS IN ROWS_2IR
     uint32_t stencil_buffer_size = 5 * TILE_WIDTH * sizeof(bfloat16);
-    uint32_t stencil_final_buffer_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16);
-    uint32_t stencil_uint32_count = stencil_buffer_size / sizeof(uint32_t);
+    uint32_t stencil_final_buffer_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16) * 2;
+    uint32_t stencil_uint32_count = stencil_final_buffer_size / sizeof(uint32_t);
     vector<uint32_t> stencil_vec_i2r(stencil_uint32_count);
-    stencil_vec_i2r = create_constant_vector_of_bfloat16(stencil_buffer_size, 1.0f);
+    stencil_vec_i2r = create_constant_vector_of_bfloat16(stencil_final_buffer_size, 1.0f);
     bfloat16* init_stencil_ptr = reinterpret_cast<bfloat16*>(stencil_vec_i2r.data());
 
     for (int s_j = 0; s_j < TILE_WIDTH; s_j++){
-        init_stencil_ptr[2*TILE_WIDTH + s_j] = 0.25f;
+        init_stencil_ptr[2*TILE_WIDTH + s_j] = bfloat16(0.25f);
+        init_stencil_ptr[9*TILE_WIDTH + s_j] = bfloat16(0.25f);
     }
-    stencil_vec_i2r.resize(stencil_final_buffer_size/sizeof(uint32_t), 0.0f);
+    //stencil_vec_i2r.resize(stencil_final_buffer_size/sizeof(uint32_t), 0.0f);
     cout << "Stencil:" << endl;
-    printMat(stencil_vec_i2r, TILE_HEIGHT, TILE_WIDTH);
+    printMat(stencil_vec_i2r, TILE_HEIGHT*2, TILE_WIDTH);
     //! INPUT BUFFER INITIALIZATION
     //! STENCIL BUFFER INITIALIZTION
 
@@ -149,7 +150,7 @@ int main(int argc, char** argv) {
 
     constexpr CoreCoord core = {0, 0};  
     const uint32_t num_tiles = dram_buffer_size / single_tile_size; // Number of tiles 
-    const uint32_t stencil_tiles = 1;
+    const uint32_t stencil_tiles = 2;
 
     DataFormat data_format = DataFormat::Float16_b;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
@@ -189,31 +190,25 @@ int main(int argc, char** argv) {
 
     cout << "Creating SRAM buffers..." << endl;
 
-    uint32_t num_sram_tiles = num_tiles;
     uint32_t cb_input_index = CBIndex::c_0;  // 0
-    // size, page_size
-    CircularBufferConfig cb_input_config(single_tile_size * num_sram_tiles, 
+    CircularBufferConfig cb_input_config(single_tile_size * num_tiles, 
                                           {{cb_input_index, data_format}}
     );
     cb_input_config.set_page_size(cb_input_index, single_tile_size);
+    CBHandle cb_input = tt_metal::CreateCircularBuffer(program, core, cb_input_config);
 
     uint32_t cb_output_index = CBIndex::c_16;  // 16
-    // size, page_size
-    CircularBufferConfig cb_output_config(single_tile_size * num_sram_tiles, 
+    CircularBufferConfig cb_output_config(single_tile_size * num_tiles, 
                                            {{cb_output_index, data_format}}
     );
     cb_output_config.set_page_size(cb_output_index, single_tile_size);
-
-    CBHandle cb_input = tt_metal::CreateCircularBuffer(program, core, cb_input_config);
     CBHandle cb_output = tt_metal::CreateCircularBuffer(program, core, cb_output_config);
 
     uint32_t cb_stencil_index = CBIndex::c_1;  // 1
-    // size, page_size
     CircularBufferConfig cb_stencil_config(single_tile_size * stencil_tiles, 
                                            {{cb_stencil_index, data_format}}
     );
     cb_stencil_config.set_page_size(cb_stencil_index, single_tile_size);
-
     CBHandle cb_stencil = tt_metal::CreateCircularBuffer(program, core, cb_stencil_config);
     
 
@@ -271,6 +266,7 @@ int main(int argc, char** argv) {
     //! This is the first memcpy, it should be done only one time at the beginnning
     //! This is a memcpy, so output doesn't have to copied
     EnqueueWriteBuffer(cq, input_dram_buffer, input_vec_i2r.data(), false); 
+    EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  
     EnqueueWriteBuffer(cq, stencil_dram_buffer, stencil_vec_i2r.data(), false);         
     
     // ---------------------------------------------------------
@@ -291,6 +287,7 @@ int main(int argc, char** argv) {
     // QUI SETTO RUNTIME ARGS PER WRITER
     tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, 
             {output_dram_buffer->address(), num_tiles, output_bank_id, output_dram_buffer->size()});
+    // QUI SETTO RUNTIME ARGS PER COMPUTE
     tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {num_tiles});
     
 

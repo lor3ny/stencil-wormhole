@@ -10,54 +10,38 @@ void MAIN {
 
     DPRINT << "Start compute" << ENDL();
     
+    uint32_t num_tiles = get_arg_val<uint32_t>(0);
+
     constexpr auto cb_in0 = tt::CBIndex::c_0;
     constexpr auto cb_out16 = tt::CBIndex::c_16;
-
-
-    uint32_t cb_tile_count = 8;
+    constexpr uint32_t dst_reg_index = 0;
 
     unary_op_init_common(cb_in0, cb_out16);
     copy_tile_init(cb_in0);
 
     // OPERATIONS ARE ASYNCH SO EVERYTHING IS PIPELINED
+    //! Tile index is always 0, destination index is always
+    //! If you process more tile at once, then you need more indices
+    for(uint32_t i = 0; i < num_tiles; i++) {
 
-    tile_regs_acquire();
+        tile_regs_acquire();
 
-    for(uint32_t i = 0; i < cb_tile_count; i++) {
         cb_reserve_back(cb_out16, 1);
 
         cb_wait_front(cb_in0, 1);
 
-        copy_tile(cb_in0, i, i);
+        copy_tile(cb_in0, 0, dst_reg_index);
 
         tile_regs_commit();
         tile_regs_wait();
 
-        pack_tile(0, cb_out16);
+        pack_tile(dst_reg_index, cb_out16);
 
         cb_push_back(cb_out16, 1);
         cb_pop_front(cb_in0, 1);
+
+        tile_regs_release();
     }
-
-    tile_regs_release();
-
-
-    // SINGLE-TILE VERSION
-
-    // tile_regs_acquire();
-
-    // cb_wait_front(cb_in0, 1);
-
-    // copy_tile(cb_in0, 0, 0);
-
-    // tile_regs_commit();
-    // tile_regs_wait();
-
-    // pack_tile(0, cb_out16);
-    // tile_regs_release();
-
-    // cb_push_back(cb_out16, 1);
-    // cb_pop_front(cb_in0, 1);
 
     DPRINT << "End compute" << ENDL();
 }
