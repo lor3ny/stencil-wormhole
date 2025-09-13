@@ -23,27 +23,27 @@ void MAIN {
 
 
 
-    //unary_op_init_common(cb_in0, cb_out16);
-    //copy_tile_init(cb_in0);
+    unary_op_init_common(cb_in1, cb_out16);
+    copy_tile_init(cb_in1);
 
-    mm_init(cb_in0, cb_in1, cb_out16);
+    //mm_init(cb_in0, cb_in1, cb_out16);
 
     // OPERATIONS ARE ASYNCH SO EVERYTHING IS PIPELINED
     //! Tile index is always 0, destination index is always
     //! If you process more tile at once, then you need more indices
-    for(uint32_t i = 0; i < num_tiles; i++) {
+    for(uint32_t i = 0; i < 1/*num_tiles*/; i++) {
 
         tile_regs_acquire();
 
         cb_reserve_back(cb_out16, 1);
 
-        if (i == 0){
-            cb_wait_front(cb_in1, 1);
-        }
-        cb_wait_front(cb_in0, 1);
+        // if (i == 0){
+        //     cb_wait_front(cb_in1, 1);
+        // }
+        cb_wait_front(cb_in1, 1);
 
-        //copy_tile(cb_in0, 0, dst_reg_index);
-        matmul_tiles(cb_in0, cb_in1, 0, 0, dst_reg_index, false);
+        copy_tile(cb_in1, 0, dst_reg_index);
+        //matmul_tiles(cb_in0, cb_in1, 0, 0, dst_reg_index, false);
 
         tile_regs_commit();
         tile_regs_wait();
@@ -51,7 +51,7 @@ void MAIN {
         pack_tile(dst_reg_index, cb_out16);
 
         cb_push_back(cb_out16, 1);
-        cb_pop_front(cb_in0, 1);
+        cb_pop_front(cb_in1, 1);
 
         tile_regs_release();
     }

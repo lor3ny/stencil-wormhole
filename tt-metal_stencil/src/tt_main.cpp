@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     const size_t single_tile_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16); // bytes
 
     //! To define by the input
-    constexpr uint32_t rows = 16, cols = 16;
+    constexpr uint32_t rows = 4, cols = 4;
     constexpr uint32_t stencil_order = 1;
     //! To define by the input
 
