@@ -190,18 +190,20 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
 
         EnqueueProgram(cq, program, false);
         EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true); // Read the result from the device, works also as a barrier i think
-   
-        //output = pad_with_zeros(output, rows, cols, 1);
 
-        //! Convert the output in im2row format
-        // vector<uint32_t> conv_out_vec;
-        // im2row_5p(output, conv_out_vec, 1);
-
-        //! SE CI FOSSE LA UPM NON DOVREI FARE QUESTA SEZIONE
-        //? POSSIAMO MIGLIORARLA FACENDO TUTTO SULLO STESSO BUFFER, FORSE NON SU PUÒ PER VIA DEL PIPELINING
         if (i != times-1){
-            EnqueueWriteBuffer(cq, input_dram_buffer, input.data(), false);  
-            EnqueueWriteBuffer(cq, output_dram_buffer, output.data(), false);  
+
+            // //! New input creation, padding, and im2row conversion (alignement?)
+            // vector<bfloat16> new_in;
+            // vector<bfloat16> new_in_i2r;
+            // for(int j = 0; j< TILE_HEIGHT*n_tiles; j+=32){
+            //     new_in.push_back(output[j]);
+            // }
+            // new_in = pad_with_zeros(new_in, 8, 8, 1);
+            // im2row_5p(input_vec, new_in_i2r, rows_pad, cols_pad);
+
+            // //! SE CI FOSSE LA UPM NON DOVREI FARE QUESTA SEZIONE
+            // EnqueueWriteBuffer(cq, input_dram_buffer, output.data(), false);  
         }  
     }
 
