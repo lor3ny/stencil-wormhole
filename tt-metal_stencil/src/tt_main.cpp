@@ -185,8 +185,10 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     cout << "Enqueueing kernels..." << endl;	
 
     //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
-    int times = 1;
+    int times = 3;
     for(int i = 0; i<times; i++){
+
+        cout << "times: " << i << endl;
 
         EnqueueProgram(cq, program, false);
         EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true); // Read the result from the device, works also as a barrier i think
@@ -194,16 +196,20 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
         if (i != times-1){
 
             // //! New input creation, padding, and im2row conversion (alignement?)
-            // vector<bfloat16> new_in;
-            // vector<bfloat16> new_in_i2r;
-            // for(int j = 0; j< TILE_HEIGHT*n_tiles; j+=32){
-            //     new_in.push_back(output[j]);
-            // }
-            // new_in = pad_with_zeros(new_in, 8, 8, 1);
-            // im2row_5p(input_vec, new_in_i2r, rows_pad, cols_pad);
+            output = untilize_nfaces(output, 64, 32);
+            vector<bfloat16> new_in;
+            vector<bfloat16> new_in_i2r(8*8*32);
+            int picker = 0;
+            for(int j = 0; j<TILE_HEIGHT*n_tiles; j++){
+                new_in.push_back(output[picker]);
+                picker+=32;
+            }
+            new_in = pad_with_zeros(new_in, 8, 8, 1);
+            im2row_5p(new_in, new_in_i2r, 10, 10);
+            new_in_i2r = tilize_nfaces(new_in_i2r, 64, 32);
 
             // //! SE CI FOSSE LA UPM NON DOVREI FARE QUESTA SEZIONE
-            // EnqueueWriteBuffer(cq, input_dram_buffer, output.data(), false);  
+            EnqueueWriteBuffer(cq, input_dram_buffer, new_in_i2r.data(), false);  
         }  
     }
 
@@ -337,7 +343,7 @@ int main(int argc, char** argv) {
     CloseDevice(device);
     //! KERNEL AREA
 
-    std::cout << "Output: " << std::endl;
+    cout << "Output: " << endl;
     printMat(output_vec, rows_i2r, cols_i2r);
 
     return 0;
