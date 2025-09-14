@@ -10,6 +10,9 @@
 #include <tt-metalium/bfloat16.hpp>
 #include <tt-metalium/command_queue.hpp>
 
+#include <tt-metalium/tilize_utils.hpp>
+#include <tt-metalium/tensor_accessor_args.hpp>
+
 #include <unistd.h>
 
 #include "im2row.hpp"
@@ -66,15 +69,15 @@ int main(int argc, char** argv) {
 
     //! INPUT BUFFER INITIALIZATION
     //! STENCIL BUFFER INITIALIZTION
-    uint32_t input_bfp16_count = buffer_size / sizeo(bfloat16);
+    uint32_t input_bfp16_count = buffer_size / sizeof(bfloat16);
     vector<bfloat16> input_vec(input_bfp16_count);
     for(int i = 0; i<input_bfp16_count; i++){
         input_vec[i] = bfloat16(1.0f); //bfloat16((float)i);
     }
 
     uint32_t stencil_buffer_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16) * 2;
-    uint32_t stencil_bfp16_cunt = stencil_buffer_size / sizeof(bfloat16);
-    vector<bfloat16> stencil_vec_i2r(stencil_uint32_count, 1.0f);
+    uint32_t stencil_bfp16_count = stencil_buffer_size / sizeof(bfloat16);
+    vector<bfloat16> stencil_vec_i2r(stencil_bfp16_count, 1.0f);
 
     for (int s_j = 0; s_j < TILE_WIDTH; s_j++){
         stencil_vec_i2r[2*TILE_WIDTH + s_j] = bfloat16(0.25f);
@@ -101,7 +104,7 @@ int main(int argc, char** argv) {
     //* im2row CONVERTION
     //* ----------
 
-    vector<uint32_t> input_vec_i2r(i2r_buffer_count);
+    vector<bfloat16> input_vec_i2r(i2r_buffer_count);
     im2row_5p(input_vec, input_vec_i2r, rows_pad, cols_pad);
 
     //* ----------

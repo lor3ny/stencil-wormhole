@@ -33,7 +33,7 @@ constexpr float est_stencil[9] = {
 };
 
 //! This function is specialized for star 5-point stencil
-void im2row_5p(vector<uint32_t>& in, vector<uint32_t>& out, uint32_t rows, uint32_t cols){
+void im2row_5p(vector<bfloat16>& in, vector<bfloat16>& out, uint32_t rows, uint32_t cols){
     
     bfloat16* in_bf16 = reinterpret_cast<bfloat16*>(in.data());
     bfloat16* out_bf16 = reinterpret_cast<bfloat16*>(out.data());
@@ -58,7 +58,7 @@ void im2row_5p(vector<uint32_t>& in, vector<uint32_t>& out, uint32_t rows, uint3
 }
 
 
-uint32_t align_vector_size(vector<uint32_t>& in, size_t starting_size, size_t single_tile_size){
+uint32_t align_vector_size(vector<bfloat16>& in, size_t starting_size, size_t single_tile_size){
 
     uint32_t new_size = starting_size;
 
@@ -77,14 +77,13 @@ uint32_t align_vector_size(vector<uint32_t>& in, size_t starting_size, size_t si
 
 
 // it is implemented considering star stencils, not squared ones
-vector<uint32_t> pad_with_zeros(vector<uint32_t>& in, int rows, int cols, int stencil_order){
+vector<bfloat16> pad_with_zeros(vector<bfloat16>& in, int rows, int cols, int stencil_order){
 
     size_t pad_size = stencil_order * 2;
 
     size_t new_rows = rows + pad_size;
     size_t new_cols = cols + pad_size;
-    std::vector<uint32_t> out(new_rows * new_cols);
-    create_constant_vector_of_bfloat16(new_rows * new_cols * sizeof(bfloat16), 0.0f);
+    std::vector<bfloat16> out(new_rows * new_cols, 0.0f);
 
     for (size_t r = 0; r < rows; ++r) {
         // Destination row start (skip first row + padding col)
