@@ -219,3 +219,18 @@ CPMAddPackage(
         "TT_LOGGER_INSTALL ON"
         "TT_LOGGER_BUILD_TESTING OFF"
 )
+
+####################################################################################################################
+# enchantum
+####################################################################################################################
+
+
+include(FetchContent)
+
+FetchContent_Declare(
+    enchantum
+    GIT_REPOSITORY https://github.com/ZXShady/enchantum.git
+    GIT_TAG 8ca5b0eb7e7ebe0252e5bc6915083f1dd1b8294e
+)
+
+FetchContent_MakeAvailable(enchantum)

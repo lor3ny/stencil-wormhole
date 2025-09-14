@@ -113,16 +113,17 @@ int main(int argc, char** argv) {
 
     cout << "DRAM buffer size (bytes): " << i2r_buffer_size << endl;
 
-    uint32_t dram_buffer_size = align_vector_size(input_vec_i2r, i2r_buffer_size, single_tile_size);
-    uint32_t diff_dram = (dram_buffer_size - i2r_buffer_size) / sizeof(bfloat16);
+    //uint32_t dram_buffer_size = align_vector_size(input_vec_i2r, i2r_buffer_size, single_tile_size);
+    //uint32_t diff_dram = (dram_buffer_size - i2r_buffer_size) / sizeof(bfloat16);
 
-    std::cout << "Input I2R: " << std::endl;
+    std::cout << "Input I2R: "<< std::endl;
     printMat(input_vec_i2r, rows_i2r, cols_i2r);
 
     // std::cout << "Input Padded im2row-ed Aligned: " << std::endl;
     // printMat(input_vec_i2r, rows_i2r+diff_dram/5, cols_i2r);
 
     //! OUTPUT Device handling
+    uint32_t dram_buffer_size = i2r_buffer_size;
     vector<bfloat16> output_vec(dram_buffer_size/sizeof(bfloat16), 0.0f);
     //! THIS SECTION HAVE TO BE ADAPATED TO THE TT KERNEL
     //! Now works only for copy! 
@@ -134,8 +135,8 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
 
     //! TILIZZAZIONE SEMBRA NECESSARIA, CAPIRE
-    //?src0_vec = tilize_nfaces(src0_vec, M, K);
-    //?src1_vec = tilize_nfaces(src1_vec, K, N);
+    input_vec_i2r = tilize_nfaces(input_vec_i2r, rows_i2r, cols_i2r);
+    stencil_vec_i2r = tilize_nfaces(stencil_vec_i2r, TILE_HEIGHT*2, TILE_WIDTH);
     //! TILIZZAZIONE SEMBRA NECESSARIA, CAPIRE
 
     cout << "Initializing..." << endl;
@@ -326,7 +327,7 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
 
     //! TILIZZAZIONE SEMBRA NECESSARIA, CAPIRE
-    //?output_vec = untilize_nfaces(result_vec, M, N);
+    output_vec = untilize_nfaces(output_vec, rows_i2r, cols_i2r);
     //! TILIZZAZIONE SEMBRA NECESSARIA, CAPIRE
 
     std::cout << "Output: " << std::endl;

@@ -109,6 +109,7 @@ target_link_directories(stencil PRIVATE
 target_link_libraries(stencil PRIVATE
     fmt
     magic_enum
+    enchantum::enchantum
     Reflect::Reflect
     yaml-cpp
     Boost::core
@@ -117,3 +118,30 @@ target_link_libraries(stencil PRIVATE
     tt_metal
     tt-logger::tt-logger
 )
+
+# target_link_libraries(
+#     tt_metal
+#     PUBLIC
+#         umd::device
+#         enchantum::enchantum
+#         fmt::fmt-header-only
+#         TracyClient
+#         nlohmann_json::nlohmann_json
+#         TT::Metalium::HostDevCommon
+#         Reflect::Reflect
+#         TT::STL
+#         tt-logger::tt-logger
+#     PRIVATE
+#         Metalium::Metal::Impl
+#         metal_common_libs
+#         common
+#         jit_build
+#         llrt
+#         detail
+#         distributed
+#         fabric
+#         HAL::wormhole
+#         HAL::blackhole
+#         FlatBuffers::FlatBuffers
+#         TT::Metalium::Logging
+# )
