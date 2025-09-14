@@ -49,10 +49,10 @@ void im2row_5p(vector<bfloat16>& in, vector<bfloat16>& out, uint32_t rows, uint3
             out_bf16[index+2] = in_bf16[i*cols + j];
             out_bf16[index+3] = in_bf16[i*cols + (j+1)];
             out_bf16[index+4] = in_bf16[(i+1)*cols + j];
-            out_bf16[index+5] = 0; //! padding
-            out_bf16[index+6] = 0; //! padding
-            out_bf16[index+7] = 0; //! padding
-            index += 8;
+            for(int k = index+5; k<index+31; k++){
+                out_bf16[index+k] = 0; //! padding
+            }
+            index += 32;
         }
     }
 }
@@ -69,7 +69,7 @@ uint32_t align_vector_size(vector<bfloat16>& in, size_t starting_size, size_t si
         }    
         new_size += align;
     }
-    uint32_t new_count = new_size / sizeof(uint32_t);
+    uint32_t new_count = new_size / sizeof(bfloat16);
     in.resize(new_count, 0.0f);
 
     return new_size;
