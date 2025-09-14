@@ -11,8 +11,7 @@ void kernel_main() {
     
     uint32_t dst_addr = get_arg_val<uint32_t>(0);
     uint32_t tiles_count = get_arg_val<uint32_t>(1);
-    uint32_t dst_bank_id = get_arg_val<uint32_t>(2);
-    uint32_t dst_size = get_arg_val<uint32_t>(3);
+    uint32_t dst_size = get_arg_val<uint32_t>(2);
 
     constexpr uint32_t cb_id_out16 = 16;
 

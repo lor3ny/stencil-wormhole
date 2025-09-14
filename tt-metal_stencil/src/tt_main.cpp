@@ -66,28 +66,20 @@ int main(int argc, char** argv) {
 
     //! INPUT BUFFER INITIALIZATION
     //! STENCIL BUFFER INITIALIZTION
-    uint32_t uint32_count = buffer_size / sizeof(uint32_t);
-    vector<uint32_t> input_vec(uint32_count);
-    input_vec = create_constant_vector_of_bfloat16(buffer_size, 5.5f);
-    bfloat16* init_input_ptr = reinterpret_cast<bfloat16*>(input_vec.data());
-    for(int i = 0; i<uint32_count*2; i++){
-        init_input_ptr[i] = bfloat16(1.0f);//bfloat16((float)i);
+    uint32_t input_bfp16_count = buffer_size / sizeo(bfloat16);
+    vector<bfloat16> input_vec(input_bfp16_count);
+    for(int i = 0; i<input_bfp16_count; i++){
+        input_vec[i] = bfloat16(1.0f); //bfloat16((float)i);
     }
 
-    //? STENCIL IS NOT WORKING, AND IT IS CORRUPTING THE MEMORY OF THE OTHER BUFFERS
-    //? THE BUFFER HAS 0 BUT IT SHOULDN'T AFTER I'VE ADDED 3 ZEROS IN ROWS_2IR
-    uint32_t stencil_buffer_size = 5 * TILE_WIDTH * sizeof(bfloat16);
-    uint32_t stencil_final_buffer_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16) * 2;
-    uint32_t stencil_uint32_count = stencil_final_buffer_size / sizeof(uint32_t);
-    vector<uint32_t> stencil_vec_i2r(stencil_uint32_count);
-    stencil_vec_i2r = create_constant_vector_of_bfloat16(stencil_final_buffer_size, 1.0f);
-    bfloat16* init_stencil_ptr = reinterpret_cast<bfloat16*>(stencil_vec_i2r.data());
+    uint32_t stencil_buffer_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16) * 2;
+    uint32_t stencil_bfp16_cunt = stencil_buffer_size / sizeof(bfloat16);
+    vector<bfloat16> stencil_vec_i2r(stencil_uint32_count, 1.0f);
 
     for (int s_j = 0; s_j < TILE_WIDTH; s_j++){
-        init_stencil_ptr[2*TILE_WIDTH + s_j] = bfloat16(0.25f);
-        init_stencil_ptr[9*TILE_WIDTH + s_j] = bfloat16(0.25f);
+        stencil_vec_i2r[2*TILE_WIDTH + s_j] = bfloat16(0.25f);
+        stencil_vec_i2r[9*TILE_WIDTH + s_j] = bfloat16(0.25f);
     }
-    //stencil_vec_i2r.resize(stencil_final_buffer_size/sizeof(uint32_t), 0.0f);
     cout << "Stencil:" << endl;
     printMat(stencil_vec_i2r, TILE_HEIGHT*2, TILE_WIDTH);
     //! INPUT BUFFER INITIALIZATION
@@ -116,7 +108,6 @@ int main(int argc, char** argv) {
     //* ALIGNEMENT
     //* ----------
 
-
     cout << "DRAM buffer size (bytes): " << i2r_buffer_size << endl;
 
     uint32_t dram_buffer_size = align_vector_size(input_vec_i2r, i2r_buffer_size, single_tile_size);
@@ -129,8 +120,7 @@ int main(int argc, char** argv) {
     // printMat(input_vec_i2r, rows_i2r+diff_dram/5, cols_i2r);
 
     //! OUTPUT Device handling
-    vector<uint32_t> output_vec(dram_buffer_size/sizeof(uint32_t));
-    output_vec = create_constant_vector_of_bfloat16(dram_buffer_size, 0.0f);
+    vector<bfloat16> output_vec(dram_buffer_size/sizeof(bfloat16), 0.0f);
     //! THIS SECTION HAVE TO BE ADAPATED TO THE TT KERNEL
     //! Now works only for copy! 
 
@@ -139,6 +129,11 @@ int main(int argc, char** argv) {
     // HOST INITIALIZATION
     // ---------------------------------------------------------
     // ---------------------------------------------------------
+
+    //! TILIZZAZIONE SEMBRA NECESSARIA, CAPIRE
+    //?src0_vec = tilize_nfaces(src0_vec, M, K);
+    //?src1_vec = tilize_nfaces(src1_vec, K, N);
+    //! TILIZZAZIONE SEMBRA NECESSARIA, CAPIRE
 
     cout << "Initializing..." << endl;
     
@@ -167,17 +162,20 @@ int main(int argc, char** argv) {
     // Both input and output have the same configuration, in this case I have chosen Interleaved instead of Shreaded
 
     // device, size, page_size, buffer_type
-    tt_metal::InterleavedBufferConfig dram_inout_config{.device = device, 
-                                                  .size = num_tiles * single_tile_size, 
-                                                  .page_size = single_tile_size,  
-                                                  .buffer_type = tt_metal::BufferType::DRAM};
+    tt_metal::InterleavedBufferConfig dram_inout_config{
+            .device = device, 
+            .size = num_tiles * single_tile_size, 
+            .page_size = single_tile_size,  
+            .buffer_type = tt_metal::BufferType::DRAM};
+
+    tt_metal::InterleavedBufferConfig dram_stencil_config{
+            .device = device, 
+            .size = stencil_tiles * single_tile_size, 
+            .page_size = single_tile_size,  
+            .buffer_type = tt_metal::BufferType::DRAM};
+
     std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer = CreateBuffer(dram_inout_config);
     std::shared_ptr<tt::tt_metal::Buffer> output_dram_buffer = CreateBuffer(dram_inout_config);
-
-    tt_metal::InterleavedBufferConfig dram_stencil_config{.device = device, 
-                                                .size = stencil_tiles * single_tile_size, 
-                                                .page_size = single_tile_size,  
-                                                .buffer_type = tt_metal::BufferType::DRAM};
     std::shared_ptr<tt::tt_metal::Buffer> stencil_dram_buffer = CreateBuffer(dram_stencil_config);
 
     // ! In this case you should declare the starting address and the size of the region in the shared cache
@@ -190,21 +188,14 @@ int main(int argc, char** argv) {
 
     cout << "Creating SRAM buffers..." << endl;
 
-    uint32_t cb_input_index = CBIndex::c_0;  // 0
+    uint32_t cb_input_index = CBIndex::c_0;
     CircularBufferConfig cb_input_config(single_tile_size * num_tiles, 
                                           {{cb_input_index, data_format}}
     );
     cb_input_config.set_page_size(cb_input_index, single_tile_size);
     CBHandle cb_input = tt_metal::CreateCircularBuffer(program, core, cb_input_config);
 
-    uint32_t cb_output_index = CBIndex::c_16;  // 16
-    CircularBufferConfig cb_output_config(single_tile_size * num_tiles, 
-                                           {{cb_output_index, data_format}}
-    );
-    cb_output_config.set_page_size(cb_output_index, single_tile_size);
-    CBHandle cb_output = tt_metal::CreateCircularBuffer(program, core, cb_output_config);
-
-    uint32_t cb_stencil_index = CBIndex::c_1;  // 1
+    uint32_t cb_stencil_index = CBIndex::c_1; 
     CircularBufferConfig cb_stencil_config(single_tile_size * stencil_tiles, 
                                            {{cb_stencil_index, data_format}}
     );
@@ -212,17 +203,23 @@ int main(int argc, char** argv) {
     CBHandle cb_stencil = tt_metal::CreateCircularBuffer(program, core, cb_stencil_config);
     
 
+    uint32_t cb_output_index = CBIndex::c_16; 
+    CircularBufferConfig cb_output_config(single_tile_size * num_tiles, 
+                                           {{cb_output_index, data_format}}
+    );
+    cb_output_config.set_page_size(cb_output_index, single_tile_size);
+    CBHandle cb_output = tt_metal::CreateCircularBuffer(program, core, cb_output_config);
+
     // ---------------------------------------------------------
     // KERNELS CREATION: We need a reader, writer and then a compute
     // ---------------------------------------------------------
 
     cout << "Creating kernels..." << endl;
 
-    bool input_is_dram = input_dram_buffer->buffer_type() == tt_metal::BufferType::DRAM ? 1 : 0;
-    std::vector<uint32_t> reader_compile_time_args = {(uint32_t)input_is_dram};
 
-    bool output_is_dram = output_dram_buffer->buffer_type() == tt_metal::BufferType::DRAM ? 1 : 0;
-    std::vector<uint32_t> writer_compile_time_args = {(uint32_t)output_is_dram};
+    std::vector<uint32_t> reader_compile_time_args;
+    TensorAccessorArgs(*input_dram_buffer).append_to(reader_compile_time_args);
+    TensorAccessorArgs(*stencil_dram_buffer).append_to(reader_compile_time_args); 
 
     auto reader_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_stencil/src/kernels/dataflow/reader_input.cpp",
         core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_1, 
@@ -230,6 +227,8 @@ int main(int argc, char** argv) {
                                             .compile_args = reader_compile_time_args}
     );
 
+    std::vector<uint32_t> writer_compile_time_args;
+    TensorAccessorArgs(*output_dram_buffer).append_to(writer_compile_time_args); 
     
     auto writer_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_stencil/src/kernels/dataflow/writer_output.cpp",
         core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_0,
@@ -245,8 +244,8 @@ int main(int argc, char** argv) {
         core, 
         tt_metal::ComputeConfig{ 
             .math_fidelity = math_fidelity,
-            .fp32_dest_acc_en = false, 
-            .math_approx_mode = false,
+            //?.fp32_dest_acc_en = false, 
+            //?.math_approx_mode = false,
             .compile_args = compute_args,
         }
     );
@@ -258,6 +257,23 @@ int main(int argc, char** argv) {
     // If think many others
 
     // ---------------------------------------------------------
+    // SETUP RUNTIME ARGS: Set the runtime arguments for the kernels
+    // ---------------------------------------------------------
+
+    cout << "Setting up runtime arguments..." << endl;
+
+    // QUI SETTO RUNTIME ARGS PER READER
+    tt_metal::SetRuntimeArgs( program, reader_kernel_id, core,
+            {input_dram_buffer->address(), num_tiles, input_dram_buffer->size(),
+             stencil_dram_buffer->address(), stencil_tiles, stencil_dram_buffer->size()});
+    // QUI SETTO RUNTIME ARGS PER WRITER
+    tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, 
+            {output_dram_buffer->address(), num_tiles, output_dram_buffer->size()});
+    // QUI SETTO RUNTIME ARGS PER COMPUTE
+    tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {num_tiles});
+    
+
+    // ---------------------------------------------------------
     // ENQUEUE WRITE BUFFERS: Write data on the allocated buffers
     // ---------------------------------------------------------
     
@@ -265,32 +281,10 @@ int main(int argc, char** argv) {
 
     //! This is the first memcpy, it should be done only one time at the beginnning
     //! This is a memcpy, so output doesn't have to copied
-    EnqueueWriteBuffer(cq, input_dram_buffer, input_vec_i2r.data(), false); 
-    EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);  
-    EnqueueWriteBuffer(cq, stencil_dram_buffer, stencil_vec_i2r.data(), false);         
+    EnqueueWriteBuffer(cq, input_dram_buffer, input_vec_i2r.data(), false);   
+    EnqueueWriteBuffer(cq, stencil_dram_buffer, stencil_vec_i2r.data(), false);    
+    EnqueueWriteBuffer(cq, output_dram_buffer, output_vec.data(), false);     
     
-    // ---------------------------------------------------------
-    // SETUP RUNTIME ARGS: Set the runtime arguments for the kernels
-    // ---------------------------------------------------------
-
-    cout << "Setting up runtime arguments..." << endl;
-
-    //! I'm not sure about that, but seems to be not used in the kernels
-    const uint32_t input_bank_id = 0;
-    const uint32_t output_bank_id = 0;
-    const uint32_t stencil_bank_id = 0;
-
-    // QUI SETTO RUNTIME ARGS PER READER
-    tt_metal::SetRuntimeArgs( program, reader_kernel_id, core,
-            {input_dram_buffer->address(), num_tiles, input_bank_id, input_dram_buffer->size(),
-             stencil_dram_buffer->address(), stencil_tiles, stencil_bank_id, stencil_dram_buffer->size()});
-    // QUI SETTO RUNTIME ARGS PER WRITER
-    tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, 
-            {output_dram_buffer->address(), num_tiles, output_bank_id, output_dram_buffer->size()});
-    // QUI SETTO RUNTIME ARGS PER COMPUTE
-    tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {num_tiles});
-    
-
     // ---------------------------------------------------------
     // LAUNCH AND WAIT TERMINATION: Set the runtime arguments for the kernels
     // ---------------------------------------------------------
@@ -327,6 +321,10 @@ int main(int argc, char** argv) {
     // SAVE RESULTS AND CLEANING
     // ---------------------------------------------------------
     // ---------------------------------------------------------
+
+    //! TILIZZAZIONE SEMBRA NECESSARIA, CAPIRE
+    //?output_vec = untilize_nfaces(result_vec, M, N);
+    //! TILIZZAZIONE SEMBRA NECESSARIA, CAPIRE
 
     std::cout << "Output: " << std::endl;
     printMat(output_vec, rows_i2r, cols_i2r);

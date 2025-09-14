@@ -14,13 +14,11 @@ void kernel_main() {
     // I HAVE ONLY ONE INPUT BUFFER, that goes to CB c_0 
     uint32_t src_addr = get_arg_val<uint32_t>(0);
     uint32_t num_tiles = get_arg_val<uint32_t>(1);
-    uint32_t src_bank_id = get_arg_val<uint32_t>(2);
-    uint32_t src_size = get_arg_val<uint32_t>(3);
+    uint32_t src_size = get_arg_val<uint32_t>(2);
 
-    uint32_t stencil_addr = get_arg_val<uint32_t>(4);
-    uint32_t stencil_tiles = get_arg_val<uint32_t>(5);
-    uint32_t stencil_bank_id = get_arg_val<uint32_t>(6);
-    uint32_t stencil_size = get_arg_val<uint32_t>(7);
+    uint32_t stencil_addr = get_arg_val<uint32_t>(3);
+    uint32_t stencil_tiles = get_arg_val<uint32_t>(4);
+    uint32_t stencil_size = get_arg_val<uint32_t>(5);
 
     constexpr uint32_t cb_id_in0 = 0;
     constexpr uint32_t cb_id_in1 = 1;
@@ -41,7 +39,7 @@ void kernel_main() {
     constexpr auto s_args_0 = TensorAccessorArgs<0>();
     const auto src_dram_loc = TensorAccessor(s_args_0, src_addr, get_tile_size(cb_id_in0));
 
-    constexpr auto s_args_1 = TensorAccessorArgs<1/*s_args_0.next_compile_time_args_offset()*/>();
+    constexpr auto s_args_1 = TensorAccessorArgs<s_args_0.next_compile_time_args_offset()>();
     const auto stencil_dram_loc = TensorAccessor(s_args_1, stencil_addr, get_tile_size(cb_id_in1));
 
     //* INPUT READING, pipelined with computation and writing
