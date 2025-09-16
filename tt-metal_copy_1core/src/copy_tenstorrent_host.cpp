@@ -147,14 +147,14 @@ int main(int argc, char** argv) {
     bool output_is_dram = output_dram_buffer->buffer_type() == tt_metal::BufferType::DRAM ? 1 : 0;
     std::vector<uint32_t> writer_compile_time_args = {(uint32_t)output_is_dram};
 
-    auto reader_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/src/kernels/dataflow/reader_input.cpp",
+    auto reader_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_copy_1core/src/kernels/dataflow/reader_input.cpp",
         core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_1, 
                                             .noc = NOC::RISCV_1_default,
                                             .compile_args = reader_compile_time_args}
     );
 
     
-    auto writer_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/src/kernels/dataflow/writer_output.cpp",
+    auto writer_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_copy_1core/src/kernels/dataflow/writer_output.cpp",
         core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_0,
                                             .noc = NOC::RISCV_0_default,
                                             .compile_args = writer_compile_time_args}
@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
     std::vector<uint32_t> compute_args = {};
     KernelHandle stencil_kernel_id = tt_metal::CreateKernel( 
         program, 
-        "/home/lpiarulli_tt/stencil-wormhole/tt-metal_1core_copy/src/kernels/compute/stencil.cpp",
+        "/home/lpiarulli_tt/stencil-wormhole/tt-metal_copy_1core/src/kernels/compute/stencil.cpp",
         core, 
         tt_metal::ComputeConfig{ 
             .math_fidelity = math_fidelity,

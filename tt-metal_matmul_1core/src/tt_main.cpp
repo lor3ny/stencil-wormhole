@@ -116,7 +116,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     TensorAccessorArgs(*input_dram_buffer).append_to(reader_compile_time_args);
     TensorAccessorArgs(*stencil_dram_buffer).append_to(reader_compile_time_args); 
 
-    auto reader_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_stencil/src/kernels/dataflow/reader_input.cpp",
+    auto reader_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_matmul_1core/src/kernels/dataflow/reader_input.cpp",
         core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_1, 
                                             .noc = NOC::RISCV_1_default,
                                             .compile_args = reader_compile_time_args}
@@ -125,7 +125,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     std::vector<uint32_t> writer_compile_time_args;
     TensorAccessorArgs(*output_dram_buffer).append_to(writer_compile_time_args); 
     
-    auto writer_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_stencil/src/kernels/dataflow/writer_output.cpp",
+    auto writer_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_matmul_1core/src/kernels/dataflow/writer_output.cpp",
         core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_0,
                                             .noc = NOC::RISCV_0_default,
                                             .compile_args = writer_compile_time_args}
@@ -135,7 +135,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     std::vector<uint32_t> compute_args = {};
     KernelHandle stencil_kernel_id = tt_metal::CreateKernel( 
         program, 
-        "/home/lpiarulli_tt/stencil-wormhole/tt-metal_stencil/src/kernels/compute/stencil.cpp",
+        "/home/lpiarulli_tt/stencil-wormhole/tt-metal_matmul_1core/src/kernels/compute/stencil.cpp",
         core, 
         tt_metal::ComputeConfig { 
             .math_fidelity = math_fidelity,
