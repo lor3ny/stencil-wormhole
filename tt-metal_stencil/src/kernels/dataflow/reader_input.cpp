@@ -46,7 +46,7 @@ void kernel_main() {
 
     for (uint32_t tile_i = 0; tile_i < num_tiles; tile_i++) {
         {
-            cb_reserve_back(cb_id_in0, 1);
+            cb_reserve_back(cb_id_in0, 1); // that call is blocking, it goes only if there's space
             uint32_t l1_write_addr_in0 = get_write_ptr(cb_id_in0);
             noc_async_read_tile(tile_i, src_dram_loc, l1_write_addr_in0);
             noc_async_read_barrier();
@@ -54,7 +54,7 @@ void kernel_main() {
         }
 
         {
-            cb_reserve_back(cb_id_in1, 1);
+            cb_reserve_back(cb_id_in1, 1); // that call is blocking, it goes only if there's space
             uint32_t l1_write_addr_in1 = get_write_ptr(cb_id_in1);
             noc_async_read_tile(tile_i, stencil_dram_loc, l1_write_addr_in1);
             noc_async_read_barrier();

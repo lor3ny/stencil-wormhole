@@ -23,8 +23,12 @@ using namespace std;
 
 #define TILE_WIDTH 32 // bfloats
 #define TILE_HEIGHT 32 // bfloats
+#define ROWS 512
+#define COLS 512
 
-//export TT_METAL_DPRINT_CORES="(0,0)-(7,7)"
+
+// I wanto to have all the SRAM available, maybe I could use also multiple CBs
+#define SRAM_TILES 128
 
 
 int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bfloat16>& output, uint32_t n_tiles, uint32_t stencil_n_tiles, uint32_t tile_size, IDevice* device){
@@ -80,14 +84,14 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     cout << "Creating SRAM buffers..." << endl;
 
     uint32_t cb_input_index = CBIndex::c_0;
-    CircularBufferConfig cb_input_config(tile_size * n_tiles, 
+    CircularBufferConfig cb_input_config(tile_size * SRAM_TILES, 
                                           {{cb_input_index, data_format}}
     );
     cb_input_config.set_page_size(cb_input_index, tile_size);
     CBHandle cb_input = tt_metal::CreateCircularBuffer(program, core, cb_input_config);
 
     uint32_t cb_stencil_index = CBIndex::c_1; 
-    CircularBufferConfig cb_stencil_config(tile_size * stencil_n_tiles, 
+    CircularBufferConfig cb_stencil_config(tile_size * SRAM_TILES, 
                                            {{cb_stencil_index, data_format}}
     );
     cb_stencil_config.set_page_size(cb_stencil_index, tile_size);
@@ -95,7 +99,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     
 
     uint32_t cb_output_index = CBIndex::c_16; 
-    CircularBufferConfig cb_output_config(tile_size * n_tiles, 
+    CircularBufferConfig cb_output_config(tile_size * SRAM_TILES, 
                                            {{cb_output_index, data_format}}
     );
     cb_output_config.set_page_size(cb_output_index, tile_size);
@@ -185,7 +189,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     cout << "Enqueueing kernels..." << endl;	
 
     //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
-    int times = 2;
+    int times = 10;
     for(i = 0; i<times; i++){
 
         cout << "times: " << i << endl;
@@ -195,17 +199,17 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
 
         if (i != times-1){
 
-            output = untilize_nfaces(output, 64, 32);
-            vector<bfloat16> new_in(8*8);
+            output = untilize_nfaces(output, ROWS*COLS, TILE_WIDTH);
+            vector<bfloat16> new_in(ROWS*COLS);
             vec2stencil_5p(output, new_in, TILE_HEIGHT, n_tiles);
 
-            vector<bfloat16> new_in_pad(10*10);
-            pad_with_zeros(new_in, new_in_pad, 8, 8, 1);
+            vector<bfloat16> new_in_pad((ROWS+2)*(COLS+2));
+            pad_with_zeros(new_in, new_in_pad, ROWS, COLS, 1);
 
-            vector<bfloat16> new_in_i2r(8*8*32);
-            stencil2vec_5p(new_in_pad, new_in_i2r, 10, 10);
+            vector<bfloat16> new_in_i2r(ROWS*ROWS*TILE_WIDTH);
+            stencil2vec_5p(new_in_pad, new_in_i2r, (ROWS+2), (COLS+2));
 
-            new_in_i2r = tilize_nfaces(new_in_i2r, 64, 32);
+            new_in_i2r = tilize_nfaces(new_in_i2r, ROWS*COLS, TILE_WIDTH);
             EnqueueWriteBuffer(cq, input_dram_buffer, new_in_i2r.data(), false);  
         }  
     }
@@ -233,8 +237,8 @@ int main(int argc, char** argv) {
 
     const size_t single_tile_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16); // bytes
 
-    //! To define by the input
-    constexpr uint32_t rows = 8, cols = 8;
+    //! To define by the input 
+    constexpr uint32_t rows = ROWS, cols = COLS;
     constexpr uint32_t stencil_order = 1;
     //! To define by the input
 
@@ -243,7 +247,6 @@ int main(int argc, char** argv) {
     //* stencil
     const uint32_t stencil_rows = TILE_HEIGHT;
     const uint32_t stencil_cols = TILE_WIDTH; 
-
     //* padding
     const uint32_t rows_pad = rows + stencil_order * 2; 
     const uint32_t cols_pad = cols + stencil_order * 2;
@@ -326,13 +329,13 @@ int main(int argc, char** argv) {
     printMat(input_vec_pad, rows_pad, cols_pad);
     cout << endl;
 
-    cout << "Input I2R: " << endl;
-    printMat(input_vec_i2r, rows_i2r, cols_i2r);
-    cout << endl;
+    // cout << "Input I2R: " << endl;
+    // printMat(input_vec_i2r, rows_i2r, cols_i2r);
+    // cout << endl;
 
-    cout << "Stencil I2R:" << endl;
-    printMat(stencil_vec_i2r, TILE_HEIGHT*num_tiles, TILE_WIDTH);
-    cout << endl;
+    // cout << "Stencil I2R:" << endl;
+    // printMat(stencil_vec_i2r, TILE_HEIGHT*num_tiles, TILE_WIDTH);
+    // cout << endl;
 
     //! KERNEL AREA
     int device_id = 0;
