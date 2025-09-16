@@ -1,9 +1,5 @@
 #pragma once
 
-#include <tt-metalium/bfloat16.hpp>
-#include <iostream>
-#include <vector>
-//#include <omp.h>
 
 #include "utils.hpp"
 
@@ -33,27 +29,69 @@ constexpr float est_stencil[9] = {
 };
 
 //! This function is specialized for star 5-point stencil
-void im2row_5p(vector<bfloat16>& in, vector<bfloat16>& out, uint32_t rows, uint32_t cols){
-    
-    bfloat16* in_bf16 = reinterpret_cast<bfloat16*>(in.data());
-    bfloat16* out_bf16 = reinterpret_cast<bfloat16*>(out.data());
+// in is 10x10 and out is 64x32,
+void stencil2vec_5p(vector<bfloat16>& in, vector<bfloat16>& out, int rows, int cols){
     
     // This functin can be parallelized
     int index = 0;
-    for(int i = 1; i<rows-1; i++){ //rows
-        for(int j = 1; j<cols-1; j++){ //cols
+    int total_size = (rows-1) * (cols-1);
+    int i, j;
+
+    // for(int flat = cols; flat < total_size; flat++){
+    //     i = flat / cols;
+    //     j = flat % cols;
+
+    //     out[index] = in[(i-1)*cols + j];
+    //     out[index+1] = in[i*cols + (j-1)];
+    //     out[index+2] = in[i*cols + j];
+    //     out[index+3] = in[i*cols + (j+1)];
+    //     out[index+4] = in[(i+1)*cols + j];
+    //     for(int k = index+5; k<index+31; k++){
+    //         out[index+k] = 0; //! padding
+    //     }
+    //     index += 32;
+    // }
+
+    for(i = 1; i<rows-1; i++){ // rows from 1 to 9
+        for(j = 1; j<cols-1; j++){ // cols
 
             // This phase ca be SIMDized
-            out_bf16[index] = in_bf16[(i-1)*cols + j];
-            out_bf16[index+1] = in_bf16[i*cols + (j-1)];
-            out_bf16[index+2] = in_bf16[i*cols + j];
-            out_bf16[index+3] = in_bf16[i*cols + (j+1)];
-            out_bf16[index+4] = in_bf16[(i+1)*cols + j];
+            out[index] = in[(i-1)*cols + j];
+            out[index+1] = in[i*cols + (j-1)];
+            out[index+2] = in[i*cols + j];
+            out[index+3] = in[i*cols + (j+1)];
+            out[index+4] = in[(i+1)*cols + j];
             for(int k = index+5; k<index+31; k++){
-                out_bf16[index+k] = 0; //! padding
+                out[k] = 0; //! padding
             }
             index += 32;
         }
+    }
+}
+
+
+void vec2stencil_5p(vector<bfloat16>& in, vector<bfloat16>& out, int tile_height, int n_tiles){
+    int j;
+    int picker = 0;
+    for(j = 0; j<tile_height*n_tiles; j++){
+        out[j] = in[picker];
+        picker+=32;
+    }
+}
+
+// it is implemented considering star stencils, not squared ones
+void pad_with_zeros(vector<bfloat16>& in,  vector<bfloat16>& out, int rows, int cols, int pad_size){
+
+    size_t new_rows = rows + pad_size*2;
+    size_t new_cols = cols + pad_size*2;
+
+
+    for (size_t r = 0; r < rows; ++r) {
+        // Destination row start (skip first row + padding col)
+        bfloat16* dest = out.data() + (r + pad_size) * new_cols + pad_size;
+        const bfloat16* src = in.data() + r * cols;
+
+        std::memcpy(dest, src, cols * sizeof(bfloat16));
     }
 }
 
@@ -75,29 +113,6 @@ uint32_t align_vector_size(vector<bfloat16>& in, size_t starting_size, size_t si
     return new_size;
 }
 
-
-// it is implemented considering star stencils, not squared ones
-vector<bfloat16> pad_with_zeros(vector<bfloat16>& in, int rows, int cols, int stencil_order){
-
-    size_t pad_size = stencil_order * 2;
-
-    size_t new_rows = rows + pad_size;
-    size_t new_cols = cols + pad_size;
-    std::vector<bfloat16> out(new_rows * new_cols, 0.0f);
-
-    for (size_t r = 0; r < rows; ++r) {
-        // Destination row start (skip first row + padding col)
-        bfloat16* out_bf16 = reinterpret_cast<bfloat16*>(out.data());
-        bfloat16* in_bf16 = reinterpret_cast<bfloat16*>(in.data());
-
-        bfloat16* dest = out_bf16 + (r + stencil_order) * new_cols + stencil_order;
-        const bfloat16* src = in_bf16 + r * cols;
-
-        std::memcpy(dest, src, cols * sizeof(bfloat16));
-    }
-
-    return out;
-}
 
 //! Tester function
 void matVecMul(

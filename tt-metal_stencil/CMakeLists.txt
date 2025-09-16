@@ -33,8 +33,15 @@ else()
     add_subdirectory(dependencies EXCLUDE_FROM_ALL SYSTEM)
 endif()
 
-add_compile_options($<$<COMPILE_LANG_AND_ID:CXX,Clang>:-fsized-deallocation>)
+find_package(OpenMP)
+if (OpenMP_CXX_FOUND)
+    message(STATUS "OpenMP found, enabling support.")
+else()
+    message(WARNING "OpenMP not found, building without parallelization.")
+endif()
 
+
+add_compile_options($<$<COMPILE_LANG_AND_ID:CXX,Clang>:-fsized-deallocation>)
 add_executable(stencil src/tt_main.cpp)
 
 set_target_properties(stencil PROPERTIES
@@ -43,9 +50,16 @@ set_target_properties(stencil PROPERTIES
     CXX_EXTENSIONS OFF
 )
 
-target_compile_definitions(stencil PRIVATE
-    FMT_HEADER_ONLY
-)
+if (OpenMP_CXX_FOUND)
+    target_compile_definitions(stencil PRIVATE
+        FMT_HEADER_ONLY
+        WITH_OPENMP
+    )
+else()
+    target_compile_definitions(stencil PRIVATE
+        FMT_HEADER_ONLY
+    )
+endif()
 
 target_compile_options(stencil PRIVATE
     -Werror
@@ -105,43 +119,31 @@ target_include_directories(stencil PRIVATE
 target_link_directories(stencil PRIVATE
     $ENV{TT_METAL_HOME}/build_Release/tt_metal
 )
-
-target_link_libraries(stencil PRIVATE
-    fmt
-    magic_enum
-    enchantum::enchantum
-    Reflect::Reflect
-    yaml-cpp
-    Boost::core
-    Boost::container
-    nlohmann_json::nlohmann_json
-    tt_metal
-    tt-logger::tt-logger
-)
-
-# target_link_libraries(
-#     tt_metal
-#     PUBLIC
-#         umd::device
-#         enchantum::enchantum
-#         fmt::fmt-header-only
-#         TracyClient
-#         nlohmann_json::nlohmann_json
-#         TT::Metalium::HostDevCommon
-#         Reflect::Reflect
-#         TT::STL
-#         tt-logger::tt-logger
-#     PRIVATE
-#         Metalium::Metal::Impl
-#         metal_common_libs
-#         common
-#         jit_build
-#         llrt
-#         detail
-#         distributed
-#         fabric
-#         HAL::wormhole
-#         HAL::blackhole
-#         FlatBuffers::FlatBuffers
-#         TT::Metalium::Logging
-# )
+if (OpenMP_CXX_FOUND)
+    target_link_libraries(stencil PRIVATE
+        fmt
+        magic_enum
+        enchantum::enchantum
+        Reflect::Reflect
+        yaml-cpp
+        Boost::core
+        Boost::container
+        nlohmann_json::nlohmann_json
+        tt_metal
+        tt-logger::tt-logger
+        OpenMP::OpenMP_CXX
+    )
+else()
+    target_link_libraries(stencil PRIVATE
+        fmt
+        magic_enum
+        enchantum::enchantum
+        Reflect::Reflect
+        yaml-cpp
+        Boost::core
+        Boost::container
+        nlohmann_json::nlohmann_json
+        tt_metal
+        tt-logger::tt-logger
+    )
+endif()

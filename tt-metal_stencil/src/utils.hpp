@@ -2,6 +2,13 @@
 
 #include <iostream>
 #include <tt-metalium/bfloat16.hpp>
+#include <iostream>
+#include <vector>
+
+#ifdef WITH_OPENMP
+    #include <omp.h>
+#endif
+
 
 
 /*--------------------------------

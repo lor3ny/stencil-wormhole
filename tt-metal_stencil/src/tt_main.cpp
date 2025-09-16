@@ -33,7 +33,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     //* HOST INITIALIZATION
     //* ---------------------------------------------------------
 
-    cout << "Initializing..." << endl;
+    int i, j;
     
     // Create the device and the program
     CommandQueue& cq = device->command_queue(); // Take the command_queue from the device created
@@ -185,8 +185,8 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     cout << "Enqueueing kernels..." << endl;	
 
     //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
-    int times = 3;
-    for(int i = 0; i<times; i++){
+    int times = 2;
+    for(i = 0; i<times; i++){
 
         cout << "times: " << i << endl;
 
@@ -195,20 +195,17 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
 
         if (i != times-1){
 
-            // //! New input creation, padding, and im2row conversion (alignement?)
             output = untilize_nfaces(output, 64, 32);
-            vector<bfloat16> new_in;
-            vector<bfloat16> new_in_i2r(8*8*32);
-            int picker = 0;
-            for(int j = 0; j<TILE_HEIGHT*n_tiles; j++){
-                new_in.push_back(output[picker]);
-                picker+=32;
-            }
-            new_in = pad_with_zeros(new_in, 8, 8, 1);
-            im2row_5p(new_in, new_in_i2r, 10, 10);
-            new_in_i2r = tilize_nfaces(new_in_i2r, 64, 32);
+            vector<bfloat16> new_in(8*8);
+            vec2stencil_5p(output, new_in, TILE_HEIGHT, n_tiles);
 
-            // //! SE CI FOSSE LA UPM NON DOVREI FARE QUESTA SEZIONE
+            vector<bfloat16> new_in_pad(10*10);
+            pad_with_zeros(new_in, new_in_pad, 8, 8, 1);
+
+            vector<bfloat16> new_in_i2r(8*8*32);
+            stencil2vec_5p(new_in_pad, new_in_i2r, 10, 10);
+
+            new_in_i2r = tilize_nfaces(new_in_i2r, 64, 32);
             EnqueueWriteBuffer(cq, input_dram_buffer, new_in_i2r.data(), false);  
         }  
     }
@@ -255,8 +252,7 @@ int main(int argc, char** argv) {
     //* i2r
     const uint32_t rows_i2r = rows * cols;
     const uint32_t cols_i2r = (stencil_order*4)+1 + 27; //! plus 28 is for the padding to become 32
-    const size_t i2r_buffer_count = rows_i2r * cols_i2r;
-    const size_t i2r_buffer_size = i2r_buffer_count * sizeof(bfloat16); 
+    const size_t i2r_buffer_size = rows_i2r * cols_i2r * sizeof(bfloat16); 
     //! direct from the input
 
     uint32_t num_tiles, stencil_tiles, dram_buffer_size, diff_dram;
@@ -275,22 +271,26 @@ int main(int argc, char** argv) {
 
     vector<bfloat16> input_vec(rows * cols);
     for(i = 0; i<rows * cols; i++){
-        input_vec[i] = bfloat16(1.0f);
+        input_vec[i] = bfloat16(0.0f);
     }
+    input_vec[(rows/2)*cols + cols/2] = 1.0f;
 
     //* ----------
     //* PADDING
     //* ----------
 
     // Pad the input, and the output but it's not necessary
-    input_vec = pad_with_zeros(input_vec, rows, cols, 1);
+    vector<bfloat16> input_vec_pad(rows_pad * cols_pad, 0.0f);
+    pad_with_zeros(input_vec, input_vec_pad, rows, cols, 1);
+
+    cout << 1 << endl;
 
     //* ----------
     //* im2row CONVERTION
     //* ----------
 
-    vector<bfloat16> input_vec_i2r(i2r_buffer_count);
-    im2row_5p(input_vec, input_vec_i2r, rows_pad, cols_pad);
+    vector<bfloat16> input_vec_i2r(rows_i2r * cols_i2r);
+    stencil2vec_5p(input_vec_pad, input_vec_i2r, rows_pad, cols_pad);
 
     //* ----------
     //* ALIGNEMENT
@@ -322,12 +322,17 @@ int main(int argc, char** argv) {
     cout << "Number of tiles: " << num_tiles << endl;
     cout << "Number of stencil tiles: " << stencil_tiles << endl;
 
-    cout << "Input I2R: "<< endl;
+    cout << "Input: " << endl;
+    printMat(input_vec_pad, rows_pad, cols_pad);
+    cout << endl;
+
+    cout << "Input I2R: " << endl;
     printMat(input_vec_i2r, rows_i2r, cols_i2r);
+    cout << endl;
 
-    cout << "Stencil:" << endl;
+    cout << "Stencil I2R:" << endl;
     printMat(stencil_vec_i2r, TILE_HEIGHT*num_tiles, TILE_WIDTH);
-
+    cout << endl;
 
     //! KERNEL AREA
     int device_id = 0;
@@ -344,7 +349,8 @@ int main(int argc, char** argv) {
     //! KERNEL AREA
 
     cout << "Output: " << endl;
-    printMat(output_vec, rows_i2r, cols_i2r);
+    vec2stencil_5p(output_vec, input_vec, TILE_HEIGHT, num_tiles);
+    printMat(input_vec, rows, cols);
 
     return 0;
 }
