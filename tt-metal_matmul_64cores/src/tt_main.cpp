@@ -9,7 +9,7 @@
 #include <tt-metalium/util.hpp>
 #include <tt-metalium/bfloat16.hpp>
 #include <tt-metalium/command_queue.hpp>
-
+#include <tt-metalium/work_split.hpp>
 #include <tt-metalium/tilize_utils.hpp>
 #include <tt-metalium/tensor_accessor_args.hpp>
 
@@ -47,6 +47,14 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
 
     DataFormat data_format = DataFormat::Float16_b;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
+
+    const auto core_grid = device->compute_with_storage_grid_size();
+
+    auto [num_cores, all_cores, core_group_1, core_group_2, work_per_core1, work_per_core2] =
+    tt::tt_metal::split_work_to_cores(core_grid, n_tiles);
+
+    //? If you have 64 cores, you at least 64 tiles so at least 32x64: if you have less you need to reduce cores
+    //? I need to understand if it is better to have 1 tile per 64 core or less cores more tiles per core [MEASURE]
 
     // ---------------------------------------------------------
     // DRAM BUFFER CREATION: OFFCHIP GDDR6 MEMORY 12GB
@@ -88,14 +96,14 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
                                           {{cb_input_index, data_format}}
     );
     cb_input_config.set_page_size(cb_input_index, tile_size);
-    CBHandle cb_input = tt_metal::CreateCircularBuffer(program, core, cb_input_config);
+    CBHandle cb_input = tt_metal::CreateCircularBuffer(program, all_cores, cb_input_config);
 
     uint32_t cb_stencil_index = CBIndex::c_1; 
     CircularBufferConfig cb_stencil_config(tile_size * SRAM_TILES, 
                                            {{cb_stencil_index, data_format}}
     );
     cb_stencil_config.set_page_size(cb_stencil_index, tile_size);
-    CBHandle cb_stencil = tt_metal::CreateCircularBuffer(program, core, cb_stencil_config);
+    CBHandle cb_stencil = tt_metal::CreateCircularBuffer(program, all_cores, cb_stencil_config);
     
 
     uint32_t cb_output_index = CBIndex::c_16; 
@@ -103,7 +111,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
                                            {{cb_output_index, data_format}}
     );
     cb_output_config.set_page_size(cb_output_index, tile_size);
-    CBHandle cb_output = tt_metal::CreateCircularBuffer(program, core, cb_output_config);
+    CBHandle cb_output = tt_metal::CreateCircularBuffer(program, all_cores, cb_output_config);
 
     // ---------------------------------------------------------
     // KERNELS CREATION: We need a reader, writer and then a compute
@@ -117,7 +125,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     TensorAccessorArgs(*stencil_dram_buffer).append_to(reader_compile_time_args); 
 
     auto reader_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_matmul_64cores/src/kernels/dataflow/reader_input.cpp",
-        core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_1, 
+        all_cores, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_1, 
                                             .noc = NOC::RISCV_1_default,
                                             .compile_args = reader_compile_time_args}
     );
@@ -126,7 +134,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     TensorAccessorArgs(*output_dram_buffer).append_to(writer_compile_time_args); 
     
     auto writer_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_matmul_64cores/src/kernels/dataflow/writer_output.cpp",
-        core, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_0,
+        all_cores, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_0,
                                             .noc = NOC::RISCV_0_default,
                                             .compile_args = writer_compile_time_args}
     );
@@ -136,7 +144,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     KernelHandle stencil_kernel_id = tt_metal::CreateKernel( 
         program, 
         "/home/lpiarulli_tt/stencil-wormhole/tt-metal_stencil/src/kernels/compute/stencil.cpp",
-        core, 
+        all_cores, 
         tt_metal::ComputeConfig { 
             .math_fidelity = math_fidelity,
             .fp32_dest_acc_en = false, 
@@ -157,18 +165,44 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
 
     cout << "Setting up runtime arguments..." << endl;
 
-    tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
-            input_dram_buffer->address(), n_tiles, input_dram_buffer->size(),
-            stencil_dram_buffer->address(), stencil_n_tiles, stencil_dram_buffer->size()
+    core_group_1, core_group_2, work_per_core1, work_per_core2] =
+
+    int start_tile_idx = 0;
+    for(const auto& core : core_group_1){
+
+        tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
+            input_dram_buffer->address(), start_tile_idx, work_per_core1, input_dram_buffer->size(),
+            stencil_dram_buffer->address(), start_tile_idx, work_per_core1, stencil_dram_buffer->size()
         });
 
-    tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
-            output_dram_buffer->address(), n_tiles, output_dram_buffer->size()
+        tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
+            output_dram_buffer->address(), start_tile_idx, work_per_core1, output_dram_buffer->size()
         });
 
-    tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {
+        tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {
             n_tiles
         });
+        
+        start_tile_idx += work_per_core1;
+    }
+
+    for(const auto& core : core_group_2){
+
+        tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
+            input_dram_buffer->address(), start_tile_idx, work_per_core2, input_dram_buffer->size(),
+            stencil_dram_buffer->address(), start_tile_idx, work_per_core2, stencil_dram_buffer->size()
+        });
+
+        tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
+            output_dram_buffer->address(), start_tile_idx, work_per_core2, output_dram_buffer->size()
+        });
+
+        tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {
+            work_per_core2
+        });
+
+        start_tile_idx += work_per_core2;
+    }
     
 
     // ---------------------------------------------------------
@@ -337,16 +371,6 @@ int main(int argc, char** argv) {
     // printMat(stencil_vec_i2r, TILE_HEIGHT*num_tiles, TILE_WIDTH);
     // cout << endl;
 
-    //! CORES DECISION AREA
-
-    auto all_device_cores = CoreRange({0, 0}, {num_cores_x - 1, num_cores_y - 1});
-    cout << "Cores rows: " << compute_with_storage_grid_size.x << ", cores cols: " << compute_with_storage_grid_size.x << endl;
-
-    //? If you have 64 cores, you at least 64 tiles so at least 32x64: if you have less you need to reduce cores
-    //? I need to understand if it is better to have 1 tile per 64 core or less cores more tiles per core [MEASURE]
-    //? 
-
-    //! CORES DECISION AREA
 
     //! KERNEL AREA
     int device_id = 0;
