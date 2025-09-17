@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: © 2024 Tenstorrent Inc.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 #include <stdint.h>
 #include "dataflow_api.h"
 
@@ -13,8 +9,8 @@ void kernel_main() {
 
     // I HAVE ONLY ONE INPUT BUFFER, that goes to CB c_0 
     uint32_t src_addr = get_arg_val<uint32_t>(0);
-    uint32_t src_num_tiles = get_arg_val<uint32_t>(2);
     uint32_t src_tile_start_idx = get_arg_val<uint32_t>(1);
+    uint32_t src_num_tiles = get_arg_val<uint32_t>(2);
     uint32_t src_size = get_arg_val<uint32_t>(3);
 
     uint32_t stencil_addr = get_arg_val<uint32_t>(4);

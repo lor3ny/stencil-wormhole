@@ -17,13 +17,6 @@ void MAIN {
     constexpr uint32_t cb_out16 = 16;
     constexpr uint32_t dst_reg_index = 0;
 
-
-    // Reading the stencil tile
-
-    // unary_op_init_common(cb_in1, cb_out16);
-    // copy_tile_init(cb_in1);
-
-    //binary_op_init_common(cb_in1, cb_out1, cb_out16)
     mm_init(cb_in0, cb_in1, cb_out16);
 
     // OPERATIONS ARE ASYNCH SO EVERYTHING IS PIPELINED

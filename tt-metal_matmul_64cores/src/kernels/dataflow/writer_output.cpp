@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: © 2024 Tenstorrent Inc.
-//
-// SPDX-License-Identifier: Apache-2.0
-
 #include "dataflow_api.h"
 #include "debug/dprint.h"
 
@@ -10,8 +6,8 @@ void kernel_main() {
     DPRINT << "WRITER GO" << ENDL();
     
     uint32_t dst_addr = get_arg_val<uint32_t>(0);
-    uint32_t dst_num_tiles = get_arg_val<uint32_t>(2);
     uint32_t dst_tile_start_idx = get_arg_val<uint32_t>(1);
+    uint32_t dst_num_tiles = get_arg_val<uint32_t>(2);
     uint32_t dst_size = get_arg_val<uint32_t>(3);
 
     constexpr uint32_t cb_id_out16 = 16;
