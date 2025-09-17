@@ -43,19 +43,19 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     CommandQueue& cq = device->command_queue(); // Take the command_queue from the device created
     Program program = CreateProgram();
 
-    constexpr CoreCoord core = {0, 0};  
-
     DataFormat data_format = DataFormat::Float16_b;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
-
     const auto core_grid = device->compute_with_storage_grid_size();
 
-    auto [num_cores, all_cores, core_group_1, core_group_2, work_per_core1, work_per_core2] =
-    tt::tt_metal::split_work_to_cores(core_grid, n_tiles);
+    auto [num_cores, all_cores, core_group_1, core_group_2, work_per_core1, work_per_core2] = split_work_to_cores(core_grid, n_tiles);
+
+    cout << " Number of tensixes: " << num_cores << endl;
+    cout << " Tensixes group 1 has " << work_per_core1 << " tiles" << endl;
+    cout << " Tensixes group 2 has " << work_per_core2 << " tiles" << endl;
 
     //? If you have 64 cores, you at least 64 tiles so at least 32x64: if you have less you need to reduce cores
     //? I need to understand if it is better to have 1 tile per 64 core or less cores more tiles per core [MEASURE]
-
+ 
     // ---------------------------------------------------------
     // DRAM BUFFER CREATION: OFFCHIP GDDR6 MEMORY 12GB
     // ---------------------------------------------------------
@@ -143,7 +143,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     std::vector<uint32_t> compute_args = {};
     KernelHandle stencil_kernel_id = tt_metal::CreateKernel( 
         program, 
-        "/home/lpiarulli_tt/stencil-wormhole/tt-metal_stencil/src/kernels/compute/stencil.cpp",
+        "/home/lpiarulli_tt/stencil-wormhole/tt-metal_matmul_64cores/src/kernels/compute/stencil.cpp",
         all_cores, 
         tt_metal::ComputeConfig { 
             .math_fidelity = math_fidelity,
@@ -165,43 +165,42 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
 
     cout << "Setting up runtime arguments..." << endl;
 
-    core_group_1, core_group_2, work_per_core1, work_per_core2] =
-
     int start_tile_idx = 0;
-    for(const auto& core : core_group_1){
+    for(const auto& core_range : core_group_1.ranges()){
+        for(const auto& core : core_range) {
+            tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
+                input_dram_buffer->address(), start_tile_idx, work_per_core1, input_dram_buffer->size(),
+                stencil_dram_buffer->address(), start_tile_idx, work_per_core1, stencil_dram_buffer->size()
+            });
 
-        tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
-            input_dram_buffer->address(), start_tile_idx, work_per_core1, input_dram_buffer->size(),
-            stencil_dram_buffer->address(), start_tile_idx, work_per_core1, stencil_dram_buffer->size()
-        });
+            tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
+                output_dram_buffer->address(), start_tile_idx, work_per_core1, output_dram_buffer->size()
+            });
 
-        tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
-            output_dram_buffer->address(), start_tile_idx, work_per_core1, output_dram_buffer->size()
-        });
-
-        tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {
-            n_tiles
-        });
-        
-        start_tile_idx += work_per_core1;
+            tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {
+                work_per_core1
+            });
+            
+            start_tile_idx += work_per_core1;
+        }
     }
+    for(const auto& core_range : core_group_2.ranges()){
+        for(const auto& core : core_range) {
+            tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
+                input_dram_buffer->address(), start_tile_idx, work_per_core2, input_dram_buffer->size(),
+                stencil_dram_buffer->address(), start_tile_idx, work_per_core2, stencil_dram_buffer->size()
+            });
 
-    for(const auto& core : core_group_2){
+            tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
+                output_dram_buffer->address(), start_tile_idx, work_per_core2, output_dram_buffer->size()
+            });
 
-        tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
-            input_dram_buffer->address(), start_tile_idx, work_per_core2, input_dram_buffer->size(),
-            stencil_dram_buffer->address(), start_tile_idx, work_per_core2, stencil_dram_buffer->size()
-        });
-
-        tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
-            output_dram_buffer->address(), start_tile_idx, work_per_core2, output_dram_buffer->size()
-        });
-
-        tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {
-            work_per_core2
-        });
-
-        start_tile_idx += work_per_core2;
+            tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {
+                work_per_core2
+            });
+            
+            start_tile_idx += work_per_core2;
+        }
     }
     
 

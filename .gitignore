@@ -34,7 +34,7 @@
 *.png
 
 .vscode
-/tt-metal_matmul_1core/CMakeCache.txt
+/tt-metal_matmul_1corels/CMakeCache.txt
 /tt-metal_matmul_1core/CMakeFiles
 /tt-metal_matmul_1core/build
 /tt-metal_matmul_1core/_deps
