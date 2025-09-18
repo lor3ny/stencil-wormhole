@@ -55,12 +55,12 @@
 /tt-metal_matmul_64cores/.cpmcache
 /tt-metal_matmul_64cores/CPM_modules
 
-/tt-metal_axpy_1cores/CMakeCache.txt
-/tt-metal_axpy_1cores/CMakeFiles
-/tt-metal_axpy_1cores/build
-/tt-metal_axpy_1cores/_deps
-/tt-metal_axpy_1cores/.cpmcache
-/tt-metal_axpy_1cores/CPM_modules
+/tt-metal_axpy_64cores/CMakeCache.txt
+/tt-metal_axpy_64cores/CMakeFiles
+/tt-metal_axpy_64cores/build
+/tt-metal_axpy_64cores/_deps
+/tt-metal_axpy_64cores/.cpmcache
+/tt-metal_axpy_64cores/CPM_modules
 
 /tt-metal_copy_1core/CMakeCache.txt
 /tt-metal_copy_1core/CMakeFiles
