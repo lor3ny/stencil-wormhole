@@ -23,8 +23,8 @@ using namespace std;
 
 #define TILE_WIDTH 32 // bfloats
 #define TILE_HEIGHT 32 // bfloats
-#define ROWS 32
-#define COLS 32
+#define ROWS 512
+#define COLS 512
 
 
 // I wanto to have all the SRAM available, maybe I could use also multiple CBs
@@ -105,29 +105,6 @@ int axpy_ttker(
     // ---------------------------------------------------------
 
     cout << "Creating SRAM buffers..." << endl;
-
-    // uint32_t cb_input_index = CBIndex::c_0;
-    // CircularBufferConfig cb_input_config(tile_size * SRAM_TILES, 
-    //                                       {{cb_input_index, data_format}}
-    // );
-    // cb_input_config.set_page_size(cb_input_index, tile_size);
-    // CBHandle cb_input = tt_metal::CreateCircularBuffer(program, all_cores, cb_input_config);
-
-    // uint32_t cb_stencil_index = CBIndex::c_1; 
-    // CircularBufferConfig cb_stencil_config(tile_size * SRAM_TILES, 
-    //                                        {{cb_stencil_index, data_format}}
-    // );
-    // cb_stencil_config.set_page_size(cb_stencil_index, tile_size);
-    // CBHandle cb_stencil = tt_metal::CreateCircularBuffer(program, all_cores, cb_stencil_config);
-    
-
-    // uint32_t cb_output_index = CBIndex::c_16; 
-    // CircularBufferConfig cb_output_config(tile_size * SRAM_TILES, 
-    //                                        {{cb_output_index, data_format}}
-    // );
-    // cb_output_config.set_page_size(cb_output_index, tile_size);
-    // CBHandle cb_output = tt_metal::CreateCircularBuffer(program, all_cores, cb_output_config);
-
     
     constexpr uint32_t cb_indices[] = {
         CBIndex::c_0, // input
@@ -143,7 +120,7 @@ int axpy_ttker(
     // Circular Buffers (CB) have to be created rising order!
     for(int i = 0; i < 7; i++) {
 
-        CircularBufferConfig cb_config(tile_size * SRAM_TILES, 
+        CircularBufferConfig cb_config(tile_size * 1, 
                                             {{cb_indices[i], data_format}}
         );
         cb_config.set_page_size(cb_indices[i], tile_size);   
@@ -221,7 +198,7 @@ int axpy_ttker(
             });
 
             tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
-                output_dram_buffer->address(), start_tile_idx, work_per_core1, output_dram_buffer->size()
+                output_dram_buffer->address(), start_tile_idx, work_per_core1
             });
 
             tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {
@@ -245,7 +222,7 @@ int axpy_ttker(
             });
 
             tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
-                output_dram_buffer->address(), start_tile_idx, work_per_core2, output_dram_buffer->size()
+                output_dram_buffer->address(), start_tile_idx, work_per_core2
             });
 
             tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {
@@ -359,7 +336,7 @@ int main(int argc, char** argv) {
 
     vector<bfloat16> input_vec(rows * cols);
     for(i = 0; i<rows * cols; i++){
-        input_vec[i] = bfloat16(0.0f);
+        input_vec[i] = bfloat16(1.0f);
     }
     input_vec[(rows/2)*cols + cols/2] = 1.0f;
 
@@ -378,13 +355,13 @@ int main(int argc, char** argv) {
     // I need to find 4 submatrices: up, left, right, down
     // The center one is the input
 
-    vector<bfloat16> up_vec;
-    vector<bfloat16> left_vec;
-    vector<bfloat16> right_vec;
-    vector<bfloat16> down_vec;
+    vector<bfloat16> up_vec(rows*cols);
+    vector<bfloat16> left_vec(rows*cols);
+    vector<bfloat16> right_vec(rows*cols);
+    vector<bfloat16> down_vec(rows*cols);
     vector<bfloat16> scalar_vec(rows*cols, 0.25f);
 
-    extract_submats_5p(input_vec, 
+    extract_submats_5p(input_vec_pad, 
         up_vec,
         left_vec,
         right_vec,
