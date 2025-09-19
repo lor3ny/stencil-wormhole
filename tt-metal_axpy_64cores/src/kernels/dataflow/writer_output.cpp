@@ -35,6 +35,8 @@ void kernel_main() {
         noc_async_write_tile(idx, dst_noc_addr, l1_addr_out);
         noc_async_write_barrier();
         cb_pop_front(cb_id_out, 1);
+
+        DPRINT << i << ENDL();
     }
     
     DPRINT << "WRITER STOP" << ENDL();
