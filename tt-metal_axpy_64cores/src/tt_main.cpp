@@ -118,7 +118,7 @@ int axpy_ttker(
     };
 
     // Circular Buffers (CB) have to be created rising order!
-    for(int i = 0; i < 7; i++) {
+    for(int i = 0; i < 8; i++) {
 
         CircularBufferConfig cb_config(tile_size * 4, 
                                             {{cb_indices[i], data_format}}

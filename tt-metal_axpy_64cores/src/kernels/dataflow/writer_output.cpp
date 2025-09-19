@@ -16,7 +16,7 @@ void kernel_main() {
     uint32_t num_tiles = get_arg_val<uint32_t>(2);
 
     constexpr uint32_t cb_id_out = 7;
-    uint32_t i, idx, l1_addr_out;
+    uint32_t i, idx;
 
     const uint32_t dst_tile_bytes = get_tile_size(cb_id_out);
     const DataFormat dst_data_format = get_dataformat(cb_id_out);
@@ -31,7 +31,7 @@ void kernel_main() {
         idx = i+start_tile_index;
 
         cb_wait_front(cb_id_out, 1);
-        l1_addr_out = get_read_ptr(cb_id_out);
+        uint32_t l1_addr_out = get_read_ptr(cb_id_out);
         noc_async_write_tile(idx, dst_noc_addr, l1_addr_out);
         noc_async_write_barrier();
         cb_pop_front(cb_id_out, 1);
