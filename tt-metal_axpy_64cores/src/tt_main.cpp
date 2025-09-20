@@ -23,12 +23,12 @@ using namespace std;
 
 #define TILE_WIDTH 32 // bfloats
 #define TILE_HEIGHT 32 // bfloats
-#define ROWS 512
-#define COLS 512
+#define ROWS 128
+#define COLS 128
 
 
 // I wanto to have all the SRAM available, maybe I could use also multiple CBs
-#define SRAM_TILES 128
+#define SRAM_TILES 64
 
 
 int axpy_ttker(
@@ -120,7 +120,7 @@ int axpy_ttker(
     // Circular Buffers (CB) have to be created rising order!
     for(int i = 0; i < 8; i++) {
 
-        CircularBufferConfig cb_config(tile_size * 4, 
+        CircularBufferConfig cb_config(tile_size * SRAM_TILES, 
                                             {{cb_indices[i], data_format}}
         );
         cb_config.set_page_size(cb_indices[i], tile_size);   
@@ -256,7 +256,7 @@ int axpy_ttker(
     cout << "Enqueueing kernels..." << endl;	
 
     //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
-    int times = 1;
+    int times = 10;
     for(i = 0; i<times; i++){
 
         cout << "times: " << i << endl;
@@ -266,18 +266,36 @@ int axpy_ttker(
 
         if (i != times-1){
 
-            // output = untilize_nfaces(output, ROWS*COLS, TILE_WIDTH);
-            // vector<bfloat16> new_in(ROWS*COLS);
-            // vec2stencil_5p(output, new_in, TILE_HEIGHT, n_tiles);
+            output = untilize_nfaces(output, ROWS, COLS);
+            up = untilize_nfaces(up, ROWS, COLS);
+            left = untilize_nfaces(left, ROWS, COLS);
+            right = untilize_nfaces(right, ROWS, COLS);
+            down = untilize_nfaces(down, ROWS, COLS);
 
-            // vector<bfloat16> new_in_pad((ROWS+2)*(COLS+2));
-            // pad_with_zeros(new_in, new_in_pad, ROWS, COLS, 1);
 
-            // vector<bfloat16> new_in_i2r(ROWS*ROWS*TILE_WIDTH);
-            // stencil2vec_5p(new_in_pad, new_in_i2r, (ROWS+2), (COLS+2));
+            vector<bfloat16> output_pad((ROWS+2) * (COLS+2), 0.0f);
+            pad_with_zeros(output, output_pad, ROWS, COLS, 1);
 
-            // new_in_i2r = tilize_nfaces(new_in_i2r, ROWS*COLS, TILE_WIDTH);
-            // EnqueueWriteBuffer(cq, input_dram_buffer, new_in_i2r.data(), false);  
+            extract_submats_5p(output_pad, 
+                up,
+                left,
+                right,
+                down,
+                ROWS, 
+                COLS,
+                COLS+2
+            );
+
+            up = tilize_nfaces(up, ROWS, COLS);
+            left = tilize_nfaces(left, ROWS, COLS);
+            right = tilize_nfaces(right, ROWS, COLS);
+            down = tilize_nfaces(down, ROWS, COLS);
+
+            EnqueueWriteBuffer(cq, up_dram_buffer, up.data(), false);   
+            EnqueueWriteBuffer(cq, left_dram_buffer, left.data(), false);   
+            EnqueueWriteBuffer(cq, right_dram_buffer, right.data(), false);   
+            EnqueueWriteBuffer(cq, down_dram_buffer, down.data(), false);   
+            EnqueueWriteBuffer(cq, scalar_dram_buffer, scalar.data(), false);   
         }  
     }
 
@@ -336,9 +354,9 @@ int main(int argc, char** argv) {
 
     vector<bfloat16> input_vec(rows * cols);
     for(i = 0; i<rows * cols; i++){
-        input_vec[i] = bfloat16(1.0f);
+        input_vec[i] = bfloat16(0.0f);
     }
-    input_vec[(rows/2)*cols + cols/2] = 1.0f;
+    input_vec[(rows/2)*cols + cols/2] = 100.0f;
 
     //* ----------
     //* PADDING
@@ -448,7 +466,7 @@ int main(int argc, char** argv) {
     //! KERNEL AREA
 
     cout << "Output: " << endl;
-    printMat(input_vec, rows, cols);
+    printMat(output_vec, rows, cols);
 
     return 0;
 }

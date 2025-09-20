@@ -26,8 +26,6 @@ void kernel_main() {
 
     for(i = 0; i<num_tiles; i++){    
 
-        DPRINT << i << ENDL();
-
         idx = i+start_tile_index;
 
         cb_wait_front(cb_id_out, 1);
@@ -36,7 +34,6 @@ void kernel_main() {
         noc_async_write_barrier();
         cb_pop_front(cb_id_out, 1);
 
-        DPRINT << i << ENDL();
     }
     
     DPRINT << "WRITER STOP" << ENDL();

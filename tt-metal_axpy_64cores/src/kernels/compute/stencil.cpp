@@ -33,8 +33,6 @@ void MAIN {
 
     for(i=0; i<num_tiles; i++){
 
-        DPRINT << i << ENDL();
-
         tile_regs_acquire();
 
         add_tiles_init(cb_inUP, cb_inDOWN);
@@ -52,55 +50,42 @@ void MAIN {
         pack_tile(dst0, cb_MID);
         cb_push_back(cb_MID, 1);
         tile_regs_release();
+
+        // ADDING LEFT
         
-        // tile_regs_acquire();
-        // add_tiles_init(cb_inLEFT, cb_MID);
-        // cb_wait_front(cb_inLEFT, 1);
-        // cb_wait_front(cb_MID, 1);
-        // add_tiles(cb_inLEFT, cb_MID, 0, 0, dst0);
-        // cb_pop_front(cb_inLEFT, 1);
-        // cb_pop_front(cb_MID, 1);
+        tile_regs_acquire();
+        add_tiles_init(cb_inLEFT, cb_MID);
+        cb_wait_front(cb_inLEFT, 1);
+        cb_wait_front(cb_MID, 1);
+        add_tiles(cb_inLEFT, cb_MID, 0, 0, dst0);
+        cb_pop_front(cb_inLEFT, 1);
+        cb_pop_front(cb_MID, 1);
 
-        // tile_regs_commit();
-        // tile_regs_wait();
+        tile_regs_commit();
+        tile_regs_wait();
         
-        // cb_reserve_back(cb_MID, 1);
-        // pack_tile(dst0, cb_MID);
-        // cb_push_back(cb_MID, 1);
-        // tile_regs_release();
+        cb_reserve_back(cb_MID, 1);
+        pack_tile(dst0, cb_MID);
+        cb_push_back(cb_MID, 1);
+        tile_regs_release();
 
-        // // ADDING RIGHT
+        // ADDING RIGHT
 
-        // tile_regs_acquire();
-        // DPRINT_MATH(DPRINT << "this is the math kernel" << ENDL());
-        // DPRINT_PACK(DPRINT << "this is the pack kernel" << ENDL());
-        // DPRINT_UNPACK(DPRINT << "this is the unpack kernel" << ENDL());
-        // add_tiles_init(cb_inRIGHT, cb_MID);
-        // DPRINT_MATH(DPRINT << "this is the math kernel" << ENDL());
-        // DPRINT_PACK(DPRINT << "this is the pack kernel" << ENDL());
-        // DPRINT_UNPACK(DPRINT << "this is the unpack kernel" << ENDL());
-        // cb_wait_front(cb_inRIGHT, 1);
-        // DPRINT_MATH(DPRINT << "this is the math kernel" << ENDL());
-        // DPRINT_PACK(DPRINT << "this is the pack kernel" << ENDL());
-        // DPRINT_UNPACK(DPRINT << "this is the unpack kernel" << ENDL());
-        // cb_wait_front(cb_MID, 1);
-        // DPRINT_MATH(DPRINT << "this is the math kernel" << ENDL());
-        // DPRINT_PACK(DPRINT << "this is the pack kernel" << ENDL());
-        // DPRINT_UNPACK(DPRINT << "this is the unpack kernel" << ENDL());
-        // add_tiles(cb_inRIGHT, cb_MID, 0, 0, dst0);
-        // cb_pop_front(cb_inRIGHT, 1);
-        // cb_pop_front(cb_MID, 1);
-        // DPRINT_MATH(DPRINT << "this is the math kernel" << ENDL());
-        // DPRINT_PACK(DPRINT << "this is the pack kernel" << ENDL());
-        // DPRINT_UNPACK(DPRINT << "this is the unpack kernel" << ENDL());
+        tile_regs_acquire();
+        add_tiles_init(cb_inRIGHT, cb_MID);
+        cb_wait_front(cb_inRIGHT, 1);
+        cb_wait_front(cb_MID, 1);
+        add_tiles(cb_inRIGHT, cb_MID, 0, 0, dst0);
+        cb_pop_front(cb_inRIGHT, 1);
+        cb_pop_front(cb_MID, 1);
 
-        // tile_regs_commit();
-        // tile_regs_wait();
+        tile_regs_commit();
+        tile_regs_wait();
         
-        // cb_reserve_back(cb_MID, 1);
-        // pack_tile(dst0, cb_MID);
-        // cb_push_back(cb_MID, 1);
-        // tile_regs_release();
+        cb_reserve_back(cb_MID, 1);
+        pack_tile(dst0, cb_MID);
+        cb_push_back(cb_MID, 1);
+        tile_regs_release();
         
         // SCALING
         

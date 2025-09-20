@@ -89,14 +89,11 @@ void kernel_main() {
 
     for(i = 0; i<num_tiles; i++){
 
-        DPRINT << i << ENDL();
-
         uint32_t idx = i+start_tile_index;
         uint32_t l1_write_addr_in;
 
         {
             cb_reserve_back(cb_id_1, 1);
-            DPRINT << "a" << ENDL();
             uint32_t l1_write_addr_in1 = get_write_ptr(cb_id_1);
             noc_async_read_tile(idx, src_UP, l1_write_addr_in1);
             noc_async_read_barrier();
@@ -105,30 +102,27 @@ void kernel_main() {
 
         {
             cb_reserve_back(cb_id_4, 1);
-            DPRINT << "a" << ENDL();
             uint32_t l1_write_addr_in4 = get_write_ptr(cb_id_4);
             noc_async_read_tile(idx, src_DOWN, l1_write_addr_in4);
             noc_async_read_barrier();
             cb_push_back(cb_id_4, 1);
         }  
 
-        // {
-        //     cb_reserve_back(cb_id_2, 1);
-        //     DPRINT << "a" << ENDL();
-        //     uint32_t l1_write_addr_in2 = get_write_ptr(cb_id_2);
-        //     noc_async_read_tile(idx, src_LEFT, l1_write_addr_in2);
-        //     noc_async_read_barrier();
-        //     cb_push_back(cb_id_2, 1);
-        // }  
+        {
+            cb_reserve_back(cb_id_2, 1);
+            uint32_t l1_write_addr_in2 = get_write_ptr(cb_id_2);
+            noc_async_read_tile(idx, src_LEFT, l1_write_addr_in2);
+            noc_async_read_barrier();
+            cb_push_back(cb_id_2, 1);
+        }  
 
-        // {
-        //     cb_reserve_back(cb_id_3, 1);
-        //     DPRINT << "a" << ENDL();
-        //     uint32_t l1_write_addr_in3 = get_write_ptr(cb_id_3);
-        //     noc_async_read_tile(idx, src_RIGHT, l1_write_addr_in3);
-        //     noc_async_read_barrier();
-        //     cb_push_back(cb_id_3, 1);
-        // }   
+        {
+            cb_reserve_back(cb_id_3, 1);
+            uint32_t l1_write_addr_in3 = get_write_ptr(cb_id_3);
+            noc_async_read_tile(idx, src_RIGHT, l1_write_addr_in3);
+            noc_async_read_barrier();
+            cb_push_back(cb_id_3, 1);
+        }   
 
         // {
         //     cb_reserve_back(cb_id_0, 1);
@@ -141,7 +135,6 @@ void kernel_main() {
 
         {
             cb_reserve_back(cb_id_5, 1);
-            DPRINT << "a" << ENDL();
             uint32_t l1_write_addr_in5 = get_write_ptr(cb_id_5);
             noc_async_read_tile(idx, src_SCALAR, l1_write_addr_in5);
             noc_async_read_barrier();
