@@ -222,7 +222,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     cout << "Enqueueing kernels..." << endl;	
 
     //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
-    int times = 10;
+    int times = 1;
     for(i = 0; i<times; i++){
 
         cout << "times: " << i << endl;

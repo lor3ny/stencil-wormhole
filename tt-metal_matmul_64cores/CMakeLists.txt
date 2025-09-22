@@ -114,6 +114,7 @@ target_include_directories(stencil PRIVATE
     $ENV{TT_METAL_HOME}/tt_metal/hw/inc/
     $ENV{TT_METAL_HOME}/tt_stl/
     $ENV{TT_METAL_HOME}/tt_metal/third_party/magic_enum
+    $ENV{TT_METAL_HOME}/tt-metal/tt_metal/third_party/tracy/public/
 )
 
 target_link_directories(stencil PRIVATE

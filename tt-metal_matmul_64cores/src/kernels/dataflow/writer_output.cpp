@@ -1,9 +1,11 @@
 #include "dataflow_api.h"
-#include "debug/dprint.h"
+//#include "debug/dprint.h"
 
 void kernel_main() {
 
     DPRINT << "WRITER GO" << ENDL();
+
+    DeviceZoneScopedN("WRITER KERNEL");
     
     uint32_t dst_addr = get_arg_val<uint32_t>(0);
     uint32_t dst_tile_start_idx = get_arg_val<uint32_t>(1);

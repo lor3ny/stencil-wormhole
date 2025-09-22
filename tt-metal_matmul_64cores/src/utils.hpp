@@ -4,6 +4,7 @@
 #include <tt-metalium/bfloat16.hpp>
 #include <iostream>
 #include <vector>
+#include <tracy/Tracy.hpp>
 
 #ifdef WITH_OPENMP
     #include <omp.h>

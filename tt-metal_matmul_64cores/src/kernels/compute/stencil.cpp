@@ -1,5 +1,5 @@
 
-#include "debug/dprint.h"  // required in all kernels using DPRINT
+//#include "debug/dprint.h"  // required in all kernels using DPRINT
 #include "compute_kernel_api.h"
 #include "compute_kernel_api/common.h"
 #include "compute_kernel_api/tile_move_copy.h"
@@ -9,6 +9,8 @@ namespace NAMESPACE {
 void MAIN {
 
     DPRINT << "Start compute" << ENDL();
+
+    DeviceZoneScopedN("STENCIL KERNEL");
     
     uint32_t num_tiles = get_arg_val<uint32_t>(0);
 

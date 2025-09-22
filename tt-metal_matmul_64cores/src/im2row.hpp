@@ -31,6 +31,8 @@ constexpr float est_stencil[9] = {
 //! This function is specialized for star 5-point stencil
 // in is 10x10 and out is 64x32,
 void stencil2vec_5p(vector<bfloat16>& in, vector<bfloat16>& out, int rows, int cols){
+
+    ZoneScoped;
     
     // This functin can be parallelized
     int index = 0;
