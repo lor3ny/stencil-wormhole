@@ -1,5 +1,7 @@
 
 //#include "debug/dprint.h"  // required in all kernels using DPRINT
+#include <stdint.h>
+
 #include "compute_kernel_api.h"
 #include "compute_kernel_api/common.h"
 #include "compute_kernel_api/tile_move_copy.h"
@@ -10,7 +12,7 @@ void MAIN {
 
     DPRINT << "Start compute" << ENDL();
 
-    DeviceZoneScopedN("STENCIL KERNEL");
+    //DeviceZoneScopedN("STENCIL KERNEL");
     
     uint32_t num_tiles = get_arg_val<uint32_t>(0);
 
@@ -35,7 +37,7 @@ void MAIN {
         matmul_tiles(cb_in0, cb_in1, 0, 0, 0, false);
         
         cb_pop_front(cb_in0, 1);
-        cb_pop_front(cb_in1, 1);
+        //cb_pop_front(cb_in1, 1);
 
         tile_regs_commit();
         tile_regs_wait();

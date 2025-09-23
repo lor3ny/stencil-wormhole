@@ -30,6 +30,13 @@ void kernel_main() {
 
     //* INPUT READING, pipelined with computation and writing
 
+
+    cb_reserve_back(cb_id_in1, 1); // that call is blocking, it goes only if there's space
+    uint32_t l1_write_addr_in1 = get_write_ptr(cb_id_in1);
+    noc_async_read_tile(src_tile_start_idx, stencil_dram_loc, l1_write_addr_in1);
+    noc_async_read_barrier();
+    cb_push_back(cb_id_in1, 1);
+
     for (uint32_t tile_i = 0; tile_i < src_num_tiles; tile_i++) {
         {
             cb_reserve_back(cb_id_in0, 1); // that call is blocking, it goes only if there's space
@@ -39,13 +46,13 @@ void kernel_main() {
             cb_push_back(cb_id_in0, 1);
         }
 
-        {
-            cb_reserve_back(cb_id_in1, 1); // that call is blocking, it goes only if there's space
-            uint32_t l1_write_addr_in1 = get_write_ptr(cb_id_in1);
-            noc_async_read_tile(tile_i+stencil_tile_start_idx, stencil_dram_loc, l1_write_addr_in1);
-            noc_async_read_barrier();
-            cb_push_back(cb_id_in1, 1);
-        }
+        // {
+        //     cb_reserve_back(cb_id_in1, 1); // that call is blocking, it goes only if there's space
+        //     uint32_t l1_write_addr_in1 = get_write_ptr(cb_id_in1);
+        //     noc_async_read_tile(tile_i+stencil_tile_start_idx, stencil_dram_loc, l1_write_addr_in1);
+        //     noc_async_read_barrier();
+        //     cb_push_back(cb_id_in1, 1);
+        // }
     } 
     
     DPRINT << "READER STOP" << ENDL();

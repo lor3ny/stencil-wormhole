@@ -14,6 +14,7 @@
 #include <tt-metalium/tensor_accessor_args.hpp>
 
 #include <unistd.h>
+#include <chrono>
 
 #include "im2row.hpp"
 
@@ -67,13 +68,13 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     // device, size, page_size, buffer_type
     tt_metal::InterleavedBufferConfig dram_inout_config{
             .device = device, 
-            .size = n_tiles * tile_size, 
+            .size = input.size() * sizeof(bfloat16), 
             .page_size = tile_size,  
             .buffer_type = tt_metal::BufferType::DRAM};
 
     tt_metal::InterleavedBufferConfig dram_stencil_config{
             .device = device, 
-            .size = stencil_n_tiles * tile_size, 
+            .size = stencil.size() * sizeof(bfloat16), 
             .page_size = tile_size,  
             .buffer_type = tt_metal::BufferType::DRAM};
 
@@ -341,10 +342,10 @@ int main(int argc, char** argv) {
     //! Stencil creation, output creation
     vector<bfloat16> output_vec(dram_buffer_size/sizeof(bfloat16), 0.0f);
 
-    vector<bfloat16> stencil_vec_i2r(stencil_rows * stencil_cols * stencil_tiles, 1.0f);
-    for(i = 2; i<TILE_HEIGHT * stencil_tiles; i+=32){
-        for (j = 0; j< TILE_WIDTH; j++){
-            stencil_vec_i2r[i*TILE_WIDTH + j] = bfloat16(0.25f);
+    vector<bfloat16> stencil_vec_i2r(TILE_WIDTH * TILE_HEIGHT * 64, 0.25f);
+    for(i = 2; i<TILE_HEIGHT * 64; i+=32){
+        for (j = 0; j<TILE_WIDTH; j++){
+            stencil_vec_i2r[i*TILE_WIDTH + j] = bfloat16(-1.0f);
         }
     }
     //! Stencil creation, Output creation
@@ -372,22 +373,28 @@ int main(int argc, char** argv) {
 
 
     //! KERNEL AREA
+    auto start = std::chrono::high_resolution_clock::now();
+
     int device_id = 0;
     IDevice* device = CreateDevice(device_id);
 
     input_vec_i2r = tilize_nfaces(input_vec_i2r, rows_i2r, cols_i2r);
-    stencil_vec_i2r = tilize_nfaces(stencil_vec_i2r, TILE_HEIGHT*2, TILE_WIDTH);
+    stencil_vec_i2r = tilize_nfaces(stencil_vec_i2r, TILE_HEIGHT, TILE_WIDTH);
 
-    matmul_ttker(input_vec_i2r, stencil_vec_i2r, output_vec, num_tiles,stencil_tiles, single_tile_size, device);
+    matmul_ttker(input_vec_i2r, stencil_vec_i2r, output_vec, num_tiles, stencil_tiles, single_tile_size, device);
     
     output_vec = untilize_nfaces(output_vec, rows_i2r, cols_i2r);
 
     CloseDevice(device);
+
+    auto end = std::chrono::high_resolution_clock::now();
     //! KERNEL AREA
 
     cout << "Output: " << endl;
     vec2stencil_5p(output_vec, input_vec, TILE_HEIGHT, num_tiles);
     printMat(input_vec, rows, cols);
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+    cout << "Elapsed time: " << elapsed.count() << " ms" << endl;
 
     return 0;
 }
