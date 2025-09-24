@@ -24,6 +24,7 @@ using namespace std;
 
 #define TILE_WIDTH 32 // bfloats
 #define TILE_HEIGHT 32 // bfloats
+#define ITERATIONS 1000
 #define ROWS 64
 #define COLS 64
 
@@ -224,17 +225,17 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     cout << "Enqueueing kernels..." << endl;	
 
     //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
-    int times = 1000;
-    for(i = 0; i<times; i++){
+    for(i = 0; i<ITERATIONS; i++){
 
         //cout << "times: " << i << endl;
 
         EnqueueProgram(cq, program, false);
         EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true); // Read the result from the device, works also as a barrier i think
 
-        if (i != times-1){
+        if (i != ITERATIONS-1){
 
             output = untilize_nfaces(output, ROWS*COLS, TILE_WIDTH);
+            output[(ROWS/2)*COLS + COLS/2] = 100.0f;
             vector<bfloat16> new_in(ROWS*COLS);
             vec2stencil_5p(output, new_in, TILE_HEIGHT, n_tiles);
 
@@ -311,7 +312,7 @@ int main(int argc, char** argv) {
     for(i = 0; i<rows * cols; i++){
         input_vec[i] = bfloat16(0.0f);
     }
-    input_vec[(rows/2)*cols + cols/2] = 1.0f;
+    input_vec[(ROWS/2)*COLS + COLS/2] = 100.0f;
 
     //* ----------
     //* PADDING
@@ -352,7 +353,7 @@ int main(int argc, char** argv) {
             stencil_vec_i2r[(i+3)*TILE_WIDTH + j] = bfloat16(0.25f);
         }
         for (j = 0; j<TILE_WIDTH; j++){
-            stencil_vec_i2r[(i+4)*TILE_WIDTH + j] = bfloat16(-1.0f);
+            stencil_vec_i2r[(i+4)*TILE_WIDTH + j] = bfloat16(0.0f);
         }
         for (j = 0; j<TILE_WIDTH; j++){
             stencil_vec_i2r[(i+5)*TILE_WIDTH + j] = bfloat16(0.25f);
@@ -405,6 +406,7 @@ int main(int argc, char** argv) {
 
     cout << "Output: " << endl;
     vec2stencil_5p(output_vec, input_vec, TILE_HEIGHT, num_tiles);
+    input_vec[(ROWS/2)*COLS + COLS/2] = 100.0f;
     printMat(input_vec, rows, cols);
     std::chrono::duration<double, std::milli> elapsed = end - start;
     cout << "Elapsed time: " << elapsed.count() << " ms" << endl;
