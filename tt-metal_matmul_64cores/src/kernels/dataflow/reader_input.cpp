@@ -33,7 +33,7 @@ void kernel_main() {
 
     cb_reserve_back(cb_id_in1, 1); // that call is blocking, it goes only if there's space
     uint32_t l1_write_addr_in1 = get_write_ptr(cb_id_in1);
-    noc_async_read_tile(src_tile_start_idx, stencil_dram_loc, l1_write_addr_in1);
+    noc_async_read_tile(stencil_tile_start_idx, stencil_dram_loc, l1_write_addr_in1);
     noc_async_read_barrier();
     cb_push_back(cb_id_in1, 1);
 
@@ -45,14 +45,6 @@ void kernel_main() {
             noc_async_read_barrier();
             cb_push_back(cb_id_in0, 1);
         }
-
-        // {
-        //     cb_reserve_back(cb_id_in1, 1); // that call is blocking, it goes only if there's space
-        //     uint32_t l1_write_addr_in1 = get_write_ptr(cb_id_in1);
-        //     noc_async_read_tile(tile_i+stencil_tile_start_idx, stencil_dram_loc, l1_write_addr_in1);
-        //     noc_async_read_barrier();
-        //     cb_push_back(cb_id_in1, 1);
-        // }
     } 
     
     DPRINT << "READER STOP" << ENDL();

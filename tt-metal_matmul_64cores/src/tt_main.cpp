@@ -169,9 +169,10 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     int start_tile_idx = 0;
     for(const auto& core_range : core_group_1.ranges()){
         for(const auto& core : core_range) {
+            cout << core.x*8 + core.y << endl;
             tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
                 input_dram_buffer->address(), start_tile_idx, work_per_core1, input_dram_buffer->size(),
-                stencil_dram_buffer->address(), start_tile_idx, work_per_core1, stencil_dram_buffer->size()
+                stencil_dram_buffer->address(), core.x*8 + core.y, work_per_core1, stencil_dram_buffer->size()
             });
 
             tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
@@ -189,7 +190,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
         for(const auto& core : core_range) {
             tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
                 input_dram_buffer->address(), start_tile_idx, work_per_core2, input_dram_buffer->size(),
-                stencil_dram_buffer->address(), start_tile_idx, work_per_core2, stencil_dram_buffer->size()
+                stencil_dram_buffer->address(), core.x*8 + core.y, work_per_core2, stencil_dram_buffer->size()
             });
 
             tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
@@ -223,7 +224,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     cout << "Enqueueing kernels..." << endl;	
 
     //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
-    int times = 1;
+    int times = 1000;
     for(i = 0; i<times; i++){
 
         cout << "times: " << i << endl;
@@ -326,7 +327,7 @@ int main(int argc, char** argv) {
     //* im2row CONVERTION
     //* ----------
 
-    vector<bfloat16> input_vec_i2r(rows_i2r * cols_i2r);
+    vector<bfloat16> input_vec_i2r(rows_i2r * cols_i2r, 0.0f);
     stencil2vec_5p(input_vec_pad, input_vec_i2r, rows_pad, cols_pad);
 
     //* ----------
@@ -342,10 +343,22 @@ int main(int argc, char** argv) {
     //! Stencil creation, output creation
     vector<bfloat16> output_vec(dram_buffer_size/sizeof(bfloat16), 0.0f);
 
-    vector<bfloat16> stencil_vec_i2r(TILE_WIDTH * TILE_HEIGHT * 64, 0.25f);
-    for(i = 2; i<TILE_HEIGHT * 64; i+=32){
+    vector<bfloat16> stencil_vec_i2r(TILE_WIDTH * TILE_HEIGHT * 64, 0.0f);
+    for(i = 0; i<TILE_HEIGHT * 64; i+=32){
         for (j = 0; j<TILE_WIDTH; j++){
-            stencil_vec_i2r[i*TILE_WIDTH + j] = bfloat16(-1.0f);
+            stencil_vec_i2r[(i+1)*TILE_WIDTH + j] = bfloat16(0.25f);
+        }
+        for (j = 0; j<TILE_WIDTH; j++){
+            stencil_vec_i2r[(i+3)*TILE_WIDTH + j] = bfloat16(0.25f);
+        }
+        for (j = 0; j<TILE_WIDTH; j++){
+            stencil_vec_i2r[(i+4)*TILE_WIDTH + j] = bfloat16(-1.0f);
+        }
+        for (j = 0; j<TILE_WIDTH; j++){
+            stencil_vec_i2r[(i+5)*TILE_WIDTH + j] = bfloat16(0.25f);
+        }
+        for (j = 0; j<TILE_WIDTH; j++){
+            stencil_vec_i2r[(i+7)*TILE_WIDTH + j] = bfloat16(0.25f);
         }
     }
     //! Stencil creation, Output creation
@@ -368,7 +381,7 @@ int main(int argc, char** argv) {
     // cout << endl;
 
     // cout << "Stencil I2R:" << endl;
-    // printMat(stencil_vec_i2r, TILE_HEIGHT*num_tiles, TILE_WIDTH);
+    // printMat(stencil_vec_i2r, TILE_HEIGHT*64, TILE_WIDTH);
     // cout << endl;
 
 
