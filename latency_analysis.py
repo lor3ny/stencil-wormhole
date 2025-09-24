@@ -7,7 +7,7 @@ def analyze_execution_cycles(csv_file):
     df = pd.read_csv(csv_file, skiprows=1)
     
     # Filter ALL_RED_LOOP
-    all_red_loop = df[df['  zone name'] == 'ALL_RED_LOOP']
+    all_red_loop = df[df['  zone name'] == 'STENCIL KERNEL']
     
     # Group by core_x, core_y, RISC processor type, and zone phase
     grouped = all_red_loop.groupby([' core_x', ' core_y', ' RISC processor type', ' type'])
@@ -48,13 +48,17 @@ def analyze_execution_cycles(csv_file):
     max_core = next(ct for ct in core_times if ct[0] == max_time)
     
     # Print results
-    print(f"Min: {min_time} (Core {min_core[1]},{min_core[2]})")
-    print(f"Lower Quartile: {lower_quartile}")
-    print(f"Mean: {mean}")
-    print(f"Median: {median}")
-    print(f"Upper Quartile: {upper_quartile}")
-    print(f"Max: {max_time} (Core {max_core[1]},{max_core[2]})")
+    print(f"Min: {min_time} microseconds {min_time/1000} milliseconds (Core {min_core[1]},{min_core[2]})")
+    print(f"Lower Quartile: {lower_quartile} microseconds {lower_quartile/1000} milliseconds")
+    print(f"Mean: {mean} microseconds {mean/1000} milliseconds")
+    print(f"Median: {median} microseconds {median/1000} milliseconds")
+    print(f"Upper Quartile: {upper_quartile} microseconds {upper_quartile/1000} milliseconds")
+    print(f"Max: {max_time} microseconds {max_time/1000} milliseconds (Core {max_core[1]},{max_core[2]})")
 
 # Example usage
-csv_file = '/home/tenstorrent/tt-metal/generated/profiler/.logs/profile_log_device.csv'
+csv_file = '/home/lpiarulli_tt/tt-metal/generated/profiler/.logs/profile_log_device.csv'
 analyze_execution_cycles(csv_file)
+
+
+#which works out 1 microsecond per cycle
+#since it's 1MHz clock speed

@@ -6,13 +6,14 @@
 #include "compute_kernel_api/common.h"
 #include "compute_kernel_api/tile_move_copy.h"
 #include "compute_kernel_api/matmul.h"
+#include "tools/profiler/kernel_profiler.hpp"
 
 namespace NAMESPACE {
 void MAIN {
 
     DPRINT << "Start compute" << ENDL();
 
-    //DeviceZoneScopedN("STENCIL KERNEL");
+    DeviceZoneScopedN("STENCIL KERNEL");
     
     uint32_t num_tiles = get_arg_val<uint32_t>(0);
 
