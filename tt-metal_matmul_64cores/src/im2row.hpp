@@ -81,6 +81,27 @@ void vec2stencil_5p(vector<bfloat16>& in, vector<bfloat16>& out, int tile_height
     }
 }
 
+inline void initialize_laplace_5p(bfloat16* stencil, int height, int width, int cores){
+    int i, j;
+    for(i = 0; i<height * cores; i+=32){
+        for (j = 0; j<width; j++){
+            stencil[(i+1)*width + j] = bfloat16(0.25f);
+        }
+        for (j = 0; j<width; j++){
+            stencil[(i+3)*width + j] = bfloat16(0.25f);
+        }
+        for (j = 0; j<width; j++){
+            stencil[(i+4)*width + j] = bfloat16(0.0f);
+        }
+        for (j = 0; j<width; j++){
+            stencil[(i+5)*width + j] = bfloat16(0.25f);
+        }
+        for (j = 0; j<width; j++){
+            stencil[(i+7)*width + j] = bfloat16(0.25f);
+        }
+    }
+}
+
 // it is implemented considering star stencils, not squared ones
 void pad_with_zeros(vector<bfloat16>& in,  vector<bfloat16>& out, int rows, int cols, int pad_size){
 
@@ -114,21 +135,3 @@ uint32_t align_vector_size(vector<bfloat16>& in, size_t starting_size, size_t si
 
     return new_size;
 }
-
-
-//! Tester function
-void matVecMul(
-    const std::vector<float>& matrix,
-    const float* vec,
-    float* result,
-    size_t rows,
-    size_t cols
-) {
-    for (size_t i = 0; i < rows; ++i) {
-        result[i] = 0.0f;
-        for (size_t j = 0; j < cols; ++j) {
-            result[i] += matrix[i * cols + j] * vec[j];
-        }
-    }
-}
-

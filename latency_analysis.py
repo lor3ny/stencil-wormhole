@@ -1,13 +1,101 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+
+def analyze_and_plot_kernels(csv_file, kernel_zones, output_file="timeline.png"):
+    """
+    Analyze multiple kernel zones and plot timeline per core.
+    
+    kernel_zones: list of zone names, e.g. ["WRITER KERNEL", "STENCIL KERNEL", "READER KERNEL"]
+    """
+    print(f"Analyzing zones: {kernel_zones}")
+
+    df = pd.read_csv(csv_file, skiprows=1)
+    
+    execution_cycles = {}
+
+    # Assign colors per kernel
+    kernel_colors = {
+        "WRITER KERNEL": "tab:blue",
+        "STENCIL KERNEL": "tab:orange",
+        "READER KERNEL": "tab:green"
+    }
+
+    # Extract start and end for each kernel zone
+    for zone_name in kernel_zones:
+        zone_df = df[df['  zone name'] == zone_name]
+        grouped = zone_df.groupby([' core_x', ' core_y', ' RISC processor type', ' type'])
+        for (core_x, core_y, processor, phase), group in grouped:
+            latest_entry = group.sort_values(' time[cycles since reset]', ascending=False).iloc[0]
+            key = (core_x, core_y, processor)
+            if key not in execution_cycles:
+                execution_cycles[key] = {}
+            if zone_name not in execution_cycles[key]:
+                execution_cycles[key][zone_name] = {'ZONE_START': None, 'ZONE_END': None}
+            execution_cycles[key][zone_name][phase] = latest_entry[' time[cycles since reset]']
+
+    # Collect timeline data
+    timeline_data = []
+    for (core_x, core_y, processor), zones in execution_cycles.items():
+        core_label = f"Core({core_x},{core_y})-{processor}"
+        for kernel_name, phases in zones.items():
+            if phases['ZONE_START'] is not None and phases['ZONE_END'] is not None:
+                start = phases['ZONE_START']
+                end = phases['ZONE_END']
+                timeline_data.append({
+                    "core": core_label,
+                    "kernel": kernel_name,
+                    "start": start,
+                    "duration": end - start,
+                    "color": kernel_colors.get(kernel_name, "gray")
+                })
+
+    # ---- Plot ----
+    fig, ax = plt.subplots(figsize=(15, 40))
+    
+    cores = list(sorted(set(d["core"] for d in timeline_data)))
+    y_positions = {core: i for i, core in enumerate(cores)}
+
+    # Plot bars
+    for d in timeline_data:
+        ax.barh(y_positions[d["core"]],
+                d["duration"],
+                left=d["start"],
+                height=0.4,
+                color=d["color"],
+                align="center",
+                label=d["kernel"])
+
+    ax.set_yticks(list(y_positions.values()))
+    ax.set_yticklabels(list(y_positions.keys()))
+    ax.set_xlabel("Cycles since reset")
+    ax.set_ylabel("Core + Processor")
+    ax.set_title("Kernel Execution Timeline per Core")
+
+    # Avoid duplicate labels in legend
+    handles, labels = ax.get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    ax.legend(by_label.values(), by_label.keys(), title="Kernel Type")
+
+    plt.tight_layout()
+    plt.savefig(output_file, dpi=300)
+    plt.close(fig)
+
+    print(f"Timeline saved to {output_file}")
+    return timeline_data
+
+
 
 # Load CSV
-def analyze_execution_cycles(csv_file):
+def analyze_execution_cycles(csv_file, zone_name):
+
+    print(f"Analyzing zone: {zone_name}")
+
     # Read CSV
     df = pd.read_csv(csv_file, skiprows=1)
     
     # Filter ALL_RED_LOOP
-    all_red_loop = df[df['  zone name'] == 'STENCIL KERNEL']
+    all_red_loop = df[df['  zone name'] == zone_name]
     
     # Group by core_x, core_y, RISC processor type, and zone phase
     grouped = all_red_loop.groupby([' core_x', ' core_y', ' RISC processor type', ' type'])
@@ -53,11 +141,58 @@ def analyze_execution_cycles(csv_file):
     print(f"Mean: {mean} microseconds {mean/1000} milliseconds")
     print(f"Median: {median} microseconds {median/1000} milliseconds")
     print(f"Upper Quartile: {upper_quartile} microseconds {upper_quartile/1000} milliseconds")
-    print(f"Max: {max_time} microseconds {max_time/1000} milliseconds (Core {max_core[1]},{max_core[2]})")
+    print(f"Max: {max_time} microseconds {max_time/1000} milliseconds (Core {max_core[1]},{max_core[2]})\n")
 
-# Example usage
+
+def compute_overall_duration(csv_file, kernels):
+    """
+    Computes the overall execution duration across multiple kernels.
+    
+    Returns:
+        overall_start: earliest ZONE_START among all kernels
+        overall_end: latest ZONE_END among all kernels
+        duration: overall_end - overall_start
+    """
+    df = pd.read_csv(csv_file, skiprows=1)
+    
+    all_starts = []
+    all_ends = []
+    
+    for kernel_name in kernels:
+        zone_df = df[df['  zone name'] == kernel_name]
+        grouped = zone_df.groupby([' core_x', ' core_y', ' RISC processor type', ' type'])
+        for (core_x, core_y, processor, phase), group in grouped:
+            latest_entry = group.sort_values(' time[cycles since reset]', ascending=False).iloc[0]
+            if phase == "ZONE_START":
+                all_starts.append(latest_entry[' time[cycles since reset]'])
+            elif phase == "ZONE_END":
+                all_ends.append(latest_entry[' time[cycles since reset]'])
+
+    if not all_starts or not all_ends:
+        print("No start or end times found for the given kernels.")
+        return None, None, None
+
+    overall_start = min(all_starts)
+    overall_end = max(all_ends)
+    duration = overall_end - overall_start
+
+    print(f"Overall start: {overall_start}")
+    print(f"Overall end: {overall_end}")
+    print(f"Total duration across kernels: {duration} cycles, {duration/1000} milliseconds)")
+    
+    return overall_start, overall_end, duration
+
+# Examanalyze_execution_cycles(csv_file)ple usage
 csv_file = '/home/lpiarulli_tt/tt-metal/generated/profiler/.logs/profile_log_device.csv'
-analyze_execution_cycles(csv_file)
+kernels = ["WRITER KERNEL", "STENCIL KERNEL", "READER KERNEL"]
+
+analyze_execution_cycles(csv_file, 'STENCIL KERNEL')
+analyze_execution_cycles(csv_file, 'READER KERNEL')
+analyze_execution_cycles(csv_file, 'WRITER KERNEL')
+
+compute_overall_duration(csv_file, kernels)
+
+timeline = analyze_and_plot_kernels(csv_file, kernels, "multi_kernel_timeline.png")
 
 
 #which works out 1 microsecond per cycle

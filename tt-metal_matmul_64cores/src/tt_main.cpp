@@ -23,8 +23,10 @@ using namespace tt::tt_metal;
 using namespace std;
 
 #define TILE_WIDTH 32 // bfloats
-#define TILE_HEIGHT 32 // bfloats
-#define ITERATIONS 1000
+#define TILE_HEIGHT 32 // 
+#define TILE_SIZE 2048 // bfloats*TILE_WIDTH*TILE_HEIGHT
+
+#define ITERATIONS 10
 #define ROWS 64
 #define COLS 64
 
@@ -33,7 +35,13 @@ using namespace std;
 #define SRAM_TILES 128
 
 
-int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bfloat16>& output, uint32_t n_tiles, uint32_t stencil_n_tiles, uint32_t tile_size, IDevice* device){
+int matmul_ttker(vector<bfloat16>& input, 
+    vector<bfloat16>& stencil, 
+    vector<bfloat16>& output, 
+    uint32_t n_tiles,
+    uint32_t rows,
+    uint32_t cols,
+    IDevice* device){
     
     //* ---------------------------------------------------------
     //* HOST INITIALIZATION
@@ -48,7 +56,6 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     DataFormat data_format = DataFormat::Float16_b;
     MathFidelity math_fidelity = MathFidelity::HiFi4;
     const auto core_grid = device->compute_with_storage_grid_size();
-
     auto [num_cores, all_cores, core_group_1, core_group_2, work_per_core1, work_per_core2] = split_work_to_cores(core_grid, n_tiles);
 
     cout << " Number of tensixes: " << num_cores << endl;
@@ -70,13 +77,13 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     tt_metal::InterleavedBufferConfig dram_inout_config{
             .device = device, 
             .size = input.size() * sizeof(bfloat16), 
-            .page_size = tile_size,  
+            .page_size = TILE_SIZE,  
             .buffer_type = tt_metal::BufferType::DRAM};
 
     tt_metal::InterleavedBufferConfig dram_stencil_config{
             .device = device, 
             .size = stencil.size() * sizeof(bfloat16), 
-            .page_size = tile_size,  
+            .page_size = TILE_SIZE,  
             .buffer_type = tt_metal::BufferType::DRAM};
 
     std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer = CreateBuffer(dram_inout_config);
@@ -94,25 +101,25 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     cout << "Creating SRAM buffers..." << endl;
 
     uint32_t cb_input_index = CBIndex::c_0;
-    CircularBufferConfig cb_input_config(tile_size * SRAM_TILES, 
+    CircularBufferConfig cb_input_config(TILE_SIZE * SRAM_TILES, 
                                           {{cb_input_index, data_format}}
     );
-    cb_input_config.set_page_size(cb_input_index, tile_size);
+    cb_input_config.set_page_size(cb_input_index, TILE_SIZE);
     CBHandle cb_input = tt_metal::CreateCircularBuffer(program, all_cores, cb_input_config);
 
     uint32_t cb_stencil_index = CBIndex::c_1; 
-    CircularBufferConfig cb_stencil_config(tile_size * SRAM_TILES, 
+    CircularBufferConfig cb_stencil_config(TILE_SIZE * SRAM_TILES, 
                                            {{cb_stencil_index, data_format}}
     );
-    cb_stencil_config.set_page_size(cb_stencil_index, tile_size);
+    cb_stencil_config.set_page_size(cb_stencil_index, TILE_SIZE);
     CBHandle cb_stencil = tt_metal::CreateCircularBuffer(program, all_cores, cb_stencil_config);
     
 
     uint32_t cb_output_index = CBIndex::c_16; 
-    CircularBufferConfig cb_output_config(tile_size * SRAM_TILES, 
+    CircularBufferConfig cb_output_config(TILE_SIZE * SRAM_TILES, 
                                            {{cb_output_index, data_format}}
     );
-    cb_output_config.set_page_size(cb_output_index, tile_size);
+    cb_output_config.set_page_size(cb_output_index, TILE_SIZE);
     CBHandle cb_output = tt_metal::CreateCircularBuffer(program, all_cores, cb_output_config);
 
     // ---------------------------------------------------------
@@ -211,20 +218,20 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     // ENQUEUE WRITE BUFFERS: Write data on the allocated buffers
     // ---------------------------------------------------------
     
-    cout << "Enqueueing write buffers..." << endl;
+    cout << "Memcpy and compute launch..." << endl;
 
     //! This is the first memcpy, it should be done only one time at the beginnning
     //! This is a memcpy, so output doesn't have to copied
+    input = tilize_nfaces(input, rows * cols, TILE_WIDTH);
+    stencil = tilize_nfaces(stencil, TILE_HEIGHT, TILE_WIDTH);
+
     EnqueueWriteBuffer(cq, input_dram_buffer, input.data(), false);   
     EnqueueWriteBuffer(cq, stencil_dram_buffer, stencil.data(), false);       
-    
-    // ---------------------------------------------------------
-    // LAUNCH AND WAIT TERMINATION: Set the runtime arguments for the kernels
-    // ---------------------------------------------------------
 
-    cout << "Enqueueing kernels..." << endl;	
+    vector<bfloat16> new_in(rows*cols);
+    vector<bfloat16> new_in_pad((rows+2)*(cols+2));
+    vector<bfloat16> new_in_i2r(rows*cols*TILE_WIDTH);
 
-    //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
     for(i = 0; i<ITERATIONS; i++){
 
         //cout << "times: " << i << endl;
@@ -232,26 +239,20 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
         EnqueueProgram(cq, program, false);
         EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true); // Read the result from the device, works also as a barrier i think
 
+        output = untilize_nfaces(output, rows*cols, TILE_WIDTH);
+
         if (i != ITERATIONS-1){
-
-            output = untilize_nfaces(output, ROWS*COLS, TILE_WIDTH);
-            output[(ROWS/2)*COLS + COLS/2] = 100.0f;
-            vector<bfloat16> new_in(ROWS*COLS);
             vec2stencil_5p(output, new_in, TILE_HEIGHT, n_tiles);
+            new_in[(rows/2)*cols + cols/2] = 100.0f;
+            pad_with_zeros(new_in, new_in_pad, rows, cols, 1);
+            stencil2vec_5p(new_in_pad, new_in_i2r, (rows+2), (cols+2));
 
-            vector<bfloat16> new_in_pad((ROWS+2)*(COLS+2));
-            pad_with_zeros(new_in, new_in_pad, ROWS, COLS, 1);
-
-            vector<bfloat16> new_in_i2r(ROWS*ROWS*TILE_WIDTH);
-            stencil2vec_5p(new_in_pad, new_in_i2r, (ROWS+2), (COLS+2));
-
-            new_in_i2r = tilize_nfaces(new_in_i2r, ROWS*COLS, TILE_WIDTH);
+            new_in_i2r = tilize_nfaces(new_in_i2r, rows*cols, TILE_WIDTH);
             EnqueueWriteBuffer(cq, input_dram_buffer, new_in_i2r.data(), false);  
         }  
     }
 
     Finish(cq);
-    cout << "Core {0, 0} on Device 0 completed the task!" << endl;
 
     return 0;
 }
@@ -271,7 +272,6 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
     // ---------------------------------------------------------
 
-    const size_t single_tile_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16); // bytes
 
     //! To define by the input 
     constexpr uint32_t rows = ROWS, cols = COLS;
@@ -299,8 +299,8 @@ int main(int argc, char** argv) {
     int ret, i, j;
 
 
-    if (i2r_buffer_size < single_tile_size){
-        cerr << "Error: problem size must be at least " << single_tile_size << " elements." << endl;
+    if (i2r_buffer_size < TILE_SIZE){
+        cerr << "Error: problem size must be at least " << TILE_SIZE << " elements." << endl;
         return -1;
     }
 
@@ -309,10 +309,10 @@ int main(int argc, char** argv) {
     //* ----------
 
     vector<bfloat16> input_vec(rows * cols);
-    for(i = 0; i<rows * cols; i++){
+    for(i = 0; i<rows*cols; i++){
         input_vec[i] = bfloat16(0.0f);
     }
-    input_vec[(ROWS/2)*COLS + COLS/2] = 100.0f;
+    input_vec[(rows/2)*cols + cols/2] = 100.0f;
 
     //* ----------
     //* PADDING
@@ -321,8 +321,6 @@ int main(int argc, char** argv) {
     // Pad the input, and the output but it's not necessary
     vector<bfloat16> input_vec_pad(rows_pad * cols_pad, 0.0f);
     pad_with_zeros(input_vec, input_vec_pad, rows, cols, 1);
-
-    cout << 1 << endl;
 
     //* ----------
     //* im2row CONVERTION
@@ -335,35 +333,11 @@ int main(int argc, char** argv) {
     //* ALIGNEMENT
     //* ----------
 
-    dram_buffer_size = align_vector_size(input_vec_i2r, i2r_buffer_size, single_tile_size);
+    dram_buffer_size = align_vector_size(input_vec_i2r, i2r_buffer_size, TILE_SIZE);
     diff_dram = (dram_buffer_size - i2r_buffer_size) / sizeof(bfloat16);
 
-    num_tiles = dram_buffer_size / single_tile_size;
+    num_tiles = dram_buffer_size / TILE_SIZE;
     stencil_tiles = num_tiles;
-
-    //! Stencil creation, output creation
-    vector<bfloat16> output_vec(dram_buffer_size/sizeof(bfloat16), 0.0f);
-
-    vector<bfloat16> stencil_vec_i2r(TILE_WIDTH * TILE_HEIGHT * 64, 0.0f);
-    for(i = 0; i<TILE_HEIGHT * 64; i+=32){
-        for (j = 0; j<TILE_WIDTH; j++){
-            stencil_vec_i2r[(i+1)*TILE_WIDTH + j] = bfloat16(0.25f);
-        }
-        for (j = 0; j<TILE_WIDTH; j++){
-            stencil_vec_i2r[(i+3)*TILE_WIDTH + j] = bfloat16(0.25f);
-        }
-        for (j = 0; j<TILE_WIDTH; j++){
-            stencil_vec_i2r[(i+4)*TILE_WIDTH + j] = bfloat16(0.0f);
-        }
-        for (j = 0; j<TILE_WIDTH; j++){
-            stencil_vec_i2r[(i+5)*TILE_WIDTH + j] = bfloat16(0.25f);
-        }
-        for (j = 0; j<TILE_WIDTH; j++){
-            stencil_vec_i2r[(i+7)*TILE_WIDTH + j] = bfloat16(0.25f);
-        }
-    }
-    //! Stencil creation, Output creation
-
 
     cout << "Problem shape: " << rows << "x" << cols << endl;
     cout << "Stencil order: " << stencil_order << endl;
@@ -373,40 +347,28 @@ int main(int argc, char** argv) {
     cout << "Number of tiles: " << num_tiles << endl;
     cout << "Number of stencil tiles: " << stencil_tiles << endl;
 
-    cout << "Input: " << endl;
-    printMat(input_vec_pad, rows_pad, cols_pad);
-    cout << endl;
-
-    // cout << "Input I2R: " << endl;
-    // printMat(input_vec_i2r, rows_i2r, cols_i2r);
-    // cout << endl;
-
-    // cout << "Stencil I2R:" << endl;
-    // printMat(stencil_vec_i2r, TILE_HEIGHT*64, TILE_WIDTH);
-    // cout << endl;
-
 
     //! KERNEL AREA
-    auto start = std::chrono::high_resolution_clock::now();
 
     int device_id = 0;
     IDevice* device = CreateDevice(device_id);
+    auto [num_cores, all_cores, core_group_1, core_group_2, work_per_core1, work_per_core2] = split_work_to_cores(device->compute_with_storage_grid_size(), num_tiles);
+    vector<bfloat16> output_vec(dram_buffer_size/sizeof(bfloat16), 0.0f);
+    vector<bfloat16> stencil_vec_i2r(TILE_WIDTH * TILE_HEIGHT * num_cores, 0.0f);
+    initialize_laplace_5p(stencil_vec_i2r.data(), TILE_HEIGHT, TILE_WIDTH, num_cores);
 
-    input_vec_i2r = tilize_nfaces(input_vec_i2r, rows_i2r, cols_i2r);
-    stencil_vec_i2r = tilize_nfaces(stencil_vec_i2r, TILE_HEIGHT, TILE_WIDTH);
 
-    matmul_ttker(input_vec_i2r, stencil_vec_i2r, output_vec, num_tiles, stencil_tiles, single_tile_size, device);
-    
-    output_vec = untilize_nfaces(output_vec, rows_i2r, cols_i2r);
+    auto start = std::chrono::high_resolution_clock::now();
+    matmul_ttker(input_vec_i2r, stencil_vec_i2r, output_vec, num_tiles, ROWS, COLS, device);
+    auto end = std::chrono::high_resolution_clock::now();
 
     CloseDevice(device);
 
-    auto end = std::chrono::high_resolution_clock::now();
     //! KERNEL AREA
 
     cout << "Output: " << endl;
     vec2stencil_5p(output_vec, input_vec, TILE_HEIGHT, num_tiles);
-    input_vec[(ROWS/2)*COLS + COLS/2] = 100.0f;
+    input_vec[(rows/2)*cols + cols/2] = 100.0f;
     printMat(input_vec, rows, cols);
     std::chrono::duration<double, std::milli> elapsed = end - start;
     cout << "Elapsed time: " << elapsed.count() << " ms" << endl;
