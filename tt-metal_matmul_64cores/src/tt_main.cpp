@@ -169,7 +169,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     int start_tile_idx = 0;
     for(const auto& core_range : core_group_1.ranges()){
         for(const auto& core : core_range) {
-            cout << core.x*8 + core.y << endl;
+            //cout << core.x*8 + core.y << endl;
             tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
                 input_dram_buffer->address(), start_tile_idx, work_per_core1, input_dram_buffer->size(),
                 stencil_dram_buffer->address(), core.x*8 + core.y, work_per_core1, stencil_dram_buffer->size()
@@ -227,7 +227,7 @@ int matmul_ttker(vector<bfloat16>& input, vector<bfloat16>& stencil, vector<bflo
     int times = 1000;
     for(i = 0; i<times; i++){
 
-        cout << "times: " << i << endl;
+        //cout << "times: " << i << endl;
 
         EnqueueProgram(cq, program, false);
         EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true); // Read the result from the device, works also as a barrier i think

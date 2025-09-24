@@ -12,7 +12,7 @@ void MAIN {
 
     DPRINT << "Start compute" << ENDL();
 
-    //DeviceZoneScopedN("STENCIL KERNEL");
+    DeviceZoneScopedN("STENCIL KERNEL");
     
     uint32_t num_tiles = get_arg_val<uint32_t>(0);
 
