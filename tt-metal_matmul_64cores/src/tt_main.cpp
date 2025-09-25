@@ -223,39 +223,72 @@ int matmul_ttker(vector<bfloat16>& input,
 
     //! This is the first memcpy, it should be done only one time at the beginnning
     //! This is a memcpy, so output doesn't have to copied
+
     vector<bfloat16> new_in(rows*cols);
-    vector<bfloat16> new_in_pad((rows+2)*(cols+2));
+    vector<bfloat16> new_in_pad((rows+2)*(cols+2), 0.0f);
     vector<bfloat16> new_in_i2r(rows*cols*TILE_WIDTH);
 
     input = tilize_nfaces(input, rows * cols, TILE_WIDTH);
     stencil = tilize_nfaces(stencil, TILE_HEIGHT, TILE_WIDTH);
 
-    EnqueueWriteBuffer(cq, input_dram_buffer, input.data(), false);   
-    EnqueueWriteBuffer(cq, stencil_dram_buffer, stencil.data(), false);   
+    EnqueueWriteBuffer(cq, input_dram_buffer, input.data(), true);   
+    EnqueueWriteBuffer(cq, stencil_dram_buffer, stencil.data(), true);
     
-    auto start = std::chrono::high_resolution_clock::now();
+    double elapsed_cpu = 0.0;
+    double elapsed_memcpy = 0.0;
+    double elapsed_wormhole = 0.0;
+    std::chrono::duration<double, std::milli> elapsed;
+    std::chrono::_V2::system_clock::time_point start_total, end_total, start_wormhole, end_wormhole, start_memcpy, end_memcpy, start_cpu, end_cpu;
+
+    start_total = std::chrono::high_resolution_clock::now();
 
     for(i = 0; i<iterations; i++){
 
-        EnqueueProgram(cq, program, false);
-        EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true);
+        start_wormhole = std::chrono::high_resolution_clock::now();
+        EnqueueProgram(cq, program, true);
+        end_wormhole = std::chrono::high_resolution_clock::now();
+        elapsed = end_wormhole - start_wormhole;
+        elapsed_wormhole += elapsed.count();
 
-        output = untilize_nfaces(output, rows*cols, TILE_WIDTH);
+        start_memcpy = std::chrono::high_resolution_clock::now();
+        EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true);
+        end_memcpy = std::chrono::high_resolution_clock::now();
+        elapsed = end_memcpy - start_memcpy;
+        elapsed_memcpy += elapsed.count();
 
         if (i != iterations-1){
+            start_cpu = std::chrono::high_resolution_clock::now();
+            output = untilize_nfaces(output, rows*cols, TILE_WIDTH);
             vec2stencil_5p(output, new_in, TILE_HEIGHT, n_tiles);
             new_in[(rows/2)*cols + cols/2] = 100.0f;
             pad_with_zeros(new_in, new_in_pad, rows, cols, 1);
             stencil2vec_5p(new_in_pad, new_in_i2r, (rows+2), (cols+2));
-
             new_in_i2r = tilize_nfaces(new_in_i2r, rows*cols, TILE_WIDTH);
-            EnqueueWriteBuffer(cq, input_dram_buffer, new_in_i2r.data(), false);  
-        }  
+            end_cpu = std::chrono::high_resolution_clock::now();
+            elapsed = end_cpu - start_cpu;
+            elapsed_cpu += elapsed.count();
+
+            start_memcpy = std::chrono::high_resolution_clock::now();
+            EnqueueWriteBuffer(cq, input_dram_buffer, new_in_i2r.data(), true);  
+            end_memcpy = std::chrono::high_resolution_clock::now();
+            elapsed = end_memcpy - start_memcpy;
+            elapsed_memcpy += elapsed.count();
+
+        } else {
+            start_cpu = std::chrono::high_resolution_clock::now();
+            output = untilize_nfaces(output, rows*cols, TILE_WIDTH);
+            end_cpu = std::chrono::high_resolution_clock::now();
+            elapsed = end_cpu - start_cpu;
+            elapsed_cpu += elapsed.count();
+        }
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> elapsed = end - start;
-    cout << "Elapsed time: " << elapsed.count() << " ms" << endl;
+    end_total = std::chrono::high_resolution_clock::now();
+    elapsed = end_total - start_total;
+    cout << "-TOTAL- " << elapsed.count() << " ms" << endl;
+    cout << "-CPU- " << elapsed_cpu << " ms" << endl;
+    cout << "-MEMCPY- " << elapsed_memcpy << " ms" << endl;
+    cout << "-WORMHOLE- " << elapsed_wormhole << " ms" << endl;
 
     Finish(cq);
 

@@ -248,31 +248,45 @@ int axpy_ttker(
     down = tilize_nfaces(down, rows, cols);
     scalar = tilize_nfaces(scalar, TILE_HEIGHT, TILE_WIDTH);
    
-    EnqueueWriteBuffer(cq, up_dram_buffer, up.data(), false);   
-    EnqueueWriteBuffer(cq, left_dram_buffer, left.data(), false);   
-    EnqueueWriteBuffer(cq, right_dram_buffer, right.data(), false);   
-    EnqueueWriteBuffer(cq, down_dram_buffer, down.data(), false);   
-    EnqueueWriteBuffer(cq, scalar_dram_buffer, scalar.data(), false);       
+    EnqueueWriteBuffer(cq, up_dram_buffer, up.data(), true);   
+    EnqueueWriteBuffer(cq, left_dram_buffer, left.data(), true);   
+    EnqueueWriteBuffer(cq, right_dram_buffer, right.data(), true);   
+    EnqueueWriteBuffer(cq, down_dram_buffer, down.data(), true);   
+    EnqueueWriteBuffer(cq, scalar_dram_buffer, scalar.data(), true);       
     
-    auto start = std::chrono::high_resolution_clock::now();
+    double elapsed_cpu = 0.0;
+    double elapsed_memcpy = 0.0;
+    double elapsed_wormhole = 0.0;
+    std::chrono::_V2::system_clock::time_point start_total, end_total, start_wormhole, end_wormhole, start_memcpy, end_memcpy, start_cpu, end_cpu;
+    std::chrono::duration<double, std::milli> elapsed;
+    
+    start_total = std::chrono::high_resolution_clock::now();
 
     for(i = 0; i<iterations; i++){
 
-        EnqueueProgram(cq, program, false);
-        EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true); // Read the result from the device, works also as a barrier i think
+        start_wormhole = std::chrono::high_resolution_clock::now();
+        EnqueueProgram(cq, program, true);
+        end_wormhole = std::chrono::high_resolution_clock::now();
+        elapsed = end_wormhole - start_wormhole;
+        elapsed_wormhole += elapsed.count();
 
-        output = untilize_nfaces(output, rows, cols);
+        start_memcpy = std::chrono::high_resolution_clock::now();
+        EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true);
+        end_memcpy = std::chrono::high_resolution_clock::now();
+        elapsed = end_memcpy - start_memcpy;
+        elapsed_memcpy += elapsed.count();
+
 
         if (i != iterations-1){
 
+            start_cpu = std::chrono::high_resolution_clock::now();
+            output = untilize_nfaces(output, rows, cols);
             up = untilize_nfaces(up, rows, cols);
             left = untilize_nfaces(left, rows, cols);
             right = untilize_nfaces(right, rows, cols);
             down = untilize_nfaces(down, rows, cols);
-
             output[(rows/2)*cols + cols/2] = 100.0f;
             pad_with_zeros(output, output_pad, rows, cols, 1);
-
             extract_submats_5p(output_pad, 
                 up,
                 left,
@@ -282,22 +296,37 @@ int axpy_ttker(
                 cols,
                 cols+2
             );
-
             up = tilize_nfaces(up, rows, cols);
             left = tilize_nfaces(left, rows, cols);
             right = tilize_nfaces(right, rows, cols);
             down = tilize_nfaces(down, rows, cols);
+            end_cpu = std::chrono::high_resolution_clock::now();
+            elapsed = end_cpu - start_cpu;
+            elapsed_cpu += elapsed.count();
 
-            EnqueueWriteBuffer(cq, up_dram_buffer, up.data(), false);   
-            EnqueueWriteBuffer(cq, left_dram_buffer, left.data(), false);   
-            EnqueueWriteBuffer(cq, right_dram_buffer, right.data(), false);   
-            EnqueueWriteBuffer(cq, down_dram_buffer, down.data(), false);    
-        }  
+            start_memcpy = std::chrono::high_resolution_clock::now();
+            EnqueueWriteBuffer(cq, up_dram_buffer, up.data(), true);   
+            EnqueueWriteBuffer(cq, left_dram_buffer, left.data(), true);   
+            EnqueueWriteBuffer(cq, right_dram_buffer, right.data(), true);   
+            EnqueueWriteBuffer(cq, down_dram_buffer, down.data(), true);    
+            end_memcpy = std::chrono::high_resolution_clock::now();
+            elapsed = end_memcpy - start_memcpy;
+            elapsed_memcpy += elapsed.count();
+        }  else {
+            start_cpu = std::chrono::high_resolution_clock::now();
+            output = untilize_nfaces(output, rows, cols);
+            end_cpu = std::chrono::high_resolution_clock::now();
+            elapsed = end_cpu - start_cpu;
+            elapsed_cpu += elapsed.count();
+        }
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> elapsed = end - start;
-    cout << "Elapsed time: " << elapsed.count() << " ms" << endl;
+    end_total = std::chrono::high_resolution_clock::now();
+    elapsed = end_total - start_total;
+    cout << "-TOTAL- " << elapsed.count() << " ms" << endl;
+    cout << "-CPU- " << elapsed_cpu << " ms" << endl;
+    cout << "-MEMCPY- " << elapsed_memcpy << " ms" << endl;
+    cout << "-WORMHOLE- " << elapsed_wormhole << " ms" << endl;
 
     Finish(cq);
 

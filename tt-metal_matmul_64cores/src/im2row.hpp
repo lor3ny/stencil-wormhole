@@ -54,18 +54,34 @@ void stencil2vec_5p(vector<bfloat16>& in, vector<bfloat16>& out, int rows, int c
     //     index += 32;
     // }
 
-    for(i = 1; i<rows-1; i++){ // rows from 1 to 9
-        for(j = 1; j<cols-1; j++){ // cols
+    // for(i = 1; i<rows-1; i++){ // rows from 1 to 9
+    //     for(j = 1; j<cols-1; j++){ // cols
 
-            // This phase ca be SIMDized
-            out[index+1] = in[(i-1)*cols + j];
-            out[index+3] = in[i*cols + (j-1)];
-            out[index+4] = in[i*cols + j];
-            out[index+5] = in[i*cols + (j+1)];
-            out[index+7] = in[(i+1)*cols + j];
-            for(int k = index+9; k<index+31; k++){
-                out[k] = 0; //! padding
-            }
+    //         // This phase ca be SIMDized
+    //         out[index+1] = in[(i-1)*cols + j];
+    //         out[index+3] = in[i*cols + (j-1)];
+    //         out[index+4] = in[i*cols + j];
+    //         out[index+5] = in[i*cols + (j+1)];
+    //         out[index+7] = in[(i+1)*cols + j];
+    //         // for(int k = index+9; k<index+31; k++){
+    //         //     out[k] = 0; //! padding
+    //         // }
+    //         index += 32;
+    //     }
+    // }
+
+    for (int i = 1; i < rows - 1; i++) {
+        const bfloat16* row_above = &in[(i - 1) * cols];
+        const bfloat16* row_curr  = &in[i * cols];
+        const bfloat16* row_below = &in[(i + 1) * cols];
+
+        for (int j = 1; j < cols - 1; j++) {
+            out[index + 1] = row_above[j];
+            out[index + 3] = row_curr[j - 1];
+            out[index + 4] = row_curr[j];
+            out[index + 5] = row_curr[j + 1];
+            out[index + 7] = row_below[j];
+
             index += 32;
         }
     }

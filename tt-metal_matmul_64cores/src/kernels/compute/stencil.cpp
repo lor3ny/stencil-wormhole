@@ -11,8 +11,6 @@
 namespace NAMESPACE {
 void MAIN {
 
-    DPRINT << "Start compute" << ENDL();
-
     DeviceZoneScopedN("STENCIL KERNEL");
     
     uint32_t num_tiles = get_arg_val<uint32_t>(0);
@@ -50,7 +48,6 @@ void MAIN {
         tile_regs_release();
     }
 
-    DPRINT << "End compute" << ENDL();
 }
 
 }

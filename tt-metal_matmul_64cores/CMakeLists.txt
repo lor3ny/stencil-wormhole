@@ -41,7 +41,12 @@ else()
 endif()
 
 
-add_compile_options($<$<COMPILE_LANG_AND_ID:CXX,Clang>:-fsized-deallocation>)
+add_compile_options(
+  $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-O3>
+  $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-march=native>
+  $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-fsized-deallocation>
+)
+#if something breaks remove that
 add_executable(stencil src/tt_main.cpp)
 
 set_target_properties(stencil PROPERTIES

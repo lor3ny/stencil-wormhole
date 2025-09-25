@@ -137,12 +137,12 @@ def analyze_execution_cycles(csv_file, zone_name):
     max_core = next(ct for ct in core_times if ct[0] == max_time)
     
     # Print results
-    print(f"Min: {min_time} nanoseconds {min_time/1000000} milliseconds (Core {min_core[1]},{min_core[2]})")
-    print(f"Lower Quartile: {lower_quartile} nanoseconds {lower_quartile/1000000} milliseconds")
-    print(f"Mean: {mean} nanoseconds {mean/1000000} milliseconds")
-    print(f"Median: {median} nanoseconds {median/1000000} milliseconds")
-    print(f"Upper Quartile: {upper_quartile} nanoseconds {upper_quartile/1000000} milliseconds")
-    print(f"Max: {max_time} nanoseconds {max_time/1000000} milliseconds (Core {max_core[1]},{max_core[2]})\n")
+    print(f"Min: {min_time} nanoseconds {min_time/1000000} ms (Core {min_core[1]},{min_core[2]})")
+    print(f"Lower Quartile: {lower_quartile} nanoseconds {lower_quartile/1000000} ms")
+    print(f"Mean: {mean} nanoseconds {mean/1000000} ms")
+    print(f"Median: {median} nanoseconds {median/1000000} ms")
+    print(f"Upper Quartile: {upper_quartile} nanoseconds {upper_quartile/1000000} ms")
+    print(f"Max: {max_time} nanoseconds {max_time/1000000} ms (Core {max_core[1]},{max_core[2]})\n")
 
 
 def compute_overall_duration(csv_file, kernels, iterations):
@@ -179,8 +179,8 @@ def compute_overall_duration(csv_file, kernels, iterations):
 
     print(f"Overall start: {overall_start}")
     print(f"Overall end: {overall_end}")
-    print(f"Total duration across kernels: {duration} nanoseconds, {duration/1000000} milliseconds)")
-    print(f"Total duration on {iterations}: {duration*iterations} nanoseconds, {(duration*iterations)/1000000} milliseconds)")
+    print(f"-KER- {duration} nanoseconds {duration/1000000} ms")
+    print(f"-KER_IT- {duration*iterations} nanoseconds {(duration*iterations)/1000000} ms")
     
     return overall_start, overall_end, duration
 
@@ -202,7 +202,7 @@ if __name__ == "__main__":
 
     compute_overall_duration(csv_file, kernels, args.iterations)
 
-    timeline = analyze_and_plot_kernels(csv_file, kernels, f"timeline_{args.iterations}.png")
+    #timeline = analyze_and_plot_kernels(csv_file, kernels, f"timeline_{args.iterations}.png")
 
 
 #which works out 1 microsecond per cycle
