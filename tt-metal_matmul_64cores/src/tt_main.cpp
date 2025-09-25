@@ -26,9 +26,9 @@ using namespace std;
 #define TILE_HEIGHT 32 // 
 #define TILE_SIZE 2048 // bfloats*TILE_WIDTH*TILE_HEIGHT
 
-#define ITERATIONS 10
-#define ROWS 64
-#define COLS 64
+// #define ITERATIONS 10000
+// #define ROWS 64
+// #define COLS 64
 
 
 // I wanto to have all the SRAM available, maybe I could use also multiple CBs
@@ -41,6 +41,7 @@ int matmul_ttker(vector<bfloat16>& input,
     uint32_t n_tiles,
     uint32_t rows,
     uint32_t cols,
+    uint32_t iterations,
     IDevice* device){
     
     //* ---------------------------------------------------------
@@ -222,26 +223,26 @@ int matmul_ttker(vector<bfloat16>& input,
 
     //! This is the first memcpy, it should be done only one time at the beginnning
     //! This is a memcpy, so output doesn't have to copied
-    input = tilize_nfaces(input, rows * cols, TILE_WIDTH);
-    stencil = tilize_nfaces(stencil, TILE_HEIGHT, TILE_WIDTH);
-
-    EnqueueWriteBuffer(cq, input_dram_buffer, input.data(), false);   
-    EnqueueWriteBuffer(cq, stencil_dram_buffer, stencil.data(), false);       
-
     vector<bfloat16> new_in(rows*cols);
     vector<bfloat16> new_in_pad((rows+2)*(cols+2));
     vector<bfloat16> new_in_i2r(rows*cols*TILE_WIDTH);
 
-    for(i = 0; i<ITERATIONS; i++){
+    input = tilize_nfaces(input, rows * cols, TILE_WIDTH);
+    stencil = tilize_nfaces(stencil, TILE_HEIGHT, TILE_WIDTH);
 
-        //cout << "times: " << i << endl;
+    EnqueueWriteBuffer(cq, input_dram_buffer, input.data(), false);   
+    EnqueueWriteBuffer(cq, stencil_dram_buffer, stencil.data(), false);   
+    
+    auto start = std::chrono::high_resolution_clock::now();
+
+    for(i = 0; i<iterations; i++){
 
         EnqueueProgram(cq, program, false);
-        EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true); // Read the result from the device, works also as a barrier i think
+        EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true);
 
         output = untilize_nfaces(output, rows*cols, TILE_WIDTH);
 
-        if (i != ITERATIONS-1){
+        if (i != iterations-1){
             vec2stencil_5p(output, new_in, TILE_HEIGHT, n_tiles);
             new_in[(rows/2)*cols + cols/2] = 100.0f;
             pad_with_zeros(new_in, new_in_pad, rows, cols, 1);
@@ -251,6 +252,10 @@ int matmul_ttker(vector<bfloat16>& input,
             EnqueueWriteBuffer(cq, input_dram_buffer, new_in_i2r.data(), false);  
         }  
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+    cout << "Elapsed time: " << elapsed.count() << " ms" << endl;
 
     Finish(cq);
 
@@ -272,9 +277,22 @@ int main(int argc, char** argv) {
     // ---------------------------------------------------------
     // ---------------------------------------------------------
 
+    uint32_t iterations;
+    uint32_t rows;
+    uint32_t cols;
+
+    if (argc >= 4) {
+        iterations = atoi(argv[1]);
+        rows = atoi(argv[2]);
+        cols = atoi(argv[3]);
+        cout << "Using arguments: ITERATIONS=" << iterations << ", ROWS=" << rows << ", COLS=" << cols << endl;
+    } else {
+        cout << "Usage: " << argv[0] << " <iterations> <rows> <cols>" << endl;
+        return -1;
+    }
+
 
     //! To define by the input 
-    constexpr uint32_t rows = ROWS, cols = COLS;
     constexpr uint32_t stencil_order = 1;
     //! To define by the input
 
@@ -357,10 +375,7 @@ int main(int argc, char** argv) {
     vector<bfloat16> stencil_vec_i2r(TILE_WIDTH * TILE_HEIGHT * num_cores, 0.0f);
     initialize_laplace_5p(stencil_vec_i2r.data(), TILE_HEIGHT, TILE_WIDTH, num_cores);
 
-
-    auto start = std::chrono::high_resolution_clock::now();
-    matmul_ttker(input_vec_i2r, stencil_vec_i2r, output_vec, num_tiles, ROWS, COLS, device);
-    auto end = std::chrono::high_resolution_clock::now();
+    matmul_ttker(input_vec_i2r, stencil_vec_i2r, output_vec, num_tiles, rows, cols, iterations, device);
 
     CloseDevice(device);
 
@@ -370,8 +385,6 @@ int main(int argc, char** argv) {
     vec2stencil_5p(output_vec, input_vec, TILE_HEIGHT, num_tiles);
     input_vec[(rows/2)*cols + cols/2] = 100.0f;
     printMat(input_vec, rows, cols);
-    std::chrono::duration<double, std::milli> elapsed = end - start;
-    cout << "Elapsed time: " << elapsed.count() << " ms" << endl;
 
     return 0;
 }

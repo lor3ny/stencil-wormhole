@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import argparse
 import matplotlib.pyplot as plt
 
 def analyze_and_plot_kernels(csv_file, kernel_zones, output_file="timeline.png"):
@@ -136,15 +137,15 @@ def analyze_execution_cycles(csv_file, zone_name):
     max_core = next(ct for ct in core_times if ct[0] == max_time)
     
     # Print results
-    print(f"Min: {min_time} microseconds {min_time/1000} milliseconds (Core {min_core[1]},{min_core[2]})")
-    print(f"Lower Quartile: {lower_quartile} microseconds {lower_quartile/1000} milliseconds")
-    print(f"Mean: {mean} microseconds {mean/1000} milliseconds")
-    print(f"Median: {median} microseconds {median/1000} milliseconds")
-    print(f"Upper Quartile: {upper_quartile} microseconds {upper_quartile/1000} milliseconds")
-    print(f"Max: {max_time} microseconds {max_time/1000} milliseconds (Core {max_core[1]},{max_core[2]})\n")
+    print(f"Min: {min_time} nanoseconds {min_time/1000000} milliseconds (Core {min_core[1]},{min_core[2]})")
+    print(f"Lower Quartile: {lower_quartile} nanoseconds {lower_quartile/1000000} milliseconds")
+    print(f"Mean: {mean} nanoseconds {mean/1000000} milliseconds")
+    print(f"Median: {median} nanoseconds {median/1000000} milliseconds")
+    print(f"Upper Quartile: {upper_quartile} nanoseconds {upper_quartile/1000000} milliseconds")
+    print(f"Max: {max_time} nanoseconds {max_time/1000000} milliseconds (Core {max_core[1]},{max_core[2]})\n")
 
 
-def compute_overall_duration(csv_file, kernels):
+def compute_overall_duration(csv_file, kernels, iterations):
     """
     Computes the overall execution duration across multiple kernels.
     
@@ -178,21 +179,30 @@ def compute_overall_duration(csv_file, kernels):
 
     print(f"Overall start: {overall_start}")
     print(f"Overall end: {overall_end}")
-    print(f"Total duration across kernels: {duration} cycles, {duration/1000} milliseconds)")
+    print(f"Total duration across kernels: {duration} nanoseconds, {duration/1000000} milliseconds)")
+    print(f"Total duration on {iterations}: {duration*iterations} nanoseconds, {(duration*iterations)/1000000} milliseconds)")
     
     return overall_start, overall_end, duration
 
 # Examanalyze_execution_cycles(csv_file)ple usage
-csv_file = '/home/lpiarulli_tt/tt-metal/generated/profiler/.logs/profile_log_device.csv'
-kernels = ["WRITER KERNEL", "STENCIL KERNEL", "READER KERNEL"]
 
-analyze_execution_cycles(csv_file, 'STENCIL KERNEL')
-analyze_execution_cycles(csv_file, 'READER KERNEL')
-analyze_execution_cycles(csv_file, 'WRITER KERNEL')
 
-compute_overall_duration(csv_file, kernels)
+if __name__ == "__main__":
 
-timeline = analyze_and_plot_kernels(csv_file, kernels, "multi_kernel_timeline.png")
+    parser = argparse.ArgumentParser(description="Analyze kernel execution cycles.")
+    parser.add_argument("--iterations", type=int, required=True, help="Number of iterations")
+    args = parser.parse_args()
+
+    csv_file = '/home/lpiarulli_tt/tt-metal/generated/profiler/.logs/profile_log_device.csv'
+    kernels = ["WRITER KERNEL", "STENCIL KERNEL", "READER KERNEL"]
+
+    analyze_execution_cycles(csv_file, 'STENCIL KERNEL')
+    analyze_execution_cycles(csv_file, 'READER KERNEL')
+    analyze_execution_cycles(csv_file, 'WRITER KERNEL')
+
+    compute_overall_duration(csv_file, kernels, args.iterations)
+
+    timeline = analyze_and_plot_kernels(csv_file, kernels, f"timeline_{args.iterations}.png")
 
 
 #which works out 1 microsecond per cycle

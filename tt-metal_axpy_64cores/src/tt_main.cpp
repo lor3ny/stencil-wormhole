@@ -14,6 +14,7 @@
 #include <tt-metalium/tensor_accessor_args.hpp>
 
 #include <unistd.h>
+#include <chrono>
 
 #include "submatrices.hpp"
 
@@ -23,9 +24,7 @@ using namespace std;
 
 #define TILE_WIDTH 32 // bfloats
 #define TILE_HEIGHT 32 // bfloats
-#define ROWS 128
-#define COLS 128
-
+#define TILE_SIZE 2048 // bfloats
 
 // I wanto to have all the SRAM available, maybe I could use also multiple CBs
 #define SRAM_TILES 64
@@ -40,7 +39,9 @@ int axpy_ttker(
     vector<bfloat16>& scalar, 
     vector<bfloat16>& output, 
     uint32_t n_tiles,  
-    uint32_t tile_size, 
+    uint32_t rows, 
+    uint32_t cols, 
+    uint32_t iterations, 
     IDevice* device 
 ) {
     
@@ -78,14 +79,14 @@ int axpy_ttker(
     // device, size, page_size, buffer_type
     tt_metal::InterleavedBufferConfig dram_inout_config{
             .device = device, 
-            .size = n_tiles * tile_size, 
-            .page_size = tile_size,  
+            .size = up.size() * sizeof(bfloat16), 
+            .page_size = TILE_SIZE,  
             .buffer_type = tt_metal::BufferType::DRAM};
 
     tt_metal::InterleavedBufferConfig dram_scalar_config{
             .device = device, 
-            .size = tile_size, 
-            .page_size = tile_size,  
+            .size = scalar.size() * sizeof(bfloat16), 
+            .page_size = TILE_SIZE,  
             .buffer_type = tt_metal::BufferType::DRAM};
 
     std::shared_ptr<tt::tt_metal::Buffer> input_dram_buffer = CreateBuffer(dram_inout_config);
@@ -93,8 +94,8 @@ int axpy_ttker(
     std::shared_ptr<tt::tt_metal::Buffer> left_dram_buffer = CreateBuffer(dram_inout_config);
     std::shared_ptr<tt::tt_metal::Buffer> right_dram_buffer = CreateBuffer(dram_inout_config);
     std::shared_ptr<tt::tt_metal::Buffer> down_dram_buffer = CreateBuffer(dram_inout_config);
-    std::shared_ptr<tt::tt_metal::Buffer> scalar_dram_buffer = CreateBuffer(dram_inout_config);
     std::shared_ptr<tt::tt_metal::Buffer> output_dram_buffer = CreateBuffer(dram_inout_config);
+    std::shared_ptr<tt::tt_metal::Buffer> scalar_dram_buffer = CreateBuffer(dram_scalar_config);
 
     // ! In this case you should declare the starting address and the size of the region in the shared cache
     // ! Then Is necessary a method to avoid contention, but for stencil could be avoided by the nature of the problem
@@ -120,10 +121,10 @@ int axpy_ttker(
     // Circular Buffers (CB) have to be created rising order!
     for(int i = 0; i < 8; i++) {
 
-        CircularBufferConfig cb_config(tile_size * SRAM_TILES, 
+        CircularBufferConfig cb_config(TILE_SIZE * SRAM_TILES, 
                                             {{cb_indices[i], data_format}}
         );
-        cb_config.set_page_size(cb_indices[i], tile_size);   
+        cb_config.set_page_size(cb_indices[i], TILE_SIZE);   
         tt_metal::CreateCircularBuffer(program, all_cores, cb_config);
     }
 
@@ -135,7 +136,6 @@ int axpy_ttker(
 
 
     std::vector<uint32_t> reader_compile_time_args;
-    TensorAccessorArgs(*input_dram_buffer).append_to(reader_compile_time_args);
     TensorAccessorArgs(*scalar_dram_buffer).append_to(reader_compile_time_args); 
     TensorAccessorArgs(*up_dram_buffer).append_to(reader_compile_time_args);
     TensorAccessorArgs(*left_dram_buffer).append_to(reader_compile_time_args); 
@@ -187,13 +187,13 @@ int axpy_ttker(
     for(const auto& core_range : core_group_1.ranges()){
         for(const auto& core : core_range) {
             tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
-                input_dram_buffer->address(),
                 up_dram_buffer->address(),
                 left_dram_buffer->address(),
                 right_dram_buffer->address(),
                 down_dram_buffer->address(),
                 scalar_dram_buffer->address(), 
                 start_tile_idx,
+                core.x*8 + core.y,
                 work_per_core1
             });
 
@@ -211,13 +211,13 @@ int axpy_ttker(
     for(const auto& core_range : core_group_2.ranges()){
         for(const auto& core : core_range) {
             tt_metal::SetRuntimeArgs( program, reader_kernel_id, core, {
-                input_dram_buffer->address(),
                 up_dram_buffer->address(),
                 left_dram_buffer->address(),
                 right_dram_buffer->address(),
                 down_dram_buffer->address(),
                 scalar_dram_buffer->address(), 
                 start_tile_idx,
+                core.x*8 + core.y,
                 work_per_core2
             });
 
@@ -238,69 +238,68 @@ int axpy_ttker(
     // ENQUEUE WRITE BUFFERS: Write data on the allocated buffers
     // ---------------------------------------------------------
     
-    cout << "Enqueueing write buffers..." << endl;
+    cout << "Memcpy and compute launch..." << endl;	
 
-    //! This is the first memcpy, it should be done only one time at the beginnning
-    //! This is a memcpy, so output doesn't have to copied
-    EnqueueWriteBuffer(cq, input_dram_buffer, input.data(), false);   
+    vector<bfloat16> output_pad((rows+2) * (cols+2), 0.0f);
+
+    up = tilize_nfaces(up, rows, cols);
+    left = tilize_nfaces(left, rows, cols);
+    right = tilize_nfaces(right, rows, cols);
+    down = tilize_nfaces(down, rows, cols);
+    scalar = tilize_nfaces(scalar, TILE_HEIGHT, TILE_WIDTH);
+   
     EnqueueWriteBuffer(cq, up_dram_buffer, up.data(), false);   
     EnqueueWriteBuffer(cq, left_dram_buffer, left.data(), false);   
     EnqueueWriteBuffer(cq, right_dram_buffer, right.data(), false);   
     EnqueueWriteBuffer(cq, down_dram_buffer, down.data(), false);   
     EnqueueWriteBuffer(cq, scalar_dram_buffer, scalar.data(), false);       
     
-    // ---------------------------------------------------------
-    // LAUNCH AND WAIT TERMINATION: Set the runtime arguments for the kernels
-    // ---------------------------------------------------------
+    auto start = std::chrono::high_resolution_clock::now();
 
-    cout << "Enqueueing kernels..." << endl;	
-
-    //! The final aim is to avoid memory overhead so only the EnqueueWriteBuffer
-    int times = 10;
-    for(i = 0; i<times; i++){
-
-        cout << "times: " << i << endl;
+    for(i = 0; i<iterations; i++){
 
         EnqueueProgram(cq, program, false);
         EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true); // Read the result from the device, works also as a barrier i think
 
-        if (i != times-1){
+        output = untilize_nfaces(output, rows, cols);
 
-            output = untilize_nfaces(output, ROWS, COLS);
-            up = untilize_nfaces(up, ROWS, COLS);
-            left = untilize_nfaces(left, ROWS, COLS);
-            right = untilize_nfaces(right, ROWS, COLS);
-            down = untilize_nfaces(down, ROWS, COLS);
+        if (i != iterations-1){
 
+            up = untilize_nfaces(up, rows, cols);
+            left = untilize_nfaces(left, rows, cols);
+            right = untilize_nfaces(right, rows, cols);
+            down = untilize_nfaces(down, rows, cols);
 
-            vector<bfloat16> output_pad((ROWS+2) * (COLS+2), 0.0f);
-            pad_with_zeros(output, output_pad, ROWS, COLS, 1);
+            output[(rows/2)*cols + cols/2] = 100.0f;
+            pad_with_zeros(output, output_pad, rows, cols, 1);
 
             extract_submats_5p(output_pad, 
                 up,
                 left,
                 right,
                 down,
-                ROWS, 
-                COLS,
-                COLS+2
+                rows, 
+                cols,
+                cols+2
             );
 
-            up = tilize_nfaces(up, ROWS, COLS);
-            left = tilize_nfaces(left, ROWS, COLS);
-            right = tilize_nfaces(right, ROWS, COLS);
-            down = tilize_nfaces(down, ROWS, COLS);
+            up = tilize_nfaces(up, rows, cols);
+            left = tilize_nfaces(left, rows, cols);
+            right = tilize_nfaces(right, rows, cols);
+            down = tilize_nfaces(down, rows, cols);
 
             EnqueueWriteBuffer(cq, up_dram_buffer, up.data(), false);   
             EnqueueWriteBuffer(cq, left_dram_buffer, left.data(), false);   
             EnqueueWriteBuffer(cq, right_dram_buffer, right.data(), false);   
-            EnqueueWriteBuffer(cq, down_dram_buffer, down.data(), false);   
-            EnqueueWriteBuffer(cq, scalar_dram_buffer, scalar.data(), false);   
+            EnqueueWriteBuffer(cq, down_dram_buffer, down.data(), false);    
         }  
     }
 
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+    cout << "Elapsed time: " << elapsed.count() << " ms" << endl;
+
     Finish(cq);
-    cout << "Core {0, 0} on Device 0 completed the task!" << endl;
 
     return 0;
 }
@@ -309,21 +308,21 @@ int axpy_ttker(
 int main(int argc, char** argv) {
 
 
-    // ---------------------------------------------------------
-    // ---------------------------------------------------------
-    // PROBLEM DATA - We are solving for 2D matrices
-    // 
-    // E.g.
-    // - Stencil of order 1: box of 9 elements, star of 5. Always 1 of padding.
-    // - Stencil of order 2: box of 25 elements, start of 9 elements, star of 13 elements. Always 2 of padding. 
-    // ..
-    // ---------------------------------------------------------
-    // ---------------------------------------------------------
+    uint32_t iterations;
+    uint32_t rows;
+    uint32_t cols;
 
-    const size_t single_tile_size = TILE_WIDTH * TILE_HEIGHT * sizeof(bfloat16); // bytes
+    if (argc >= 4) {
+        iterations = atoi(argv[1]);
+        rows = atoi(argv[2]);
+        cols = atoi(argv[3]);
+        cout << "Using arguments: ITERATIONS=" << iterations << ", ROWS=" << rows << ", COLS=" << cols << endl;
+    } else {
+        cout << "Usage: " << argv[0] << " <iterations> <rows> <cols>" << endl;
+        return -1;
+    }
 
     //! To define by the input 
-    constexpr uint32_t rows = ROWS, cols = COLS;
     constexpr uint32_t stencil_order = 1;
     //! To define by the input
 
@@ -343,8 +342,8 @@ int main(int argc, char** argv) {
 
     int ret, i, j;
 
-    if (buffer_size < single_tile_size){
-        cerr << "Error: problem size must be at least " << single_tile_size << " elements." << endl;
+    if (buffer_size < TILE_SIZE){
+        cerr << "Error: problem size must be at least " << TILE_SIZE << " elements." << endl;
         return -1;
     }
 
@@ -367,17 +366,34 @@ int main(int argc, char** argv) {
     pad_with_zeros(input_vec, input_vec_pad, rows, cols, 1);
 
     //* ----------
-    //* Submatrices estraction
+    //* ALIGNEMENT
     //* ----------
 
-    // I need to find 4 submatrices: up, left, right, down
-    // The center one is the input
+    dram_buffer_size = rows * cols * sizeof(bfloat16);
+    // dram_buffer_size = align_vector_size(input_vec_i2r, i2r_buffer_size, TILE_SIZE);
+    // diff_dram = (dram_buffer_size - i2r_buffer_size) / sizeof(bfloat16);
+
+    num_tiles = dram_buffer_size / TILE_SIZE;
+
+    cout << "Problem shape: " << rows << "x" << cols << endl;
+    cout << "Stencil order: " << stencil_order << endl;
+    cout << "Padded shape: " << rows_pad << "x" << cols_pad << endl;
+    cout << "DRAM buffer size (bytes): " << buffer_size << endl;
+    cout << "Number of tiles: " << num_tiles << endl;
+
+
+    //! KERNEL AREA
+    int device_id = 0;
+    IDevice* device = CreateDevice(device_id);
+    const auto core_grid = device->compute_with_storage_grid_size();
+    auto [num_cores, all_cores, core_group_1, core_group_2, work_per_core1, work_per_core2] = split_work_to_cores(core_grid, num_tiles);
 
     vector<bfloat16> up_vec(rows*cols);
     vector<bfloat16> left_vec(rows*cols);
     vector<bfloat16> right_vec(rows*cols);
     vector<bfloat16> down_vec(rows*cols);
-    vector<bfloat16> scalar_vec(rows*cols, 0.25f);
+    vector<bfloat16> scalar_vec(TILE_WIDTH*TILE_HEIGHT*num_cores, 0.25f);
+    vector<bfloat16> output_vec(dram_buffer_size/sizeof(bfloat16), 0.0f);
 
     extract_submats_5p(input_vec_pad, 
         up_vec,
@@ -389,65 +405,6 @@ int main(int argc, char** argv) {
         cols_pad
     );
 
-    //* ----------
-    //* ALIGNEMENT
-    //* ----------
-
-    dram_buffer_size = rows * cols * sizeof(bfloat16);
-    // dram_buffer_size = align_vector_size(input_vec_i2r, i2r_buffer_size, single_tile_size);
-    // diff_dram = (dram_buffer_size - i2r_buffer_size) / sizeof(bfloat16);
-
-    num_tiles = dram_buffer_size / single_tile_size;
-    // stencil_tiles = num_tiles;
-
-    // //! Stencil creation, output creation
-    vector<bfloat16> output_vec(dram_buffer_size/sizeof(bfloat16), 0.0f);
-
-    // vector<bfloat16> stencil_vec_i2r(stencil_rows * stencil_cols * stencil_tiles, 1.0f);
-    // for(i = 2; i<TILE_HEIGHT * stencil_tiles; i+=32){
-    //     for (j = 0; j< TILE_WIDTH; j++){
-    //         stencil_vec_i2r[i*TILE_WIDTH + j] = bfloat16(0.25f);
-    //     }
-    // }
-    //! Stencil creation, Output creation
-
-
-    cout << "Problem shape: " << rows << "x" << cols << endl;
-    cout << "Stencil order: " << stencil_order << endl;
-    cout << "Padded shape: " << rows_pad << "x" << cols_pad << endl;
-    cout << "DRAM buffer size (bytes): " << buffer_size << endl;
-    cout << "Number of tiles: " << num_tiles << endl;
-
-    cout << "Input: " << endl;
-    printMat(input_vec_pad, rows_pad, cols_pad);
-    cout << endl;
-
-    cout << "UP: " << endl;
-    printMat(up_vec, rows, cols);
-    cout << endl;
-
-    cout << "LEFT: " << endl;
-    printMat(left_vec, rows, cols);
-    cout << endl;
-
-    cout << "RIGHT: " << endl;
-    printMat(right_vec, rows, cols);
-    cout << endl;
-
-    cout << "DOWN: " << endl;
-    printMat(down_vec, rows, cols);
-    cout << endl;
-
-    //! KERNEL AREA
-    int device_id = 0;
-    IDevice* device = CreateDevice(device_id);
-
-    input_vec = tilize_nfaces(input_vec, rows, cols);
-    up_vec = tilize_nfaces(up_vec, rows, cols);
-    left_vec = tilize_nfaces(left_vec, rows, cols);
-    right_vec = tilize_nfaces(right_vec, rows, cols);
-    down_vec = tilize_nfaces(down_vec, rows, cols);
-
     axpy_ttker(input_vec,
         up_vec, 
         left_vec, 
@@ -456,16 +413,17 @@ int main(int argc, char** argv) {
         scalar_vec, 
         output_vec, 
         num_tiles, 
-        single_tile_size, 
+        rows,
+        cols,
+        iterations, 
         device
     );
-    
-    output_vec = untilize_nfaces(output_vec, rows, cols);
 
     CloseDevice(device);
     //! KERNEL AREA
 
     cout << "Output: " << endl;
+    output_vec[(rows/2)*cols + cols/2] = 100.0f;
     printMat(output_vec, rows, cols);
 
     return 0;
