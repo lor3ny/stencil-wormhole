@@ -10,23 +10,6 @@
 
 using namespace std;
 
-constexpr float test_input[100] = {
-    1,2,3,4,5,6,7,8,9,10,
-    11,12,13,14,15,16,17,18,19,20,
-    21,22,23,24,25,26,27,28,29,30,
-    31,32,33,34,35,36,37,38,39,40,
-    41,42,43,44,45,46,47,48,49,50,
-    51,52,53,54,55,56,57,58,59,60,
-    61,62,63,64,65,66,67,68,69,70,
-    71,72,73,74,75,76,77,78,79,80,
-    81,82,83,84,85,86,87,88,89,90,
-    91,92,93,94,95,96,97,98,99,100,
-};
-constexpr float est_stencil[9] = {
-    0,1,0,
-    1,4,1,
-    0,1,1
-};
 
 //! This function is specialized for star 5-point stencil
 // in is 10x10 and out is 64x32,
@@ -42,24 +25,31 @@ void extract_submats_5p(
     
     int flat, i, j;
 
-    // for(flat = 0; flat<rows*cols; flat++){
-    //     i = flat / cols;
-    //     j = flat % cols;
+    #pragma omp parallel for
+    for (int i = 0; i < rows; i++) {
+        bfloat16* out_up    = &up[i * cols];
+        bfloat16* out_left  = &left[i * cols];
+        bfloat16* out_right = &right[i * cols];
+        bfloat16* out_down  = &down[i * cols];
 
-    //     up[i*cols + j] = in[i*cols_pad + (j+1)]; //UP
-    //     left[i*cols + j] = in[(i+1)*cols_pad + j]; //LEFT
-    //     right[i*cols + j] = in[(i+1)*cols_pad + (j+2)]; //RIGHT
-    //     down[i*cols + j] = in[(i+2)*cols_pad + (j+1)]; //DOWN
-    // }
+        bfloat16* in_center = &in[(i + 1) * cols_pad + 1];  // aligned with (j+1)
 
-    for(i=0; i<rows; i++){
-        for(j=0; j<cols; j++){
-            up[i*cols + j] = in[i*cols_pad + (j+1)]; //UP
-            left[i*cols + j] = in[(i+1)*cols_pad + j]; //LEFT
-            right[i*cols + j] = in[(i+1)*cols_pad + (j+2)]; //RIGHT
-            down[i*cols + j] = in[(i+2)*cols_pad + (j+1)]; //DOWN
+        for (int j = 0; j < cols; j++) {
+            out_up[j]    = in_center[j - cols_pad];  // UP
+            out_left[j]  = in_center[j - 1];         // LEFT
+            out_right[j] = in_center[j + 1];         // RIGHT
+            out_down[j]  = in_center[j + cols_pad];  // DOWN
         }
     }
+
+    // for(i=0; i<rows; i++){
+    //     for(j=0; j<cols; j++){
+    //         up[i*cols + j] = in[i*cols_pad + (j+1)]; //UP
+    //         left[i*cols + j] = in[(i+1)*cols_pad + j]; //LEFT
+    //         right[i*cols + j] = in[(i+1)*cols_pad + (j+2)]; //RIGHT
+    //         down[i*cols + j] = in[(i+2)*cols_pad + (j+1)]; //DOWN
+    //     }
+    // }
 }
 
 
