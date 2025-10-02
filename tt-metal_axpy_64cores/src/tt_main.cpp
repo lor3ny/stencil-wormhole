@@ -392,7 +392,10 @@ int main(int argc, char** argv) {
 
     // Pad the input, and the output but it's not necessary
     vector<bfloat16> input_vec_pad(rows_pad * cols_pad, 0.0f);
+    vector<bfloat16> output_vec_pad(rows_pad * cols_pad, 0.0f);
     pad_with_zeros(input_vec, input_vec_pad, rows, cols, 1);
+
+    golden_stencil(input_vec_pad, output_vec_pad, rows_pad, cols_pad, iterations);
 
     //* ----------
     //* ALIGNEMENT
@@ -409,7 +412,6 @@ int main(int argc, char** argv) {
     cout << "Padded shape: " << rows_pad << "x" << cols_pad << endl;
     cout << "DRAM buffer size (bytes): " << buffer_size << endl;
     cout << "Number of tiles: " << num_tiles << endl;
-
 
     //! KERNEL AREA
     int device_id = 0;

@@ -14,7 +14,8 @@ patterns = {
     "KER_IT": re.compile(r"-KER_IT-.*?([\d.]+)\s+ms"),
     "MEMCPY": re.compile(r"-MEMCPY-.*?([\d.]+)\s+ms"),
     "WORMHOLE": re.compile(r"-WORMHOLE-.*?([\d.]+)\s+ms"),
-    "CPU": re.compile(r"-CPU-.*?([\d.]+)\s+ms")
+    "CPU": re.compile(r"-CPU-.*?([\d.]+)\s+ms"),
+    "CPU_BASELINE": re.compile(r"-CPU_BASELINE-.*?([\d.]+)\s+ms")
 }
 
 # Dictionary to store parsed values
@@ -38,22 +39,27 @@ ker_it = [results[log]["KER_IT"] for log in log_files]
 memcpy = [results[log]["MEMCPY"] for log in log_files]
 wormhole = [results[log]["WORMHOLE"] for log in log_files]
 cpu = [results[log]["CPU"] for log in log_files]
+cpu_baseline = [results[log]["CPU_BASELINE"] for log in log_files]
 
 # Compute the "other" part (everything not in KER_IT, MEMCPY, CPU)
 other = [t - (ki + mc + c + w) for t, ki, mc, c, w in zip(totals, ker_it, memcpy, cpu, wormhole)]
 
 # Plot stacked bar chart
 x = np.arange(len(labels))
-width = 0.6
+width = 0.35
 
 fig, ax = plt.subplots(figsize=(12, 6))
 
-ax.bar(x, ker_it, width, label="Kernel Iteration (-KER_IT-)")
-ax.bar(x, memcpy, width, bottom=np.array(ker_it), label="Memcpy (-MEMCPY-)")
-ax.bar(x, cpu, width, bottom=np.array(ker_it) + np.array(memcpy), label="CPU (-CPU-)")
-ax.bar(x, wormhole, width, bottom=np.array(ker_it) + np.array(memcpy)+np.array(cpu), label="Wormhole (-WORMHOLE-)")
-ax.bar(x, other, width, bottom=np.array(ker_it) + np.array(memcpy) + np.array(cpu) + np.array(wormhole), label="Other")
+ax.bar(x - width/2, ker_it, width, label="Kernel Iteration (-KER_IT-)")
+ax.bar(x - width/2, memcpy, width, bottom=np.array(ker_it), label="Memcpy (-MEMCPY-)")
+ax.bar(x - width/2, cpu, width, bottom=np.array(ker_it) + np.array(memcpy), label="CPU (-CPU-)")
+ax.bar(x - width/2, wormhole, width, bottom=np.array(ker_it) + np.array(memcpy)+np.array(cpu), label="Wormhole (-WORMHOLE-)")
+ax.bar(x - width/2, other, width, bottom=np.array(ker_it) + np.array(memcpy) + np.array(cpu) + np.array(wormhole), label="Other")
 
+# === BASELINE ===
+ax.bar(x + width/2, cpu_baseline, width, color="gray", label="CPU_BASELINE")
+
+ax.set_yscale("log")
 ax.set_ylabel("Time (ms, log scale)")
 ax.set_title("Latency Breakdown from Logs")
 ax.set_xticks(x)

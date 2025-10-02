@@ -51,9 +51,12 @@ inline void PrintGrid(double *grid, int dim){
 }
 
 
-bfloat16* golden_stencil(vector<bfloat16>& input, vector<bfloat16>& output, int rows, int cols, int num_its) {
-    vector<bfloat16>* in_ptr = input.data();
-    vector<bfloat16>* out_ptr = output.data();
+void golden_stencil(std::vector<bfloat16>& input, std::vector<bfloat16>& output, int rows, int cols, int num_its) {
+    
+    std::vector<bfloat16> in_copy = input;
+    
+    bfloat16* in_ptr = in_copy.data();
+    bfloat16* out_ptr = output.data();
 
     std::chrono::_V2::system_clock::time_point start_total, end_total;
     std::chrono::duration<double, std::milli> elapsed;
@@ -62,21 +65,27 @@ bfloat16* golden_stencil(vector<bfloat16>& input, vector<bfloat16>& output, int 
     for (int k=0;k<num_its;k++) {
         for (int i=1; i<rows-1; i++) {
             for (int j=1; j<cols-1; j++) {
-                (*out_ptr)[(i*y)+j] = bfloat16((float) 0.25*((*in_ptr)[((i-1)*y)+j].to_float() 
-                                        + (*in_ptr)[((i+1)*y)+j].to_float() 
-                                        + (*in_ptr)[(i*y)+(j-1)].to_float() 
-                                        + (*in_ptr)[(i*y)+(j+1)].to_float()));
+                out_ptr[(i*cols)+j] = bfloat16((float) 0.25*(in_ptr[((i-1)*cols)+j].to_float() 
+                                        + in_ptr[((i+1)*cols)+j].to_float() 
+                                        + in_ptr[(i*cols)+(j-1)].to_float() 
+                                        + in_ptr[(i*cols)+(j+1)].to_float()));
             }
         }
-        vector<bfloat1>* tmp = out_ptr;
+        out_ptr[(rows/2)*cols + cols/2] = bfloat16(100.0f);
+        bfloat16* tmp = out_ptr;
         out_ptr=in_ptr;
         in_ptr=tmp;
     }
     end_total = std::chrono::high_resolution_clock::now();
     elapsed = end_total - start_total;
-    cout << "-CPU_BASELINE- " << elapsed.count() << " ms" << endl;
 
-    return uk;
+    if(num_its % 2 == 0) {
+        printMat(in_copy, rows, cols);
+    } else {
+        printMat(output, rows, cols);
+    }
+
+    std::cout << "-CPU_BASELINE- " << elapsed.count() << " ms" << std::endl;
 }
 
 //! Not it isn't used, will be checked if needed
