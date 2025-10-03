@@ -26,6 +26,7 @@ def plot_axpy_vs_matmul(data, PALETTE):
     ax.set_ylabel("Execution Time (s)")
     ax.set_xlabel("Jacobi Iterations")
     ax.set_title("AXPY vs MATMUL")
+    ax.set_yscale("log")
     ax.set_xticks(x)
     ax.set_xticklabels([l.split("_")[1] for l in axpy_labels])  # sizes only
     ax.legend()
@@ -159,12 +160,7 @@ def plot_ker_it_vs_wormhole(data, PALETTE):
     print("KER_IT vs WORMHOLE comparison plot saved to KER_IT_vs_WORMHOLE.png")
 
 
-def parse_logs(data):
-    # List of log files
-    log_files = [
-        "axpy_100.out", "axpy_500.out", "axpy_1000.out",
-        "matmul_100.out", "matmul_500.out", "matmul_1000.out"
-    ]
+def parse_logs(data, log_files):
 
     # Regex patterns to extract values
     patterns = {
@@ -188,6 +184,8 @@ def parse_logs(data):
 
         # Append values to data dictionary
         data["labels"].append(log.replace(".out", ""))
+        data["iterations"].append(int(log.split("_")[1]))
+        data["input size"].append(int(log.split("_")[2].replace(".out", "")))
         data["totals"].append(values["TOTAL"])
         data["ker_it"].append(values["KER_IT"])
         data["memcpy"].append(values["MEMCPY"])
@@ -195,6 +193,12 @@ def parse_logs(data):
         data["cpu"].append(values["CPU"])
         data["cpu_baseline"].append(values["CPU_BASELINE"])
         data["other"].append(values["TOTAL"] - (values["KER_IT"] + values["MEMCPY"] + values["CPU"] + values["WORMHOLE"]))
+
+
+def CleanData(data):
+    for key in data.keys():
+        data[key] = []
+    return data
 
 
 if __name__ == "__main__":
@@ -220,9 +224,14 @@ if __name__ == "__main__":
     })
 
 
-
+    log_files = [
+        "axpy_100_128.out", "axpy_500_128.out", "axpy_1000_128.out", "axpy_100_1024.out", "axpy_500_1024.out", "axpy_1000_1024.out",
+        "matmul_100_128.out", "matmul_500_128.out", "matmul_1000_128.out", "matmul_100_1024.out", "matmul_500_1024.out", "matmul_1000_1024.out"
+    ]
     data = {
         "labels": [],
+        "iterations": [],
+        "input size": [],
         "totals": [],
         "ker_it": [],
         "memcpy": [],
@@ -232,12 +241,22 @@ if __name__ == "__main__":
         "other": []
     }
 
-    parse_logs(data)
-
-    plot_axpy_vs_baseline(data, PALETTE)
-    plot_stacked_axpy_matmul_combined(data, PALETTE)
+    log_files = [
+        "axpy_100_128.out", "axpy_500_128.out", "axpy_1000_128.out", "axpy_100_1024.out", "axpy_500_1024.out", "axpy_1000_1024.out",
+        "matmul_100_128.out", "matmul_500_128.out", "matmul_1000_128.out", "matmul_100_1024.out", "matmul_500_1024.out", "matmul_1000_1024.out"
+    ]
+    parse_logs(data, log_files)
     plot_axpy_vs_matmul(data, PALETTE)
     plot_ker_it_vs_wormhole(data, PALETTE)
+    CleanData(data)
+
+    log_files = [
+        "axpy_100_1024.out", "axpy_500_1024.out", "axpy_1000_1024.out",
+        "matmul_100_1024.out", "matmul_500_1024.out", "matmul_1000_1024.out"
+    ]
+    parse_logs(data, log_files)
+    plot_axpy_vs_baseline(data, PALETTE)
+    plot_stacked_axpy_matmul_combined(data, PALETTE)
 
     
 
