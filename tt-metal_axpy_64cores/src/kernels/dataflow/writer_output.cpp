@@ -9,7 +9,7 @@ using namespace tt;
 
 void kernel_main() {
 
-    DeviceZoneScopedN("WRITER KERNEL");
+    DeviceZoneScopedN("Writer Kernels");
     
     uint32_t dst_addr = get_arg_val<uint32_t>(0);
     uint32_t start_tile_index = get_arg_val<uint32_t>(1);

@@ -10,7 +10,7 @@ using namespace tt;
 
 void kernel_main() {
 
-    DeviceZoneScopedN("READER KERNEL");
+    DeviceZoneScopedN("Reader Kernels");
 
     uint32_t src_addr_UP = get_arg_val<uint32_t>(0);
     uint32_t src_addr_LEFT= get_arg_val<uint32_t>(1);

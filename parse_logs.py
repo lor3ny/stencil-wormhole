@@ -160,6 +160,41 @@ def plot_ker_it_vs_wormhole(data, PALETTE):
     print("KER_IT vs WORMHOLE comparison plot saved to KER_IT_vs_WORMHOLE.png")
 
 
+def plot_ker_it_vs_cpu(data, PALETTE):
+    """
+    Plot a comparison between KER_IT and WORMHOLE execution times.
+    
+    Args:
+        data (dict): Dictionary containing 'labels', 'ker_it', and 'wormhole'.
+        PALETTE (dict): Dictionary with color definitions.
+    """
+    labels = data["labels"]
+    ker_it_times = data["ker_it"]
+    wormhole_times = data["cpu_baseline"]
+    
+    x = np.arange(len(labels))
+    width = 0.35
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    
+    # Bars
+    ax.bar(x - width/2, ker_it_times, width, label="Tracy-measured Kernel", color=PALETTE.get("AXPY", "#19E053"))
+    ax.bar(x + width/2, wormhole_times, width, label="CPU Baseline", color=PALETTE.get("Baseline", "#7D5CF2"))
+    
+    # Labels and formatting
+    ax.set_ylabel("Execution Time (s)")
+    ax.set_title("Wormhole Kernel vs CPU")
+    ax.set_xticks(x)
+    ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in labels])
+    ax.legend()
+    
+    plt.tight_layout()
+    plt.savefig("logs/KER_IT_vs_CPU.png", dpi=300)
+    plt.close(fig)
+    
+    print("KER_IT vs WORMHOLE comparison plot saved to KER_IT_vs_CPU.png")
+
+
 def parse_logs(data, log_files):
 
     # Regex patterns to extract values
@@ -257,6 +292,16 @@ if __name__ == "__main__":
     parse_logs(data, log_files)
     plot_axpy_vs_baseline(data, PALETTE)
     plot_stacked_axpy_matmul_combined(data, PALETTE)
+    CleanData(data)
+
+    log_files = [
+        "axpy_500_1024.out", "matmul_500_1024.out",
+        "axpy_1000_1024.out",
+        "matmul_1000_1024.out"
+    ]
+    parse_logs(data, log_files)
+    plot_ker_it_vs_cpu(data, PALETTE)
+    
 
     
 
