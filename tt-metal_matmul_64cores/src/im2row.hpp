@@ -91,6 +91,7 @@ void stencil2vec_5p(vector<bfloat16>& in, vector<bfloat16>& out, int rows, int c
 void vec2stencil_5p(vector<bfloat16>& in, vector<bfloat16>& out, int tile_height, int n_tiles){
     int j;
     int picker = 0;
+
     for(j = 0; j<tile_height*n_tiles; j++){
         out[j] = in[picker];
         picker+=32;
@@ -123,7 +124,6 @@ void pad_with_zeros(vector<bfloat16>& in,  vector<bfloat16>& out, int rows, int 
 
     size_t new_rows = rows + pad_size*2;
     size_t new_cols = cols + pad_size*2;
-
 
     for (size_t r = 0; r < rows; ++r) {
         // Destination row start (skip first row + padding col)

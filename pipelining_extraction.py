@@ -88,11 +88,11 @@ def analyze_and_plot_kernels(csv_file, kernel_zones, output_file="timeline.png")
     # Formatting
     ax.set_yticks(list(y_positions.values()))
     ax.set_yticklabels(list(y_positions.keys()), fontsize=16)
-    ax.set_xlabel("Cycles (normalized)", fontsize=20, labelpad=12)
-    ax.set_ylabel("Baby Core + Thread", fontsize=20, labelpad=12)
-    ax.set_title("Kernel Execution Timeline per Core", fontsize=20, pad=15)
-    ax.tick_params(axis="x", labelsize=16)
-    ax.tick_params(axis="y", labelsize=16)
+    ax.set_xlabel("Cycles (normalized)", fontsize=24, labelpad=12)
+    ax.set_ylabel("Baby Core + Thread", fontsize=24, labelpad=12)
+    ax.set_title("Kernel Execution Timeline per Core", fontsize=24, pad=15)
+    ax.tick_params(axis="x", labelsize=20)
+    ax.tick_params(axis="y", labelsize=20)
 
     # Avoid duplicate labels in legend
     handles, labels = ax.get_legend_handles_labels()
@@ -109,7 +109,7 @@ def analyze_and_plot_kernels(csv_file, kernel_zones, output_file="timeline.png")
     )
 
     plt.tight_layout()
-    plt.savefig(output_file, dpi=300)
+    plt.savefig("logs/"+output_file, dpi=300)
     plt.close(fig)
 
     print(f"Timeline saved to {output_file}")
