@@ -5,9 +5,9 @@
 #include <iostream>
 #include <vector>
 
-#ifdef WITH_OPENMP
-    #include <omp.h>
-#endif
+// #ifdef WITH_OPENMP
+//     #include <omp.h>
+// #endif
 
 
 

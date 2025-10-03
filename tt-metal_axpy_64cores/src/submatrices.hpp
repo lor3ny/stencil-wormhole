@@ -25,7 +25,7 @@ void extract_submats_5p(
     
     int flat, i, j;
 
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for (int i = 0; i < rows; i++) {
         bfloat16* out_up    = &up[i * cols];
         bfloat16* out_left  = &left[i * cols];

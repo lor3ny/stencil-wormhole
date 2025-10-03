@@ -37,7 +37,6 @@ add_compile_options(
   $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-O3>
   $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-march=native>
   $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-fsized-deallocation>
-  $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-fopenmp=libomp>
 )
 #if something breaks remove that
 add_executable(stencil src/tt_main.cpp)
@@ -123,5 +122,4 @@ target_link_libraries(stencil PRIVATE
     nlohmann_json::nlohmann_json
     tt_metal
     tt-logger::tt-logger
-    OpenMP::OpenMP_CXX
 )

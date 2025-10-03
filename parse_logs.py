@@ -2,72 +2,242 @@ import re
 import matplotlib.pyplot as plt
 import numpy as np
 
-# List of log files
-log_files = [
-    "axpy_100.out", "axpy_500.out", "axpy_1000.out",
-    "matmul_100.out", "matmul_500.out", "matmul_1000.out"
-]
+import numpy as np
+import matplotlib.pyplot as plt
 
-# Regex patterns to extract values
-patterns = {
-    "TOTAL": re.compile(r"-TOTAL-\s+([\d.]+)\s+ms"),
-    "KER_IT": re.compile(r"-KER_IT-.*?([\d.]+)\s+ms"),
-    "MEMCPY": re.compile(r"-MEMCPY-.*?([\d.]+)\s+ms"),
-    "WORMHOLE": re.compile(r"-WORMHOLE-.*?([\d.]+)\s+ms"),
-    "CPU": re.compile(r"-CPU-.*?([\d.]+)\s+ms"),
-    "CPU_BASELINE": re.compile(r"-CPU_BASELINE-.*?([\d.]+)\s+ms")
-}
+# === PLOT 1: Compare AXPY vs MATMUL (sum of memcpy+cpu+wormhole) ===
+def plot_axpy_vs_matmul(data, PALETTE):
+    sum_components = [mc + c + w for mc, c, w in zip(data["memcpy"], data["cpu"], data["wormhole"])]
 
-# Dictionary to store parsed values
-results = {log: {} for log in log_files}
+    # Split into AXPY and MATMUL groups
+    axpy_labels = [l for l in data["labels"] if "axpy" in l]
+    matmul_labels = [l for l in data["labels"] if "matmul" in l]
 
-for log in log_files:
-    with open(f"logs/{log}", "r") as f:
-        text = f.read()
+    axpy_values = [sum_components[i] for i, l in enumerate(data["labels"]) if "axpy" in l]
+    matmul_values = [sum_components[i] for i, l in enumerate(data["labels"]) if "matmul" in l]
 
-        for key, pattern in patterns.items():
-            match = pattern.search(text)
-            if match:
-                results[log][key] = float(match.group(1))
-            else:
-                results[log][key] = 0.0  # default if not found
+    x = np.arange(len(axpy_labels))
+    width = 0.35
 
-# Prepare data for plotting
-labels = [log.replace(".out", "") for log in log_files]
-totals = [results[log]["TOTAL"] for log in log_files]
-ker_it = [results[log]["KER_IT"] for log in log_files]
-memcpy = [results[log]["MEMCPY"] for log in log_files]
-wormhole = [results[log]["WORMHOLE"] for log in log_files]
-cpu = [results[log]["CPU"] for log in log_files]
-cpu_baseline = [results[log]["CPU_BASELINE"] for log in log_files]
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.bar(x - width/2, axpy_values, width, label="AXPY", color=PALETTE["AXPY"])
+    ax.bar(x + width/2, matmul_values, width, label="MATMUL", color=PALETTE["MATMUL"])
 
-# Compute the "other" part (everything not in KER_IT, MEMCPY, CPU)
-other = [t - (ki + mc + c + w) for t, ki, mc, c, w in zip(totals, ker_it, memcpy, cpu, wormhole)]
+    ax.set_ylabel("Execution Time (s)")
+    ax.set_xlabel("Jacobi Iterations")
+    ax.set_title("AXPY vs MATMUL")
+    ax.set_xticks(x)
+    ax.set_xticklabels([l.split("_")[1] for l in axpy_labels])  # sizes only
+    ax.legend()
 
-# Plot stacked bar chart
-x = np.arange(len(labels))
-width = 0.35
+    plt.tight_layout()
+    plt.savefig("logs/AXPY_vs_MATMUL.png", dpi=300)
+    plt.close(fig)
+    print("Bar plot saved to AXPY_vs_MATMUL.png")
 
-fig, ax = plt.subplots(figsize=(12, 6))
 
-ax.bar(x - width/2, ker_it, width, label="Kernel Iteration (-KER_IT-)")
-ax.bar(x - width/2, memcpy, width, bottom=np.array(ker_it), label="Memcpy (-MEMCPY-)")
-ax.bar(x - width/2, cpu, width, bottom=np.array(ker_it) + np.array(memcpy), label="CPU (-CPU-)")
-ax.bar(x - width/2, wormhole, width, bottom=np.array(ker_it) + np.array(memcpy)+np.array(cpu), label="Wormhole (-WORMHOLE-)")
-ax.bar(x - width/2, other, width, bottom=np.array(ker_it) + np.array(memcpy) + np.array(cpu) + np.array(wormhole), label="Other")
+def plot_stacked_axpy_matmul_combined(data, PALETTE):
+    def get_values(prefix, values):
+        return [v for l, v in zip(data["labels"], values) if prefix in l]
 
-# === BASELINE ===
-ax.bar(x + width/2, cpu_baseline, width, color="gray", label="CPU_BASELINE")
+    sizes = ["100", "500", "1000"]
 
-ax.set_yscale("log")
-ax.set_ylabel("Time (ms, log scale)")
-ax.set_title("Latency Breakdown from Logs")
-ax.set_xticks(x)
-ax.set_xticklabels(labels, rotation=45, ha="right")
-ax.legend()
+    # Extract subsets
+    axpy_memcpy = get_values("axpy", data["memcpy"])
+    axpy_cpu = get_values("axpy", data["cpu"])
+    axpy_wormhole = get_values("axpy", data["wormhole"])
 
-plt.tight_layout()
-plt.savefig("logs/Latency_plot.png", dpi=300)
-plt.close(fig)
+    matmul_memcpy = get_values("matmul", data["memcpy"])
+    matmul_cpu = get_values("matmul", data["cpu"])
+    matmul_wormhole = get_values("matmul", data["wormhole"])
 
-print("Stacked bar plot saved to Latency_plot.png")
+    x = np.arange(len(sizes))
+    width = 0.5
+
+    # Create a single figure with two vertical subplots
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
+
+    # --- AXPY subplot ---
+    ax1.bar(x, axpy_memcpy, width, label="Memcpy", color=PALETTE["Memcpy"])
+    ax1.bar(x, axpy_cpu, width, bottom=np.array(axpy_memcpy), label="CPU", color=PALETTE["CPU"])
+    ax1.bar(x, axpy_wormhole, width, bottom=np.array(axpy_memcpy) + np.array(axpy_cpu),
+            label="Wormhole", color=PALETTE["Wormhole"])
+
+    ax1.set_ylabel("Execution Time (s)")
+    ax1.set_title("AXPY Execution Breakdown")
+    ax1.legend()
+
+    # --- MATMUL subplot ---
+    ax2.bar(x, matmul_memcpy, width, label="Memcpy", color=PALETTE["Memcpy"])
+    ax2.bar(x, matmul_cpu, width, bottom=np.array(matmul_memcpy), label="CPU", color=PALETTE["CPU"])
+    ax2.bar(x, matmul_wormhole, width, bottom=np.array(matmul_memcpy) + np.array(matmul_cpu),
+            label="Wormhole", color=PALETTE["Wormhole"])
+
+    ax2.set_ylabel("Execution Time (s)")
+    ax2.set_title("MATMUL Execution Breakdown")
+    ax2.set_xticks(x)
+    ax2.set_xticklabels(sizes)
+    ax2.legend()
+
+    plt.xlabel("Problem Size")
+    plt.tight_layout()
+    plt.savefig("logs/AXPY_MATMUL_Breakdown.png", dpi=300)
+    plt.close(fig)
+
+    print("Combined stacked plot saved to AXPY_MATMUL_Breakdown.png")
+
+
+# === PLOT 3: AXPY stacked vs CPU_BASELINE ===
+def plot_axpy_vs_baseline(data, PALETTE):
+    axpy_indices = [i for i, l in enumerate(data["labels"]) if "axpy" in l]
+    axpy_labels = [data["labels"][i] for i in axpy_indices]
+
+    axpy_memcpy = [data["memcpy"][i] for i in axpy_indices]
+    axpy_cpu = [data["cpu"][i] for i in axpy_indices]
+    axpy_wormhole = [data["wormhole"][i] for i in axpy_indices]
+    axpy_baseline = [data["cpu_baseline"][i] for i in axpy_indices]
+
+    x = np.arange(len(axpy_labels))
+    width = 0.35
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    # Stacked AXPY
+    ax.bar(x - width/2, axpy_memcpy, width, label="Memcpy", color=PALETTE["Memcpy"])
+    ax.bar(x - width/2, axpy_cpu, width, bottom=np.array(axpy_memcpy), label="CPU", color=PALETTE["CPU"])
+    ax.bar(x - width/2, axpy_wormhole, width, bottom=np.array(axpy_memcpy) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["Wormhole"])
+
+    # Baseline bars
+    ax.bar(x + width/2, axpy_baseline, width, color=PALETTE["Baseline"], label="CPU Baseline")
+
+    ax.set_ylabel("Execution Time (s)")
+    ax.set_title("AXPY Latency Breakdown vs CPU_BASELINE")
+    ax.set_xticks(x)
+    ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in axpy_labels])
+    ax.legend()
+
+    plt.tight_layout()
+    plt.savefig("logs/AXPY_vs_BASELINE.png", dpi=300)
+    plt.close(fig)
+
+    print("Stacked bar plot saved to AXPY_vs_BASELINE.png")
+
+
+
+def plot_ker_it_vs_wormhole(data, PALETTE):
+    """
+    Plot a comparison between KER_IT and WORMHOLE execution times.
+    
+    Args:
+        data (dict): Dictionary containing 'labels', 'ker_it', and 'wormhole'.
+        PALETTE (dict): Dictionary with color definitions.
+    """
+    labels = data["labels"]
+    ker_it_times = data["ker_it"]
+    wormhole_times = data["wormhole"]
+    
+    x = np.arange(len(labels))
+    width = 0.35
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    
+    # Bars
+    ax.bar(x - width/2, ker_it_times, width, label="Tracy-measured Kernel", color=PALETTE.get("AXPY", "#19E053"))
+    ax.bar(x + width/2, wormhole_times, width, label="Host-measured Kernel", color=PALETTE.get("Wormhole", "#7D5CF2"))
+    
+    # Labels and formatting
+    ax.set_ylabel("Execution Time (s)")
+    ax.set_title("KER_IT vs WORMHOLE Execution Time Comparison")
+    ax.set_xticks(x)
+    ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in labels])
+    ax.legend()
+    
+    plt.tight_layout()
+    plt.savefig("logs/KER_IT_vs_WORMHOLE.png", dpi=300)
+    plt.close(fig)
+    
+    print("KER_IT vs WORMHOLE comparison plot saved to KER_IT_vs_WORMHOLE.png")
+
+
+def parse_logs(data):
+    # List of log files
+    log_files = [
+        "axpy_100.out", "axpy_500.out", "axpy_1000.out",
+        "matmul_100.out", "matmul_500.out", "matmul_1000.out"
+    ]
+
+    # Regex patterns to extract values
+    patterns = {
+        "TOTAL": re.compile(r"-TOTAL-\s+([\d.]+)\s+ms"),
+        "KER_IT": re.compile(r"-KER_IT-.*?([\d.]+)\s+ms"),
+        "MEMCPY": re.compile(r"-MEMCPY-.*?([\d.]+)\s+ms"),
+        "WORMHOLE": re.compile(r"-WORMHOLE-.*?([\d.]+)\s+ms"),
+        "CPU": re.compile(r"-CPU-.*?([\d.]+)\s+ms"),
+        "CPU_BASELINE": re.compile(r"-CPU_BASELINE-.*?([\d.]+)\s+ms")
+    }
+
+    for log in log_files:
+        with open(f"logs/{log}", "r") as f:
+            text = f.read()
+
+            # Extract values (default 0.0 if not found)
+            values = {
+                key: (float(pattern.search(text).group(1)) / 1000.0) if pattern.search(text) else 0.0
+                for key, pattern in patterns.items()
+            }
+
+        # Append values to data dictionary
+        data["labels"].append(log.replace(".out", ""))
+        data["totals"].append(values["TOTAL"])
+        data["ker_it"].append(values["KER_IT"])
+        data["memcpy"].append(values["MEMCPY"])
+        data["wormhole"].append(values["WORMHOLE"])
+        data["cpu"].append(values["CPU"])
+        data["cpu_baseline"].append(values["CPU_BASELINE"])
+        data["other"].append(values["TOTAL"] - (values["KER_IT"] + values["MEMCPY"] + values["CPU"] + values["WORMHOLE"]))
+
+
+if __name__ == "__main__":
+
+    # Darker cyberpunk palette (better on white background)
+    PALETTE = {
+        "Memcpy": "#F25050",      
+        "CPU": "#F2CB05",        
+        "Wormhole": "#7D5CF2",   
+        "AXPY": "#19E053",         
+        "MATMUL": "#19CAF5",      
+        "Baseline": "#182417"  
+    }
+
+    # Apply a global style for larger fonts
+    plt.rcParams.update({
+        "font.size": 18,
+        "axes.titlesize": 20,
+        "axes.labelsize": 18,
+        "xtick.labelsize": 16,
+        "ytick.labelsize": 16,
+        "legend.fontsize": 16
+    })
+
+
+
+    data = {
+        "labels": [],
+        "totals": [],
+        "ker_it": [],
+        "memcpy": [],
+        "wormhole": [],
+        "cpu": [],
+        "cpu_baseline": [],
+        "other": []
+    }
+
+    parse_logs(data)
+
+    plot_axpy_vs_baseline(data, PALETTE)
+    plot_stacked_axpy_matmul_combined(data, PALETTE)
+    plot_axpy_vs_matmul(data, PALETTE)
+    plot_ker_it_vs_wormhole(data, PALETTE)
+
+    
+
