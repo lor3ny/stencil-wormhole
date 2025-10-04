@@ -20,28 +20,21 @@ void extract_5p_and_pad(
 ) {
 
     // --------- TOP: remove last row
-    //#pragma omp parallel for
     for (int r = 0; r < rows-1; r++) {
-        for (int c = 0; c < cols; c++) {
-            out_top[r*cols + c] = in[(r+1)*cols + c];
-        }
-        //std::memcpy(out_top+(r*cols), in+(r*cols), cols * sizeof(bfloat16));
+        std::memcpy(out_top+((r+1)*cols), in+(r*cols), cols * sizeof(bfloat16));
     }
 
     // --------- LEFT: remove first col
-    //#pragma omp parallel for
     for (int r = 0; r < rows; r++) {
         std::memcpy(out_left+(r*cols)+1, in+(r*cols), (cols-1) * sizeof(bfloat16));
     }
 
         // --------- RIGHT: remove first col
-    //#pragma omp parallel for
     for (int r = 0; r < rows; r++) {
         std::memcpy(out_right+(r*cols), in+(r*cols)+1, (cols-1) * sizeof(bfloat16));
     }
 
     // --------- DOWN: remove first row
-    //#pragma omp parallel for
     for (int r = 1; r < rows; r++) {
         std::memcpy(out_down+((r-1)*cols), in+(r*cols), cols * sizeof(bfloat16));
     }
@@ -68,10 +61,10 @@ void extract_submats_5p_nopad(
         bfloat16* in_center = &in[i*cols];  // aligned with (j+1)
 
         for (int j = 0; j < cols; j++) {
-            if(i != 0){
+            if(i != rows-1){
                 out_up[j]    = in_center[j];  // UP
             }
-            if(i != rows-1){
+            if(i != 0){
                 out_down[j]  = in_center[j];  // DOWN
             }
             if(j != cols-1){

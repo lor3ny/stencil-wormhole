@@ -276,7 +276,7 @@ int axpy_ttker(
             start_cpu = std::chrono::high_resolution_clock::now();
             output[(rows/2)*cols + cols/2] = 100.0f;
             //pad_with_zeros(output.data(), output_pad.data(), rows, cols, 1);
-            extract_submats_5p_nopad(output.data(), 
+            extract_5p_and_pad(output.data(), 
                 up.data(),
                 left.data(),
                 right.data(),
