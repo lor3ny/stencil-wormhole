@@ -115,9 +115,9 @@ if __name__ == "__main__":
     csv_file = '/home/lpiarulli_tt/tt-metal/generated/profiler/.logs/profile_log_device.csv'
     kernels = ["WRITER KERNEL", "STENCIL KERNEL", "READER KERNEL"]
 
-    analyze_execution_cycles(csv_file, 'STENCIL KERNEL')
-    analyze_execution_cycles(csv_file, 'READER KERNEL')
-    analyze_execution_cycles(csv_file, 'WRITER KERNEL')
+    analyze_execution_cycles(csv_file, 'Compute Kernels')
+    analyze_execution_cycles(csv_file, 'Reader Kernels')
+    analyze_execution_cycles(csv_file, 'Writer Kernels')
 
     compute_overall_duration(csv_file, kernels, args.iterations)
 

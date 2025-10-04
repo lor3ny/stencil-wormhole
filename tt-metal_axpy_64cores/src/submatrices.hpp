@@ -4,28 +4,100 @@
 #include "utils.hpp"
 
 
-#define N 10
-#define M 10
-#define K 3
-
 using namespace std;
 
+
+//! This function is specialized for star 5-point stencil and tries to integrate padding
+// in is 10x10 and out is 64x32,
+void extract_5p_and_pad(
+    bfloat16* __restrict in,
+    bfloat16* __restrict out_top,
+    bfloat16* __restrict out_left,
+    bfloat16* __restrict out_right,
+    bfloat16* __restrict out_down,
+    int rows, 
+    int cols
+) {
+
+    // --------- TOP: remove last row
+    //#pragma omp parallel for
+    for (int r = 0; r < rows-1; r++) {
+        for (int c = 0; c < cols; c++) {
+            out_top[r*cols + c] = in[(r+1)*cols + c];
+        }
+        //std::memcpy(out_top+(r*cols), in+(r*cols), cols * sizeof(bfloat16));
+    }
+
+    // --------- LEFT: remove first col
+    //#pragma omp parallel for
+    for (int r = 0; r < rows; r++) {
+        std::memcpy(out_left+(r*cols)+1, in+(r*cols), (cols-1) * sizeof(bfloat16));
+    }
+
+        // --------- RIGHT: remove first col
+    //#pragma omp parallel for
+    for (int r = 0; r < rows; r++) {
+        std::memcpy(out_right+(r*cols), in+(r*cols)+1, (cols-1) * sizeof(bfloat16));
+    }
+
+    // --------- DOWN: remove first row
+    //#pragma omp parallel for
+    for (int r = 1; r < rows; r++) {
+        std::memcpy(out_down+((r-1)*cols), in+(r*cols), cols * sizeof(bfloat16));
+    }
+}
+
+void extract_submats_5p_nopad(
+    bfloat16* __restrict in,
+    bfloat16* __restrict up,
+    bfloat16* __restrict left,
+    bfloat16* __restrict right, 
+    bfloat16* __restrict down,  
+    int rows, 
+    int cols
+) {
+    
+    int flat, i, j;
+
+    for (int i = 0; i < rows; i++) {
+        bfloat16* out_up    = &up[(i+1) * cols];
+        bfloat16* out_left  = &left[i * cols];
+        bfloat16* out_right = &right[i * cols];
+        bfloat16* out_down  = &down[(i-1) * cols];
+
+        bfloat16* in_center = &in[i*cols];  // aligned with (j+1)
+
+        for (int j = 0; j < cols; j++) {
+            if(i != 0){
+                out_up[j]    = in_center[j];  // UP
+            }
+            if(i != rows-1){
+                out_down[j]  = in_center[j];  // DOWN
+            }
+            if(j != cols-1){
+                out_left[j+1]  = in_center[j];  // LEFT
+            }
+            if(j != 0){
+                out_right[j-1] = in_center[j];  // RIGHT
+            }
+        }
+    }
+}
 
 //! This function is specialized for star 5-point stencil
 // in is 10x10 and out is 64x32,
 void extract_submats_5p(
-    vector<bfloat16>& in,
-    vector<bfloat16>& up,
-    vector<bfloat16>& left,
-    vector<bfloat16>& right, 
-    vector<bfloat16>& down,  
+    bfloat16* __restrict in,
+    bfloat16* __restrict up,
+    bfloat16* __restrict left,
+    bfloat16* __restrict right, 
+    bfloat16* __restrict down,  
     int rows, 
     int cols, 
     int cols_pad) {
     
     int flat, i, j;
 
-    #pragma omp parallel for
     for (int i = 0; i < rows; i++) {
         bfloat16* out_up    = &up[i * cols];
         bfloat16* out_left  = &left[i * cols];
@@ -41,38 +113,18 @@ void extract_submats_5p(
             out_down[j]  = in_center[j + cols_pad];  // DOWN
         }
     }
-
-    // for(i=0; i<rows; i++){
-    //     for(j=0; j<cols; j++){
-    //         up[i*cols + j] = in[i*cols_pad + (j+1)]; //UP
-    //         left[i*cols + j] = in[(i+1)*cols_pad + j]; //LEFT
-    //         right[i*cols + j] = in[(i+1)*cols_pad + (j+2)]; //RIGHT
-    //         down[i*cols + j] = in[(i+2)*cols_pad + (j+1)]; //DOWN
-    //     }
-    // }
-}
-
-
-void vec2stencil_5p(vector<bfloat16>& in, vector<bfloat16>& out, int tile_height, int n_tiles){
-    int j;
-    int picker = 0;
-    for(j = 0; j<tile_height*n_tiles; j++){
-        out[j] = in[picker];
-        picker+=32;
-    }
 }
 
 // it is implemented considering star stencils, not squared ones
-void pad_with_zeros(vector<bfloat16>& in,  vector<bfloat16>& out, int rows, int cols, int pad_size){
+void pad_with_zeros(const bfloat16* __restrict in, bfloat16* __restrict out, int rows, int cols, int pad_size){
 
     size_t new_rows = rows + pad_size*2;
     size_t new_cols = cols + pad_size*2;
 
 
     for (size_t r = 0; r < rows; ++r) {
-        // Destination row start (skip first row + padding col)
-        bfloat16* dest = out.data() + (r + pad_size) * new_cols + pad_size;
-        const bfloat16* src = in.data() + r * cols;
+        const bfloat16* src = in + r * cols;
+        bfloat16* dest = out + (r + pad_size) * new_cols + pad_size;
 
         std::memcpy(dest, src, cols * sizeof(bfloat16));
     }

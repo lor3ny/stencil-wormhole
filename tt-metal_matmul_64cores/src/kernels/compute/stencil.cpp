@@ -11,7 +11,7 @@
 namespace NAMESPACE {
 void MAIN {
 
-    DeviceZoneScopedN("STENCIL KERNEL");
+    DeviceZoneScopedN("Compute Kernels");
     
     uint32_t num_tiles = get_arg_val<uint32_t>(0);
 

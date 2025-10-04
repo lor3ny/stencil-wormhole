@@ -241,12 +241,6 @@ int axpy_ttker(
     cout << "Memcpy and compute launch..." << endl;	
 
     vector<bfloat16> output_pad((rows+2) * (cols+2), 0.0f);
-
-    up = tilize_nfaces(up, rows, cols);
-    left = tilize_nfaces(left, rows, cols);
-    right = tilize_nfaces(right, rows, cols);
-    down = tilize_nfaces(down, rows, cols);
-    scalar = tilize_nfaces(scalar, TILE_HEIGHT, TILE_WIDTH);
    
     EnqueueWriteBuffer(cq, up_dram_buffer, up.data(), true);   
     EnqueueWriteBuffer(cq, left_dram_buffer, left.data(), true);   
@@ -280,26 +274,16 @@ int axpy_ttker(
         if (i != iterations-1){
 
             start_cpu = std::chrono::high_resolution_clock::now();
-            output = untilize_nfaces(output, rows, cols);
-            up = untilize_nfaces(up, rows, cols);
-            left = untilize_nfaces(left, rows, cols);
-            right = untilize_nfaces(right, rows, cols);
-            down = untilize_nfaces(down, rows, cols);
             output[(rows/2)*cols + cols/2] = 100.0f;
-            pad_with_zeros(output, output_pad, rows, cols, 1);
-            extract_submats_5p(output_pad, 
-                up,
-                left,
-                right,
-                down,
+            //pad_with_zeros(output.data(), output_pad.data(), rows, cols, 1);
+            extract_submats_5p_nopad(output.data(), 
+                up.data(),
+                left.data(),
+                right.data(),
+                down.data(),
                 rows, 
-                cols,
-                cols+2
+                cols
             );
-            up = tilize_nfaces(up, rows, cols);
-            left = tilize_nfaces(left, rows, cols);
-            right = tilize_nfaces(right, rows, cols);
-            down = tilize_nfaces(down, rows, cols);
             end_cpu = std::chrono::high_resolution_clock::now();
             elapsed = end_cpu - start_cpu;
             elapsed_cpu += elapsed.count();
@@ -312,12 +296,6 @@ int axpy_ttker(
             end_memcpy = std::chrono::high_resolution_clock::now();
             elapsed = end_memcpy - start_memcpy;
             elapsed_memcpy += elapsed.count();
-        }  else {
-            start_cpu = std::chrono::high_resolution_clock::now();
-            output = untilize_nfaces(output, rows, cols);
-            end_cpu = std::chrono::high_resolution_clock::now();
-            elapsed = end_cpu - start_cpu;
-            elapsed_cpu += elapsed.count();
         }
     }
 
@@ -393,7 +371,7 @@ int main(int argc, char** argv) {
     // Pad the input, and the output but it's not necessary
     vector<bfloat16> input_vec_pad(rows_pad * cols_pad, 0.0f);
     vector<bfloat16> output_vec_pad(rows_pad * cols_pad, 0.0f);
-    pad_with_zeros(input_vec, input_vec_pad, rows, cols, 1);
+    pad_with_zeros(input_vec.data(), input_vec_pad.data(), rows, cols, 1);
 
     golden_stencil(input_vec_pad, output_vec_pad, rows_pad, cols_pad, iterations);
 
@@ -426,11 +404,11 @@ int main(int argc, char** argv) {
     vector<bfloat16> scalar_vec(TILE_WIDTH*TILE_HEIGHT*num_cores, 0.25f);
     vector<bfloat16> output_vec(dram_buffer_size/sizeof(bfloat16), 0.0f);
 
-    extract_submats_5p(input_vec_pad, 
-        up_vec,
-        left_vec,
-        right_vec,
-        down_vec,
+    extract_submats_5p(input_vec_pad.data(), 
+        up_vec.data(),
+        left_vec.data(),
+        right_vec.data(),
+        down_vec.data(),
         rows, 
         cols,
         cols_pad

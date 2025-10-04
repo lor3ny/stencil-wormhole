@@ -6,7 +6,7 @@ void kernel_main() {
 
     DPRINT << "READER GO" << ENDL();
 
-    DeviceZoneScopedN("READER KERNEL");
+    DeviceZoneScopedN("Reader Kernels");
 
     // I HAVE ONLY ONE INPUT BUFFER, that goes to CB c_0 
     uint32_t src_addr = get_arg_val<uint32_t>(0);
