@@ -25,7 +25,6 @@ def plot_axpy_vs_matmul(data, PALETTE):
 
     ax.set_ylabel("Execution Time (s)")
     ax.set_xlabel("Jacobi Iterations")
-    ax.set_title("AXPY vs MATMUL")
     ax.set_yscale("log")
     ax.set_xticks(x)
     ax.set_xticklabels([l.split("_")[1] for l in axpy_labels])  # sizes only
@@ -75,7 +74,6 @@ def plot_stacked_axpy_matmul_combined(data, PALETTE):
             label="Wormhole", color=PALETTE["Wormhole"])
 
     ax2.set_ylabel("Execution Time (s)")
-    ax2.set_title("MATMUL Execution Breakdown")
     ax2.set_xticks(x)
     ax2.set_xticklabels(sizes)
     ax2.legend()
@@ -112,13 +110,59 @@ def plot_axpy_vs_baseline(data, PALETTE):
     ax.bar(x + width/2, axpy_baseline, width, color=PALETTE["Baseline"], label="CPU Baseline")
 
     ax.set_ylabel("Execution Time (s)")
-    ax.set_title("AXPY Latency Breakdown vs CPU_BASELINE")
     ax.set_xticks(x)
     ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in axpy_labels])
     ax.legend()
 
     plt.tight_layout()
     plt.savefig("logs/AXPY_vs_BASELINE.png", dpi=300)
+    plt.close(fig)
+
+    print("Stacked bar plot saved to AXPY_vs_BASELINE.png")
+
+# === PLOT 3: AXPY stacked vs CPU_BASELINE ===
+def plot_axpy_vs_baseline_UVM_UPM(data, PALETTE):
+    axpy_indices = [i for i, l in enumerate(data["labels"]) if "axpy" in l]
+    axpy_labels = [data["labels"][i] for i in axpy_indices]
+
+    axpy_memcpy_UVM = [data["memcpy"][i]/60 for i in axpy_indices]
+
+    axpy_cpu = [data["cpu"][i] for i in axpy_indices]
+    axpy_wormhole = [data["wormhole"][i] for i in axpy_indices]
+    axpy_baseline = [data["cpu_baseline"][i] for i in axpy_indices]
+
+    x = np.arange(len(axpy_labels))
+    width = 0.35
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
+
+    # --- UVM subplot ---
+    ax1.bar(x - width/2, axpy_memcpy_UVM, width, label="Memcpy", color=PALETTE["Memcpy"])
+    ax1.bar(x - width/2, axpy_cpu, width, bottom=np.array(axpy_memcpy_UVM), label="CPU", color=PALETTE["CPU"])
+    ax1.bar(x - width/2, axpy_wormhole, width, bottom=np.array(axpy_memcpy_UVM) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["Wormhole"])
+
+    # Baseline bars
+    ax1.bar(x + width/2, axpy_baseline, width, color=PALETTE["Baseline"], label="CPU Baseline")
+
+    ax1.set_ylabel("Execution Time (s)")
+    ax1.set_xticks(x)
+    ax1.set_xticklabels([lbl.replace("axpy_", "") for lbl in axpy_labels])
+    ax1.legend()
+
+    # --- UPM subplot ---
+    ax2.bar(x - width/2, axpy_cpu, width, bottom=np.array(axpy_memcpy_UVM), label="CPU", color=PALETTE["CPU"])
+    ax2.bar(x - width/2, axpy_wormhole, width, bottom=np.array(axpy_memcpy_UVM) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["Wormhole"])
+
+    # Baseline bars
+    ax2.bar(x + width/2, axpy_baseline, width, color=PALETTE["Baseline"], label="CPU Baseline")
+
+    ax2.set_ylabel("Execution Time (s)")
+    ax2.set_xticks(x)
+    ax2.set_xticklabels([lbl.replace("axpy_", "") for lbl in axpy_labels])
+    ax2.legend()
+
+    plt.tight_layout()
+    plt.savefig("logs/AXPY_vs_BASELINE_UVM_UPM.png", dpi=300)
     plt.close(fig)
 
     print("Stacked bar plot saved to AXPY_vs_BASELINE.png")
@@ -148,7 +192,6 @@ def plot_axpy_vs_baseline_energy(data, PALETTE):
     ax.bar(x + width, energy_cpu, width, label="CPU Baseline (170W)", color=PALETTE["Baseline"])
 
     ax.set_ylabel("Energy Consumption (J)")  # Joules = W * s
-    ax.set_title("AXPY Energy Consumption vs CPU Baseline")
     ax.set_xticks(x)
     ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in axpy_labels])
     ax.legend()
@@ -184,7 +227,6 @@ def plot_ker_it_vs_wormhole(data, PALETTE):
     
     # Labels and formatting
     ax.set_ylabel("Execution Time (s)")
-    ax.set_title("KER_IT vs WORMHOLE Execution Time Comparison")
     ax.set_xticks(x)
     ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in labels])
     ax.legend()
@@ -219,7 +261,6 @@ def plot_ker_it_vs_cpu(data, PALETTE):
     
     # Labels and formatting
     ax.set_ylabel("Execution Time (s)")
-    ax.set_title("Wormhole Kernel vs CPU")
     ax.set_xticks(x)
     ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in labels])
     ax.legend()
@@ -318,19 +359,20 @@ if __name__ == "__main__":
     plot_axpy_vs_matmul(data, PALETTE)
     CleanData(data)
 
-    meth = ["axpy", "matmul"]
+    meth = ["axpy"]
     its = ["100", "500", "1000"]
-    sizes = ["8196", "16384", "30720"]
+    sizes = ["8192", "16384", "30720"]
     log_files = [f"{m}_{i}_{s}.out" for m in meth for i in its for s in sizes]
     parse_logs(data, log_files)
     plot_axpy_vs_baseline(data, PALETTE)
     plot_axpy_vs_baseline_energy(data, PALETTE)
+    plot_axpy_vs_baseline_UVM_UPM(data, PALETTE)
     plot_stacked_axpy_matmul_combined(data, PALETTE)
     CleanData(data)
 
     meth = ["axpy", "matmul"]
     its = ["100", "500", "1000"]
-    sizes = ["8196", "16384", "30720"]
+    sizes = ["1024", "2048", "4096"]
     log_files = [f"{m}_{i}_{s}.out" for m in meth for i in its for s in sizes]
     parse_logs(data, log_files)
     plot_ker_it_vs_wormhole(data, PALETTE)
