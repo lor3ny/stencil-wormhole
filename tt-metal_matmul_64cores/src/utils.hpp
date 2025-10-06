@@ -79,11 +79,11 @@ void golden_stencil(std::vector<bfloat16>& input, std::vector<bfloat16>& output,
     end_total = std::chrono::high_resolution_clock::now();
     elapsed = end_total - start_total;
 
-    if(num_its % 2 == 0) {
-        printMat(in_copy, rows, cols);
-    } else {
-        printMat(output, rows, cols);
-    }
+    // if(num_its % 2 == 0) {
+    //     printMat(in_copy, rows, cols);
+    // } else {
+    //     printMat(output, rows, cols);
+    // }
 
     std::cout << "-CPU_BASELINE- " << elapsed.count() << " ms" << std::endl;
 }

@@ -257,12 +257,13 @@ int matmul_ttker(vector<bfloat16>& input,
         elapsed_memcpy += elapsed.count();
 
         if (i != iterations-1){
+
             start_cpu = std::chrono::high_resolution_clock::now();
             output = untilize_nfaces(output, rows*cols, TILE_WIDTH);
-            vec2stencil_5p(output, new_in, TILE_HEIGHT, n_tiles);
-            new_in[(rows/2)*cols + cols/2] = 100.0f;
-            pad_with_zeros(new_in, new_in_pad, rows, cols, 1);
-            stencil2vec_5p(new_in_pad, new_in_i2r, (rows+2), (cols+2));
+
+            output[((rows/2)*cols + cols/2)*32] = 100.0f;
+            output_stencil2vec_5p(output.data(), new_in_i2r.data(), rows, cols);
+
             new_in_i2r = tilize_nfaces(new_in_i2r, rows*cols, TILE_WIDTH);
             end_cpu = std::chrono::high_resolution_clock::now();
             elapsed = end_cpu - start_cpu;
@@ -275,11 +276,7 @@ int matmul_ttker(vector<bfloat16>& input,
             elapsed_memcpy += elapsed.count();
 
         } else {
-            start_cpu = std::chrono::high_resolution_clock::now();
             output = untilize_nfaces(output, rows*cols, TILE_WIDTH);
-            end_cpu = std::chrono::high_resolution_clock::now();
-            elapsed = end_cpu - start_cpu;
-            elapsed_cpu += elapsed.count();
         }
     }
 
@@ -418,10 +415,10 @@ int main(int argc, char** argv) {
 
     //! KERNEL AREA
 
-    cout << "Output: " << endl;
-    vec2stencil_5p(output_vec, input_vec, TILE_HEIGHT, num_tiles);
-    input_vec[(rows/2)*cols + cols/2] = 100.0f;
-    printMat(input_vec, rows, cols);
+    // cout << "Output: " << endl;
+    // vec2stencil_5p(output_vec, input_vec, TILE_HEIGHT, num_tiles);
+    // input_vec[(rows/2)*cols + cols/2] = 100.0f;
+    // printMat(input_vec, rows, cols);
 
     return 0;
 }

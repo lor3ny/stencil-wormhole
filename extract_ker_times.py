@@ -113,7 +113,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     csv_file = '/home/lpiarulli_tt/tt-metal/generated/profiler/.logs/profile_log_device.csv'
-    kernels = ["WRITER KERNEL", "STENCIL KERNEL", "READER KERNEL"]
+    kernels = ["Compute Kernels", "Reader Kernels", "Writer Kernels"]
 
     analyze_execution_cycles(csv_file, 'Compute Kernels')
     analyze_execution_cycles(csv_file, 'Reader Kernels')

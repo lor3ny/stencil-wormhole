@@ -123,6 +123,42 @@ def plot_axpy_vs_baseline(data, PALETTE):
 
     print("Stacked bar plot saved to AXPY_vs_BASELINE.png")
 
+# === PLOT 4: AXPY stacked vs CPU_BASELINE ===
+def plot_axpy_vs_baseline_energy(data, PALETTE):
+    axpy_indices = [i for i, l in enumerate(data["labels"]) if "axpy" in l]
+    axpy_labels = [data["labels"][i] for i in axpy_indices]
+
+    axpy_ker_it = [data["ker_it"][i] for i in axpy_indices]   # kernel iterations (from GPU part)
+    axpy_cpu = [data["cpu"][i] for i in axpy_indices]         # CPU time
+    axpy_baseline = [data["cpu_baseline"][i] for i in axpy_indices]  # baseline CPU-only time
+
+    # Convert to ENERGY (W * time)
+    energy_wor = [ker * 24 for ker in axpy_ker_it]
+    energy_wor_cpu  = [(ker * 24 + cpu * 170) for ker, cpu in zip(axpy_ker_it, axpy_cpu)]
+    energy_cpu = [base * 170 for base in axpy_baseline]
+
+    x = np.arange(len(axpy_labels))  # positions
+    width = 0.25
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    # Plot 3 bars per environment
+    ax.bar(x - width, energy_wor, width, label="Wormhole Only (24W)", color=PALETTE["Memcpy"])
+    ax.bar(x, energy_wor_cpu, width, label="Wormhole+CPU (24W + 170W)", color=PALETTE["CPU"])
+    ax.bar(x + width, energy_cpu, width, label="CPU Baseline (170W)", color=PALETTE["Baseline"])
+
+    ax.set_ylabel("Energy Consumption (J)")  # Joules = W * s
+    ax.set_title("AXPY Energy Consumption vs CPU Baseline")
+    ax.set_xticks(x)
+    ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in axpy_labels])
+    ax.legend()
+
+    plt.tight_layout()
+    plt.savefig("logs/AXPY_vs_BASELINE_energy.png", dpi=300)
+    plt.close(fig)
+
+    print("Energy bar plot saved to AXPY_vs_BASELINE_energy.png")
+
 
 
 def plot_ker_it_vs_wormhole(data, PALETTE):
@@ -259,10 +295,6 @@ if __name__ == "__main__":
     })
 
 
-    log_files = [
-        "axpy_100_128.out", "axpy_500_128.out", "axpy_1000_128.out", "axpy_100_1024.out", "axpy_500_1024.out", "axpy_1000_1024.out",
-        "matmul_100_128.out", "matmul_500_128.out", "matmul_1000_128.out", "matmul_100_1024.out", "matmul_500_1024.out", "matmul_1000_1024.out"
-    ]
     data = {
         "labels": [],
         "iterations": [],
@@ -276,30 +308,32 @@ if __name__ == "__main__":
         "other": []
     }
 
-    log_files = [
-        "axpy_100_128.out", "axpy_500_128.out", "axpy_1000_128.out", "axpy_100_1024.out", "axpy_500_1024.out", "axpy_1000_1024.out",
-        "matmul_100_128.out", "matmul_500_128.out", "matmul_1000_128.out", "matmul_100_1024.out", "matmul_500_1024.out", "matmul_1000_1024.out"
-    ]
+
+
+    meth = ["axpy", "matmul"]
+    its = ["100", "500", "1000"]
+    sizes = ["1024", "2048", "4096"]
+    log_files = [f"{m}_{i}_{s}.out" for m in meth for i in its for s in sizes]
     parse_logs(data, log_files)
     plot_axpy_vs_matmul(data, PALETTE)
-    plot_ker_it_vs_wormhole(data, PALETTE)
     CleanData(data)
 
-    log_files = [
-        "axpy_100_1024.out", "axpy_500_1024.out", "axpy_1000_1024.out",
-        "matmul_100_1024.out", "matmul_500_1024.out", "matmul_1000_1024.out"
-    ]
+    meth = ["axpy", "matmul"]
+    its = ["100", "500", "1000"]
+    sizes = ["8196", "16384", "30720"]
+    log_files = [f"{m}_{i}_{s}.out" for m in meth for i in its for s in sizes]
     parse_logs(data, log_files)
     plot_axpy_vs_baseline(data, PALETTE)
+    plot_axpy_vs_baseline_energy(data, PALETTE)
     plot_stacked_axpy_matmul_combined(data, PALETTE)
     CleanData(data)
 
-    log_files = [
-        "axpy_500_1024.out", "matmul_500_1024.out",
-        "axpy_1000_1024.out",
-        "matmul_1000_1024.out"
-    ]
+    meth = ["axpy", "matmul"]
+    its = ["100", "500", "1000"]
+    sizes = ["8196", "16384", "30720"]
+    log_files = [f"{m}_{i}_{s}.out" for m in meth for i in its for s in sizes]
     parse_logs(data, log_files)
+    plot_ker_it_vs_wormhole(data, PALETTE)
     plot_ker_it_vs_cpu(data, PALETTE)
     
 

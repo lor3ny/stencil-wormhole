@@ -87,6 +87,48 @@ void stencil2vec_5p(vector<bfloat16>& in, vector<bfloat16>& out, int rows, int c
     }
 }
 
+void output_stencil2vec_5p(bfloat16* __restrict in, bfloat16* __restrict out, int rows, int cols){
+    int index = 0;
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+
+            // compute flat index in input (stride 32)
+            int base_idx = (i * cols + j) * 32;
+
+            // initialize all 9 stencil entries to 0
+            for (int k = 0; k < 9; k++) {
+                out[index + k] = bfloat16(0.0f);
+            }
+
+            // center
+            out[index + 4] = in[base_idx];
+
+            // top
+            if (i > 0) {
+                out[index + 1] = in[((i - 1) * cols + j) * 32];
+            }
+
+            // bottom
+            if (i < rows - 1) {
+                out[index + 7] = in[((i + 1) * cols + j) * 32];
+            }
+
+            // left
+            if (j > 0) {
+                out[index + 3] = in[(i * cols + (j - 1)) * 32];
+            }
+
+            // right
+            if (j < cols - 1) {
+                out[index + 5] = in[(i * cols + (j + 1)) * 32];
+            }
+
+            index += 32;
+        }
+    }
+}
+
 
 void vec2stencil_5p(vector<bfloat16>& in, vector<bfloat16>& out, int tile_height, int n_tiles){
     int j;
