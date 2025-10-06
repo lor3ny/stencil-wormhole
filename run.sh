@@ -1,5 +1,5 @@
 
-echo "Running stencil with 64 cores and different iterations..."
+echo "Running stencil with 64 cores and different iterations WITH PROFILING."
 
 # 100 500 1000
 # 1024 2048 4096 8192 16384 30720
