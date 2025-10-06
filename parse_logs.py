@@ -27,7 +27,7 @@ def plot_axpy_vs_matmul(data, PALETTE):
     ax.set_xlabel("Jacobi Iterations")
     ax.set_yscale("log")
     ax.set_xticks(x)
-    ax.set_xticklabels([l.split("_")[1] for l in axpy_labels])  # sizes only
+    ax.set_xticklabels([l for l in axpy_labels])  # sizes only
     ax.legend()
 
     plt.tight_layout()
@@ -111,7 +111,7 @@ def plot_axpy_vs_baseline(data, PALETTE):
 
     ax.set_ylabel("Execution Time (s)")
     ax.set_xticks(x)
-    ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in axpy_labels])
+    ax.set_xticklabels([lbl.replace("axpy_", "").replace("matmul_", "") for lbl in axpy_labels])
     ax.legend()
 
     plt.tight_layout()
@@ -123,7 +123,7 @@ def plot_axpy_vs_baseline(data, PALETTE):
 # === PLOT 3: AXPY stacked vs CPU_BASELINE ===
 def plot_axpy_vs_baseline_UVM_UPM(data, PALETTE):
     axpy_indices = [i for i, l in enumerate(data["labels"]) if "axpy" in l]
-    axpy_labels = [data["labels"][i] for i in axpy_indices]
+    axpy_labels = [data["labels"] for i in axpy_indices]
 
     axpy_memcpy_UVM = [data["memcpy"][i]/60 for i in axpy_indices]
 
@@ -158,7 +158,7 @@ def plot_axpy_vs_baseline_UVM_UPM(data, PALETTE):
 
     ax2.set_ylabel("Execution Time (s)")
     ax2.set_xticks(x)
-    ax2.set_xticklabels([lbl.replace("axpy_", "") for lbl in axpy_labels])
+    ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in axpy_labels])
     ax2.legend()
 
     plt.tight_layout()
@@ -193,7 +193,7 @@ def plot_axpy_vs_baseline_energy(data, PALETTE):
 
     ax.set_ylabel("Energy Consumption (J)")  # Joules = W * s
     ax.set_xticks(x)
-    ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in axpy_labels])
+    ax.set_xticklabels([lbl.replace("axpy_", "").replace("matmul_", "") for lbl in axpy_labels])
     ax.legend()
 
     plt.tight_layout()
@@ -228,7 +228,7 @@ def plot_ker_it_vs_wormhole(data, PALETTE):
     # Labels and formatting
     ax.set_ylabel("Execution Time (s)")
     ax.set_xticks(x)
-    ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in labels])
+    ax.set_xticklabels([lbl.replace("axpy_", "").replace("matmul_", "") for lbl in labels])
     ax.legend()
     
     plt.tight_layout()
@@ -262,7 +262,8 @@ def plot_ker_it_vs_cpu(data, PALETTE):
     # Labels and formatting
     ax.set_ylabel("Execution Time (s)")
     ax.set_xticks(x)
-    ax.set_xticklabels([lbl.replace("axpy_", "") for lbl in labels])
+    
+    ax.set_xticklabels([lbl.replace("axpy_", "").replace("matmul_", "") for lbl in labels])
     ax.legend()
     
     plt.tight_layout()
@@ -354,26 +355,33 @@ if __name__ == "__main__":
     meth = ["axpy", "matmul"]
     its = ["100", "500", "1000"]
     sizes = ["1024", "2048", "4096"]
-    log_files = [f"{m}_{i}_{s}.out" for m in meth for i in its for s in sizes]
+    log_files = [f"{m}_{i}_{s}.out" for m in meth for s in sizes for i in its]
     parse_logs(data, log_files)
     plot_axpy_vs_matmul(data, PALETTE)
+    CleanData(data)
+
+    meth = ["axpy", "matmul"]
+    its = ["100", "500", "1000"]
+    sizes = ["4096"]
+    log_files = [f"{m}_{i}_{s}.out" for m in meth for s in sizes for i in its]
+    parse_logs(data, log_files)
+    plot_stacked_axpy_matmul_combined(data, PALETTE)
     CleanData(data)
 
     meth = ["axpy"]
     its = ["100", "500", "1000"]
     sizes = ["8192", "16384", "30720"]
-    log_files = [f"{m}_{i}_{s}.out" for m in meth for i in its for s in sizes]
+    log_files = [f"{m}_{i}_{s}.out" for m in meth for s in sizes for i in its]
     parse_logs(data, log_files)
     plot_axpy_vs_baseline(data, PALETTE)
     plot_axpy_vs_baseline_energy(data, PALETTE)
     plot_axpy_vs_baseline_UVM_UPM(data, PALETTE)
-    plot_stacked_axpy_matmul_combined(data, PALETTE)
     CleanData(data)
 
     meth = ["axpy", "matmul"]
     its = ["100", "500", "1000"]
     sizes = ["1024", "2048", "4096"]
-    log_files = [f"{m}_{i}_{s}.out" for m in meth for i in its for s in sizes]
+    log_files = [f"{m}_{i}_{s}.out" for m in meth for s in sizes for i in its]
     parse_logs(data, log_files)
     plot_ker_it_vs_wormhole(data, PALETTE)
     plot_ker_it_vs_cpu(data, PALETTE)
