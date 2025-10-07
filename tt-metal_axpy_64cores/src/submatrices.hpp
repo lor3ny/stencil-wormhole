@@ -3,11 +3,13 @@
 
 #include "utils.hpp"
 
+#include <chrono>
+
 
 using namespace std;
 
 //! FUCKING OPTIMIZED, NEED TO BE TESTED
-void extract_5p_memcpy_optimized(
+inline double extract_5p_memcpy_optimized(
     bfloat16* __restrict in,
     bfloat16* __restrict out_top,
     bfloat16* __restrict out_left,
@@ -16,23 +18,38 @@ void extract_5p_memcpy_optimized(
     int rows,
     int cols
 ) {
+
+    std::chrono::_V2::system_clock::time_point start_total, end_total;
+    std::chrono::duration<double, std::milli> elapsed;
+    
+    start_total = std::chrono::high_resolution_clock::now();
+
+    int r;
+    int lr_count = (cols-1) * sizeof(bfloat16);
+    int ud_count = (rows-1) * cols * sizeof(bfloat16);
+
     // TOP: Copy rows 0 to rows-2 to out_top[cols, 2*cols, ..., (rows-1)*cols]
     if (rows > 1) {
-        std::memcpy(out_top + cols, in, (rows - 1) * cols * sizeof(bfloat16));
+        std::memcpy(out_top + cols, in, ud_count);
     }
 
     // DOWN: Copy rows 1 to rows-1 to out_down[0, cols, ..., (rows-2)*cols]
     if (rows > 1) {
-        std::memcpy(out_down, in + cols, (rows - 1) * cols * sizeof(bfloat16));
+        std::memcpy(out_down, in + cols, ud_count);
     }
 
     // LEFT and RIGHT: Copy cols 1 to cols-1 for each row
-    for (int r = 0; r < rows; ++r) {
+    #pragma unroll 32
+    for (r = 0; r < rows; r++) {
         // LEFT: Copy cols 1 to cols-1 to out_left[r*cols + 1, ..., r*cols + cols-1]
         // RIGHT: Copy cols 1 to cols-1 to out_right[r*cols, ..., r*cols + cols-2]
-        std::memcpy(out_left + r * cols + 1, in + r * cols + 1, (cols - 1) * sizeof(bfloat16));
-        std::memcpy(out_right + r * cols, in + r * cols + 1, (cols - 1) * sizeof(bfloat16));
+        std::memcpy(out_left + r * cols + 1, in + r * cols + 1, lr_count);
+        std::memcpy(out_right + r * cols, in + r * cols + 1, lr_count);
     }
+
+    end_total = std::chrono::high_resolution_clock::now();
+    elapsed = end_total - start_total;
+    return elapsed.count();
 }
 
 //! This function is specialized for star 5-point stencil and tries to integrate padding

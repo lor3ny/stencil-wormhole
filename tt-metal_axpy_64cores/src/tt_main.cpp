@@ -253,6 +253,10 @@ int axpy_ttker(
     double elapsed_wormhole = 0.0;
     std::chrono::_V2::system_clock::time_point start_total, end_total, start_wormhole, end_wormhole, start_memcpy, end_memcpy, start_cpu, end_cpu;
     std::chrono::duration<double, std::milli> elapsed;
+
+    int r;
+    int lr_count = (cols-1) * sizeof(bfloat16);
+    int ud_count = (rows-1) * cols * sizeof(bfloat16);
     
     start_total = std::chrono::high_resolution_clock::now();
 
@@ -275,14 +279,20 @@ int axpy_ttker(
 
             start_cpu = std::chrono::high_resolution_clock::now();
             output[(rows/2)*cols + cols/2] = 100.0f;
-            extract_5p_memcpy_singleloop(output.data(), 
-                up.data(),
-                left.data(),
-                right.data(),
-                down.data(),
-                rows, 
-                cols
-            );
+    
+            // TOP: Copy rows 0 to rows-2 to out_top[cols, 2*cols, ..., (rows-1)*cols]
+            std::memcpy(up.data() + cols, output.data(), ud_count);
+            // DOWN: Copy rows 1 to rows-1 to out_down[0, cols, ..., (rows-2)*cols]
+            std::memcpy(down.data(), output.data() + cols, ud_count);      
+
+            // LEFT and RIGHT: Copy cols 1 to cols-1 for each row
+            #pragma unroll 32
+            for (r = 0; r < rows; r++) {
+                // LEFT: Copy cols 1 to cols-1 to out_left[r*cols + 1, ..., r*cols + cols-1]
+                // RIGHT: Copy cols 1 to cols-1 to out_right[r*cols, ..., r*cols + cols-2]
+                std::memcpy(left.data() + r * cols + 1, output.data() + r * cols + 1, lr_count);
+                std::memcpy(right.data() + r * cols, output.data() + r * cols + 1, lr_count);
+            }
             end_cpu = std::chrono::high_resolution_clock::now();
             elapsed = end_cpu - start_cpu;
             elapsed_cpu += elapsed.count();
