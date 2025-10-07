@@ -161,7 +161,11 @@ def plot_axpy_vs_baseline_UVM_UPM(data, PALETTE):
     ax1.set_title("UVM 900GB/s Analysis")
     ax1.set_ylabel("Execution Time (s)")
     ax1.set_xticks(x)
-    ax1.legend()
+
+    # Deduplicate legend
+    handles, labels = ax1.get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    ax1.legend(by_label.values(), by_label.keys())
 
     # --- UPM subplot ---
     ax2.bar(x - width, axpy_memcpy, width, label="Memcpy", color=PALETTE["Memcpy"])
@@ -179,13 +183,18 @@ def plot_axpy_vs_baseline_UVM_UPM(data, PALETTE):
     ax2.set_xlabel("Iterations\nInput Size", labelpad=18)
     ax2.set_xticks(x)
     ax2.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels])
-    ax2.legend()
+
+    # Deduplicate legend
+    handles, labels = ax2.get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    ax2.legend(by_label.values(), by_label.keys())
 
     plt.tight_layout()
     plt.savefig("logs/AXPY_vs_BASELINE_UVM_UPM.png", dpi=300)
     plt.close(fig)
 
-    print("Stacked bar plot saved to AXPY_vs_BASELINE.png")
+    print("Stacked bar plot saved to AXPY_vs_BASELINE_UVM_UPM.png")
+
 
 # === PLOT 4: AXPY stacked vs CPU_BASELINE ===
 def plot_axpy_vs_baseline_energy(data, PALETTE):
