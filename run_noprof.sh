@@ -8,8 +8,9 @@ do
     for SIZE in 8192 16384 30720
     do
         echo "AXPY $SIZE with iterations: $ITERATIONS"
-        rm -rf logs/axpy_${ITERATIONS}.out
-        ./tt-metal_axpy_64cores/build/stencil $ITERATIONS $SIZE $SIZE >> logs/axpy_${ITERATIONS}_${SIZE}.out
+        rm -rf logs/axpy_${ITERATIONS}_${SIZE}_noprof.out
+        TT_METAL_DEVICE_PROFILER=0 ./tt-metal_axpy_64cores/build/stencil $ITERATIONS $SIZE $SIZE >> /dev/null
+        TT_METAL_DEVICE_PROFILER=0 ./tt-metal_axpy_64cores/build/stencil $ITERATIONS $SIZE $SIZE >> logs/axpy_${ITERATIONS}_${SIZE}_noprof.out
     done
 done
 
@@ -25,8 +26,5 @@ done
 #         #python3 extract_ker_times.py --iterations $ITERATIONS >> logs/matmul_${ITERATIONS}_${SIZE}.out
 #     done
 # done
-
-
-python3 parse_logs.py
 
 echo "Done."

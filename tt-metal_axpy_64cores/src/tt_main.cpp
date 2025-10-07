@@ -312,7 +312,7 @@ int axpy_ttker(
             elapsed_memcpy += elapsed.count();
         }
     }
-
+    
     end_total = std::chrono::high_resolution_clock::now();
     elapsed = end_total - start_total;
     cout << "-TOTAL- " << elapsed.count() << " ms" << endl;

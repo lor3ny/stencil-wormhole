@@ -134,7 +134,7 @@ def plot_axpy_vs_baseline_UVM_UPM(data, PALETTE):
     axpy_indices = [i for i, l in enumerate(data["labels"]) if "axpy" in l]
     axpy_labels = [data["labels"][i] for i in axpy_indices]
 
-    axpy_memcpy_UVM = [data["memcpy"][i]/60 for i in axpy_indices]
+    axpy_memcpy_UVM = [data["memcpy"][i]/15 for i in axpy_indices]
     axpy_memcpy = [data["memcpy"][i] for i in axpy_indices]
 
     axpy_cpu = [data["cpu"][i] for i in axpy_indices]
