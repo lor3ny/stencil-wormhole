@@ -30,21 +30,22 @@ inline double extract_5p_memcpy_optimized(
 
     // TOP: Copy rows 0 to rows-2 to out_top[cols, 2*cols, ..., (rows-1)*cols]
     if (rows > 1) {
+        //std::memcpy(out_top + cols, in, ud_count);
         std::memcpy(out_top + cols, in, ud_count);
     }
 
     // DOWN: Copy rows 1 to rows-1 to out_down[0, cols, ..., (rows-2)*cols]
     if (rows > 1) {
+        //std::memcpy(out_down, in + cols, ud_count);
         std::memcpy(out_down, in + cols, ud_count);
     }
 
     // LEFT and RIGHT: Copy cols 1 to cols-1 for each row
-    #pragma unroll 32
     for (r = 0; r < rows; r++) {
         // LEFT: Copy cols 1 to cols-1 to out_left[r*cols + 1, ..., r*cols + cols-1]
         // RIGHT: Copy cols 1 to cols-1 to out_right[r*cols, ..., r*cols + cols-2]
-        std::memcpy(out_left + r * cols + 1, in + r * cols + 1, lr_count);
-        std::memcpy(out_right + r * cols, in + r * cols + 1, lr_count);
+        std::memcpy(out_left+(r*cols)+1, in+(r*cols), (cols-1) * sizeof(bfloat16));
+        std::memcpy(out_right+(r*cols), in+(r*cols)+1, (cols-1) * sizeof(bfloat16));
     }
 
     end_total = std::chrono::high_resolution_clock::now();
@@ -66,18 +67,18 @@ void extract_5p_memcpy_singleloop(
     for (int r = 0; r < rows; ++r) {
         // TOP: Copy rows 0 to rows-2 to out_top[cols, 2*cols, ..., (rows-1)*cols]
         if (r < rows - 1) {
-            std::memcpy(out_top + (r + 1) * cols, in + r * cols, cols * sizeof(bfloat16));
+            std::memcpy(out_top+((r+1)*cols), in+(r*cols), cols * sizeof(bfloat16));
         }
 
         // LEFT: Copy cols 1 to cols-1 to out_left[r*cols + 1, ..., r*cols + cols-1]
-        std::memcpy(out_left + r * cols + 1, in + r * cols + 1, (cols - 1) * sizeof(bfloat16));
+        std::memcpy(out_left+(r*cols)+1, in+(r*cols), (cols-1) * sizeof(bfloat16));
 
         // RIGHT: Copy cols 1 to cols-1 to out_right[r*cols, ..., r*cols + cols-2]
-        std::memcpy(out_right + r * cols, in + r * cols + 1, (cols - 1) * sizeof(bfloat16));
+        std::memcpy(out_right+(r*cols), in+(r*cols)+1, (cols-1) * sizeof(bfloat16));
 
         // DOWN: Copy rows 1 to rows-1 to out_down[0, cols, ..., (rows-2)*cols]
         if (r > 0) {
-            std::memcpy(out_down + (r - 1) * cols, in + r * cols, cols * sizeof(bfloat16));
+            std::memcpy(out_down+((r-1)*cols), in+(r*cols), cols * sizeof(bfloat16));
         }
     }
 }

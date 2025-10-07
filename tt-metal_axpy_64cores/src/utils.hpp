@@ -27,6 +27,17 @@ inline void printMat(std::vector<bfloat16>& matrix, int rows, int cols) {
 }
 
 
+inline void printMat(const bfloat16* matrix, int rows, int cols) {
+    for(int i =0; i<rows; i++){
+        for(int j =0; j<cols; j++){
+            std::cout << matrix[i*cols + j].to_float() << " ";
+        }
+        std::cout << "\n";
+    }
+    std::cout << std::flush;
+}
+
+
 inline void InitializeGrid(double *grid, int dim){
     int i, j;
     for(i = 0; i < dim; ++i){

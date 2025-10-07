@@ -15,6 +15,7 @@
 
 #include <unistd.h>
 #include <chrono>
+#include <immintrin.h>
 
 #include "submatrices.hpp"
 
@@ -257,6 +258,10 @@ int axpy_ttker(
     int r;
     int lr_count = (cols-1) * sizeof(bfloat16);
     int ud_count = (rows-1) * cols * sizeof(bfloat16);
+
+    bfloat16* out = output.data()+cols;
+    bfloat16* up_ptr = up.data();
+    bfloat16* down_ptr = down.data();
     
     start_total = std::chrono::high_resolution_clock::now();
 
@@ -269,7 +274,7 @@ int axpy_ttker(
         elapsed_wormhole += elapsed.count();
 
         start_memcpy = std::chrono::high_resolution_clock::now();
-        EnqueueReadBuffer(cq, output_dram_buffer, output.data(), true);
+        EnqueueReadBuffer(cq, output_dram_buffer, out, true);
         end_memcpy = std::chrono::high_resolution_clock::now();
         elapsed = end_memcpy - start_memcpy;
         elapsed_memcpy += elapsed.count();
@@ -278,30 +283,35 @@ int axpy_ttker(
         if (i != iterations-1){
 
             start_cpu = std::chrono::high_resolution_clock::now();
-            output[(rows/2)*cols + cols/2] = 100.0f;
-    
+            out[(rows/2)*cols + cols/2] = 100.0f;
+
             // TOP: Copy rows 0 to rows-2 to out_top[cols, 2*cols, ..., (rows-1)*cols]
-            std::memcpy(up.data() + cols, output.data(), ud_count);
+            //std::memcpy(up_ptr + cols, out, ud_count);
+            up_ptr = out - cols; 
+
             // DOWN: Copy rows 1 to rows-1 to out_down[0, cols, ..., (rows-2)*cols]
-            std::memcpy(down.data(), output.data() + cols, ud_count);      
+            //std::memcpy(out_down, in + cols, ud_count);
+            //std::memcpy(down_ptr, out + cols, ud_count);
+            down_ptr = out + cols;
 
             // LEFT and RIGHT: Copy cols 1 to cols-1 for each row
-            #pragma unroll 32
             for (r = 0; r < rows; r++) {
                 // LEFT: Copy cols 1 to cols-1 to out_left[r*cols + 1, ..., r*cols + cols-1]
                 // RIGHT: Copy cols 1 to cols-1 to out_right[r*cols, ..., r*cols + cols-2]
-                std::memcpy(left.data() + r * cols + 1, output.data() + r * cols + 1, lr_count);
-                std::memcpy(right.data() + r * cols, output.data() + r * cols + 1, lr_count);
+                std::memcpy(left.data()+(r*cols)+1, out+(r*cols), lr_count);
+                std::memcpy(right.data()+(r*cols), out+(r*cols)+1, lr_count);
             }
+
+            
             end_cpu = std::chrono::high_resolution_clock::now();
             elapsed = end_cpu - start_cpu;
             elapsed_cpu += elapsed.count();
 
             start_memcpy = std::chrono::high_resolution_clock::now();
-            EnqueueWriteBuffer(cq, up_dram_buffer, up.data(), true);   
+            EnqueueWriteBuffer(cq, up_dram_buffer, up_ptr, true);   
             EnqueueWriteBuffer(cq, left_dram_buffer, left.data(), true);   
             EnqueueWriteBuffer(cq, right_dram_buffer, right.data(), true);   
-            EnqueueWriteBuffer(cq, down_dram_buffer, down.data(), true);    
+            EnqueueWriteBuffer(cq, down_dram_buffer, down_ptr, true);    
             end_memcpy = std::chrono::high_resolution_clock::now();
             elapsed = end_memcpy - start_memcpy;
             elapsed_memcpy += elapsed.count();
@@ -411,7 +421,7 @@ int main(int argc, char** argv) {
     vector<bfloat16> right_vec(rows*cols);
     vector<bfloat16> down_vec(rows*cols);
     vector<bfloat16> scalar_vec(TILE_WIDTH*TILE_HEIGHT*num_cores, 0.25f);
-    vector<bfloat16> output_vec(dram_buffer_size/sizeof(bfloat16), 0.0f);
+    vector<bfloat16> output_vec(dram_buffer_size/sizeof(bfloat16)+2*cols, 0.0f);
 
     extract_submats_5p(input_vec_pad.data(), 
         up_vec.data(),
@@ -440,9 +450,9 @@ int main(int argc, char** argv) {
     CloseDevice(device);
     //! KERNEL AREA
 
-    //cout << "Output: " << endl;
-    //output_vec[(rows/2)*cols + cols/2] = 100.0f;
-    //printMat(output_vec, rows, cols);
+    // cout << "Output: " << endl;
+    // output_vec[((rows/2)*cols + cols/2)+cols] = 100.0f;
+    // printMat(output_vec.data() + cols, rows, cols);
 
     return 0;
 }
