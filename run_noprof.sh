@@ -3,7 +3,8 @@ echo "Running stencil with 64 cores and different iterations WITHOUT PROFILING."
 
 # 100 500 1000
 # 1024 2048 4096
-for ITERATIONS in 100 500 1000
+# missing also 500 - 30720
+for ITERATIONS in 1000
 do
     for SIZE in 8192 16384 30720
     do
