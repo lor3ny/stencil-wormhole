@@ -262,6 +262,8 @@ int axpy_ttker(
     bfloat16* out = output.data()+cols;
     bfloat16* up_ptr = up.data();
     bfloat16* down_ptr = down.data();
+    bfloat16* left_ptr = left.data();
+    bfloat16* right_ptr = right.data();
     
     start_total = std::chrono::high_resolution_clock::now();
 
@@ -284,33 +286,26 @@ int axpy_ttker(
 
             start_cpu = std::chrono::high_resolution_clock::now();
             out[(rows/2)*cols + cols/2] = 100.0f;
-
             // TOP: Copy rows 0 to rows-2 to out_top[cols, 2*cols, ..., (rows-1)*cols]
-            //std::memcpy(up_ptr + cols, out, ud_count);
-            up_ptr = out - cols; 
-
             // DOWN: Copy rows 1 to rows-1 to out_down[0, cols, ..., (rows-2)*cols]
-            //std::memcpy(out_down, in + cols, ud_count);
-            //std::memcpy(down_ptr, out + cols, ud_count);
+            up_ptr = out - cols; 
             down_ptr = out + cols;
 
             // LEFT and RIGHT: Copy cols 1 to cols-1 for each row
             for (r = 0; r < rows; r++) {
                 // LEFT: Copy cols 1 to cols-1 to out_left[r*cols + 1, ..., r*cols + cols-1]
                 // RIGHT: Copy cols 1 to cols-1 to out_right[r*cols, ..., r*cols + cols-2]
-                std::memcpy(left.data()+(r*cols)+1, out+(r*cols), lr_count);
-                std::memcpy(right.data()+(r*cols), out+(r*cols)+1, lr_count);
+                std::memcpy(left_ptr+(r*cols)+1, out+(r*cols), lr_count);
+                std::memcpy(right_ptr+(r*cols), out+(r*cols)+1, lr_count);
             }
-
-            
             end_cpu = std::chrono::high_resolution_clock::now();
             elapsed = end_cpu - start_cpu;
             elapsed_cpu += elapsed.count();
 
             start_memcpy = std::chrono::high_resolution_clock::now();
             EnqueueWriteBuffer(cq, up_dram_buffer, up_ptr, true);   
-            EnqueueWriteBuffer(cq, left_dram_buffer, left.data(), true);   
-            EnqueueWriteBuffer(cq, right_dram_buffer, right.data(), true);   
+            EnqueueWriteBuffer(cq, left_dram_buffer, left_ptr, true);   
+            EnqueueWriteBuffer(cq, right_dram_buffer, right_ptr, true);   
             EnqueueWriteBuffer(cq, down_dram_buffer, down_ptr, true);    
             end_memcpy = std::chrono::high_resolution_clock::now();
             elapsed = end_memcpy - start_memcpy;
