@@ -173,7 +173,7 @@ def plot_axpy_vs_baseline_UVM_UPM(data, PALETTE):
     ax2.bar(x - width, axpy_wormhole, width, bottom=np.array(axpy_memcpy) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["AXPY"])
 
     ax2.bar(x, axpy_cpu, width, label="CPU", color=PALETTE["CPU"])
-    ax2.bar(x, axpy_wormhole, width, bottom=np.array(axpy_cpu), label="Wormhole", color=PALETTE["Wormhole"])
+    ax2.bar(x, axpy_wormhole, width, bottom=np.array(axpy_cpu), label="Wormhole", color=PALETTE["AXPY"])
 
     # Baseline bars
     ax2.bar(x + width, axpy_baseline, width, color=PALETTE["Baseline"], label="CPU Baseline")
