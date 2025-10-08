@@ -25,10 +25,10 @@ def plot_axpy_vs_matmul(data, PALETTE):
     ax.bar(x + width/2, matmul_values, width, label="MATMUL", color=PALETTE["MATMUL"])
 
     ax.set_ylabel("Execution Time (s)")
-    ax.set_xlabel("Iterations\nInput Size", labelpad=18)
+    ax.set_xlabel("Iterations\nInput Size", labelpad=20)
     ax.set_yscale("log")
     ax.set_xticks(x)
-    ax.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels])
+    ax.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels], rotation=45)
     ax.legend()
 
     plt.tight_layout()
@@ -58,15 +58,15 @@ def plot_stacked_axpy_matmul_combined(data, PALETTE):
     width = 0.5
 
     # Create a single figure with two vertical subplots
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 10), sharex=True)
 
     # --- AXPY subplot ---
     ax1.bar(x_axpy, axpy_memcpy, width, label="Memcpy", color=PALETTE["Memcpy"])
     ax1.bar(x_axpy, axpy_cpu, width, bottom=np.array(axpy_memcpy), label="CPU", color=PALETTE["CPU"])
     ax1.bar(x_axpy, axpy_wormhole, width, bottom=np.array(axpy_memcpy) + np.array(axpy_cpu),
-            label="Wormhole", color=PALETTE["Wormhole"])
+            label="Wormhole", color=PALETTE["AXPY"])
 
-    ax1.set_ylabel("Execution Time (s)")
+    ax1.set_ylabel("Execution Time (s)", labelpad=22, fontsize=22)
     ax1.set_title("AXPY Execution Breakdown")
     ax1.set_xticks(x_axpy)
     ax1.legend()
@@ -75,13 +75,13 @@ def plot_stacked_axpy_matmul_combined(data, PALETTE):
     ax2.bar(x_matmul, matmul_memcpy, width, label="Memcpy", color=PALETTE["Memcpy"])
     ax2.bar(x_matmul, matmul_cpu, width, bottom=np.array(matmul_memcpy), label="CPU", color=PALETTE["CPU"])
     ax2.bar(x_matmul, matmul_wormhole, width, bottom=np.array(matmul_memcpy) + np.array(matmul_cpu),
-            label="Wormhole", color=PALETTE["Wormhole"])
+            label="Wormhole", color=PALETTE["AXPY"])
 
-    ax2.set_ylabel("Execution Time (s)")
-    ax2.set_xlabel("Iterations\nInput Size", labelpad=18)
+    ax2.set_ylabel("Execution Time (s)", labelpad=22)
+    ax2.set_xlabel("Iterations\nInput Size", labelpad=22)
     ax2.set_title("MATMUL Execution Breakdown")
     ax2.set_xticks(x_matmul)
-    ax2.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels])
+    ax2.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels], rotation=45)
     ax2.legend()
 
     plt.xlabel("Problem Size")
@@ -106,12 +106,12 @@ def plot_axpy_vs_baseline(data, PALETTE):
     x = np.arange(len(axpy_labels))
     width = 0.35
 
-    fig, ax = plt.subplots(figsize=(19, 6))
+    fig, ax = plt.subplots(figsize=(19, 7.6))
 
     # Stacked AXPY
     ax.bar(x - width/2, axpy_memcpy, width, label="Memcpy", color=PALETTE["Memcpy"])
     ax.bar(x - width/2, axpy_cpu, width, bottom=np.array(axpy_memcpy), label="CPU", color=PALETTE["CPU"])
-    ax.bar(x - width/2, axpy_wormhole, width, bottom=np.array(axpy_memcpy) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["Wormhole"])
+    ax.bar(x - width/2, axpy_wormhole, width, bottom=np.array(axpy_memcpy) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["AXPY"])
 
     # Baseline bars
     ax.bar(x + width/2, axpy_baseline, width, color=PALETTE["Baseline"], label="CPU Baseline")
@@ -120,7 +120,7 @@ def plot_axpy_vs_baseline(data, PALETTE):
     ax.set_ylabel("Execution Time (s)")
     ax.set_xlabel("Iterations\nInput Size", labelpad=18)
     ax.set_xticks(x)
-    ax.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels])
+    ax.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels], rotation=45)
     ax.legend()
 
     plt.tight_layout()
@@ -144,16 +144,16 @@ def plot_axpy_vs_baseline_UVM_UPM(data, PALETTE):
     x = np.arange(len(axpy_labels))
     width = 0.25
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(19, 10), sharex=True)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(19, 14), sharex=True)
 
     # --- UVM subplot ---
     ax1.bar(x - width, axpy_memcpy, width, label="Memcpy", color=PALETTE["Memcpy"])
     ax1.bar(x - width, axpy_cpu, width, bottom=np.array(axpy_memcpy), label="CPU", color=PALETTE["CPU"])
-    ax1.bar(x - width, axpy_wormhole, width, bottom=np.array(axpy_memcpy) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["Wormhole"])
+    ax1.bar(x - width, axpy_wormhole, width, bottom=np.array(axpy_memcpy) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["AXPY"])
 
     ax1.bar(x, axpy_memcpy_UVM, width, label="Memcpy", color=PALETTE["Memcpy"])
     ax1.bar(x, axpy_cpu, width, bottom=np.array(axpy_memcpy_UVM), label="CPU", color=PALETTE["CPU"])
-    ax1.bar(x, axpy_wormhole, width, bottom=np.array(axpy_memcpy_UVM) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["Wormhole"])
+    ax1.bar(x, axpy_wormhole, width, bottom=np.array(axpy_memcpy_UVM) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["AXPY"])
 
     # Baseline bars
     ax1.bar(x + width, axpy_baseline, width, color=PALETTE["Baseline"], label="CPU Baseline")
@@ -170,7 +170,7 @@ def plot_axpy_vs_baseline_UVM_UPM(data, PALETTE):
     # --- UPM subplot ---
     ax2.bar(x - width, axpy_memcpy, width, label="Memcpy", color=PALETTE["Memcpy"])
     ax2.bar(x - width, axpy_cpu, width, bottom=np.array(axpy_memcpy), label="CPU", color=PALETTE["CPU"])
-    ax2.bar(x - width, axpy_wormhole, width, bottom=np.array(axpy_memcpy) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["Wormhole"])
+    ax2.bar(x - width, axpy_wormhole, width, bottom=np.array(axpy_memcpy) + np.array(axpy_cpu), label="Wormhole", color=PALETTE["AXPY"])
 
     ax2.bar(x, axpy_cpu, width, label="CPU", color=PALETTE["CPU"])
     ax2.bar(x, axpy_wormhole, width, bottom=np.array(axpy_cpu), label="Wormhole", color=PALETTE["Wormhole"])
@@ -182,7 +182,7 @@ def plot_axpy_vs_baseline_UVM_UPM(data, PALETTE):
     ax2.set_ylabel("Execution Time (s)")
     ax2.set_xlabel("Iterations\nInput Size", labelpad=18)
     ax2.set_xticks(x)
-    ax2.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels])
+    ax2.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels], rotation=45)
 
     # Deduplicate legend
     handles, labels = ax2.get_legend_handles_labels()
@@ -213,7 +213,7 @@ def plot_axpy_vs_baseline_energy(data, PALETTE):
     x = np.arange(len(axpy_labels))  # positions
     width = 0.25
 
-    fig, ax = plt.subplots(figsize=(19, 6))
+    fig, ax = plt.subplots(figsize=(19, 7.6))
 
     # Plot 3 bars per environment
     ax.bar(x - width, energy_wor, width, label="Wormhole Only (24W)", color=PALETTE["Memcpy"])
@@ -222,9 +222,9 @@ def plot_axpy_vs_baseline_energy(data, PALETTE):
 
     ax.set_title("Energy Consumption Comparison")
     ax.set_ylabel("Energy Consumption (Joule)")  # Joules = W * s
-    ax.set_xlabel("Iterations\nInput Size", labelpad=18)
+    ax.set_xlabel("Iterations\nInput Size", labelpad=20)
     ax.set_xticks(x)
-    ax.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels])
+    ax.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels], rotation=45)
     ax.legend()
 
     plt.tight_layout()
@@ -267,9 +267,9 @@ def plot_ker_it_vs_wormhole(data, PALETTE):
     # Labels
     ax.set_title("Kernel Execution vs Wormhole Execution")
     ax.set_ylabel("Execution Time (s)")
-    ax.set_xlabel("Iterations\nInput Size", labelpad=18)
+    ax.set_xlabel("Iterations\nInput Size", labelpad=20)
     ax.set_xticks(x)
-    ax.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels])
+    ax.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels], rotation=45)
     ax.legend(ncol=2)
 
     plt.tight_layout()
@@ -309,9 +309,9 @@ def plot_ker_it_vs_cpu(data, PALETTE):
     # Labels
     ax.set_title("Kernel Execution vs CPU Baseline")
     ax.set_ylabel("Execution Time (s)")
-    ax.set_xlabel("Iterations\nInput Size", labelpad=18)
+    ax.set_xlabel("Iterations\nInput Size", labelpad=20)
     ax.set_xticks(x)
-    ax.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels])
+    ax.set_xticklabels([lbl.replace("axpy_", "").replace("_", "\n")+"x"+lbl.split("_")[2] for lbl in axpy_labels], rotation=45)
     ax.legend()
 
     plt.tight_layout()
@@ -366,22 +366,22 @@ if __name__ == "__main__":
 
     # Darker cyberpunk palette (better on white background)
     PALETTE = {
-        "Memcpy": "#F25050",      
-        "CPU": "#F2CB05",        
-        "Wormhole": "#7D5CF2",   
-        "AXPY": "#19E053",         
-        "MATMUL": "#19CAF5",      
-        "Baseline": "#182417"  
+        "Memcpy": "#e08600",      # bright yellow
+        "CPU": "#e04f53",         # green
+        "Wormhole": "#c55d8e",    # purple
+        "AXPY": "#a3d649",        # vivid orange
+        "MATMUL": "#9b8cff",      # strong red
+        "Baseline": "#4f97c8"     # clear blue
     }
 
     # Apply a global style for larger fonts
     plt.rcParams.update({
         "font.size": 18,
         "axes.titlesize": 20,
-        "axes.labelsize": 18,
-        "xtick.labelsize": 16,
-        "ytick.labelsize": 16,
-        "legend.fontsize": 16
+        "axes.labelsize": 22,
+        "xtick.labelsize": 20,
+        "ytick.labelsize": 20,
+        "legend.fontsize": 20
     })
 
 
@@ -397,8 +397,6 @@ if __name__ == "__main__":
         "cpu_baseline": [],
         "other": []
     }
-
-
 
     meth = ["axpy", "matmul"]
     its = ["100", "500", "1000"]

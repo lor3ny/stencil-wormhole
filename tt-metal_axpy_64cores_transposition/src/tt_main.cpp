@@ -96,6 +96,7 @@ int axpy_ttker(
     std::shared_ptr<tt::tt_metal::Buffer> right_dram_buffer = CreateBuffer(dram_inout_config);
     std::shared_ptr<tt::tt_metal::Buffer> down_dram_buffer = CreateBuffer(dram_inout_config);
     std::shared_ptr<tt::tt_metal::Buffer> output_dram_buffer = CreateBuffer(dram_inout_config);
+    std::shared_ptr<tt::tt_metal::Buffer> transposed_dram_buffer = CreateBuffer(dram_inout_config);
     std::shared_ptr<tt::tt_metal::Buffer> scalar_dram_buffer = CreateBuffer(dram_scalar_config);
 
     // ! In this case you should declare the starting address and the size of the region in the shared cache
@@ -117,10 +118,11 @@ int axpy_ttker(
         CBIndex::c_5, // scalar
         CBIndex::c_6, // auxiliary
         CBIndex::c_7, // output
+        CBIndex::c_8, // trans_output
     };
 
     // Circular Buffers (CB) have to be created rising order!
-    for(int i = 0; i < 8; i++) {
+    for(int i = 0; i < 9; i++) {
 
         CircularBufferConfig cb_config(TILE_SIZE * SRAM_TILES, 
                                             {{cb_indices[i], data_format}}
@@ -150,7 +152,8 @@ int axpy_ttker(
     );
 
     std::vector<uint32_t> writer_compile_time_args;
-    TensorAccessorArgs(*output_dram_buffer).append_to(writer_compile_time_args);  
+    TensorAccessorArgs(*output_dram_buffer).append_to(writer_compile_time_args); 
+    TensorAccessorArgs(*transposed_dram_buffer).append_to(writer_compile_time_args); 
     
     auto writer_kernel_id = tt_metal::CreateKernel( program, "/home/lpiarulli_tt/stencil-wormhole/tt-metal_axpy_64cores/src/kernels/dataflow/writer_output.cpp",
         all_cores, tt_metal::DataMovementConfig{ .processor = DataMovementProcessor::RISCV_0,
@@ -199,7 +202,7 @@ int axpy_ttker(
             });
 
             tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
-                output_dram_buffer->address(), start_tile_idx, work_per_core1
+                output_dram_buffer->address(), transposed_dram_buffer->address(), start_tile_idx, work_per_core1
             });
 
             tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {
@@ -223,7 +226,7 @@ int axpy_ttker(
             });
 
             tt_metal::SetRuntimeArgs(program, writer_kernel_id, core, {
-                output_dram_buffer->address(), start_tile_idx, work_per_core2
+                output_dram_buffer->address(), transposed_dram_buffer->address(), start_tile_idx, work_per_core2
             });
 
             tt_metal::SetRuntimeArgs(program, stencil_kernel_id, core, {
@@ -240,6 +243,8 @@ int axpy_ttker(
     // ---------------------------------------------------------
     
     cout << "Memcpy and compute launch..." << endl;	
+
+    vector<bfloat16> output_pad((rows+2) * (cols+2), 0.0f);
    
     EnqueueWriteBuffer(cq, up_dram_buffer, up.data(), true);   
     EnqueueWriteBuffer(cq, left_dram_buffer, left.data(), true);   
@@ -257,7 +262,10 @@ int axpy_ttker(
     int lr_count = (cols-1) * sizeof(bfloat16);
     int ud_count = (rows-1) * cols * sizeof(bfloat16);
 
+    vector<bfloat16> output_trans((rows*cols)+cols, 0.0f);
+
     bfloat16* out = output.data()+cols;
+    bfloat16* out_trans = output_trans.data()+cols;
     bfloat16* up_ptr = up.data();
     bfloat16* down_ptr = down.data();
     bfloat16* left_ptr = left.data();
@@ -276,9 +284,13 @@ int axpy_ttker(
 
         start_memcpy = std::chrono::high_resolution_clock::now();
         EnqueueReadBuffer(cq, output_dram_buffer, out, true);
+        EnqueueReadBuffer(cq, transposed_dram_buffer, out_trans, true);
         end_memcpy = std::chrono::high_resolution_clock::now();
         elapsed = end_memcpy - start_memcpy;
         elapsed_memcpy += elapsed.count();
+
+        cout << "Output: " << endl;
+        printMat(out_trans, rows, cols);
 
 
         if (i != iterations-1){
@@ -291,12 +303,24 @@ int axpy_ttker(
             down_ptr = out + cols;
 
             // LEFT and RIGHT: Copy cols 1 to cols-1 for each row
-            for (r = 0; r < rows; r++) {
-                // LEFT: Copy cols 1 to cols-1 to out_left[r*cols + 1, ..., r*cols + cols-1]
-                // RIGHT: Copy cols 1 to cols-1 to out_right[r*cols, ..., r*cols + cols-2]
-                std::memcpy(left_ptr+(r*cols)+1, out+(r*cols), lr_count);
-                std::memcpy(right_ptr+(r*cols), out+(r*cols)+1, lr_count);
-            }
+
+            // for(r = 0; r < rows; r++) {
+            //     for(c = r+1; c < cols; c++) {
+            //         bfloat16 temp = out[r*cols + c];
+            //         out[c*cols + r] = out[r*cols + c];
+            //         out[r*cols + c] = temp;
+            //     }
+            // }
+
+            left_ptr = out_trans - cols; 
+            right_ptr = out_trans + cols;
+
+            // for (r = 0; r < rows; r++) {
+            //     // LEFT: Copy cols 1 to cols-1 to out_left[r*cols + 1, ..., r*cols + cols-1]
+            //     // RIGHT: Copy cols 1 to cols-1 to out_right[r*cols, ..., r*cols + cols-2]
+            //     std::memcpy(left_ptr+(r*cols)+1, out+(r*cols), lr_count);
+            //     std::memcpy(right_ptr+(r*cols), out+(r*cols)+1, lr_count);
+            // }
 
             end_cpu = std::chrono::high_resolution_clock::now();
             elapsed = end_cpu - start_cpu;
@@ -387,7 +411,7 @@ int main(int argc, char** argv) {
     vector<bfloat16> output_vec_pad(rows_pad * cols_pad, 0.0f);
     pad_with_zeros(input_vec.data(), input_vec_pad.data(), rows, cols, 1);
 
-    //golden_stencil(input_vec_pad, output_vec_pad, rows_pad, cols_pad, iterations);
+    golden_stencil(input_vec_pad, output_vec_pad, rows_pad, cols_pad, iterations);
 
     //* ----------
     //* ALIGNEMENT
@@ -445,9 +469,9 @@ int main(int argc, char** argv) {
     CloseDevice(device);
     //! KERNEL AREA
 
-    // cout << "Output: " << endl;
-    // output_vec[((rows/2)*cols + cols/2)+cols] = 100.0f;
-    // printMat(output_vec.data() + cols, rows, cols);
+    cout << "Output: " << endl;
+    output_vec[((rows/2)*cols + cols/2)+cols] = 100.0f;
+    printMat(output_vec.data() + cols, rows, cols);
 
     return 0;
 }

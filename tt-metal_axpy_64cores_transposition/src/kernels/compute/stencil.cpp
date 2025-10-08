@@ -5,6 +5,8 @@
 #include "compute_kernel_api/eltwise_binary.h"
 #include "compute_kernel_api/eltwise_unary/eltwise_unary.h"
 #include "compute_kernel_api/tile_move_copy.h"
+#include "compute_kernel_api/transpose_wh.h"
+#include "compute_kernel_api/tilize.h"
 //#include "tools/profiler/kernel_profiler.hpp"
 
 namespace NAMESPACE {
@@ -13,6 +15,7 @@ void MAIN {
     //DeviceZoneScopedN("Compute Kernels");
     
     uint32_t num_tiles = get_arg_val<uint32_t>(0);
+    uint32_t tile_size = 1024;
 
     constexpr auto cb_inUP = 1;
     constexpr auto cb_inLEFT = 2;
@@ -22,11 +25,14 @@ void MAIN {
 
     constexpr auto cb_MID = 6; // AUXILIARY
     constexpr auto cb_OUTPUT = 7; // OUTPUT
+    constexpr auto cb_TRANSPOSE = 8; // TRANSPOSED OUTPUT
     constexpr uint32_t dst0 = 0;
 
     uint32_t i;
 
     binary_op_init_common(cb_inUP, cb_inDOWN, cb_MID);
+
+    DPRINT << "Start computing" << ENDL();
 
     for(i=0; i<num_tiles; i++){
 
@@ -103,6 +109,34 @@ void MAIN {
         pack_tile(dst0, cb_OUTPUT);
         cb_push_back(cb_OUTPUT, 1);
         tile_regs_release();
+
+        // TRANSPOSING
+        DPRINT << "HERE 0" << ENDL();
+
+        tile_regs_acquire();
+        DPRINT << "HERE 1" << ENDL();
+        transpose_wh_init(cb_OUTPUT, cb_TRANSPOSE);
+        DPRINT << "HERE 2" << ENDL();
+        cb_wait_front(cb_OUTPUT, 1);
+        DPRINT << "HERE 3" << ENDL();
+        transpose_wh_tile(cb_OUTPUT, 0, dst0);
+        DPRINT << "HERE 4" << ENDL();
+
+        tile_regs_commit();
+        tile_regs_wait();
+
+        DPRINT << "HERE 5" << ENDL();
+
+        cb_reserve_back(cb_TRANSPOSE, 1);
+        DPRINT << "HERE 6" << ENDL();
+        pack_tile(dst0, cb_TRANSPOSE);
+        DPRINT << "HERE 7" << ENDL();
+        cb_push_back(cb_TRANSPOSE, 1);
+        DPRINT << "HERE 8" << ENDL();
+        tile_regs_release();
+        DPRINT << "HERE 9" << ENDL();
     }
+
+    DPRINT << "Stop computing" << ENDL();
 }
 }
